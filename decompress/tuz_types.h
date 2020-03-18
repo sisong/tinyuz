@@ -68,6 +68,8 @@ typedef enum tuz_TCodeType{
     tuz_codeType_data=1,
 } tuz_TCodeType;
     
+static const tuz_byte kMinDictMatchLen = 2;
+    
 #ifdef __cplusplus
 }
 #endif

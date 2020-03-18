@@ -43,8 +43,7 @@ typedef enum tuz_TResult{
     tuz_ALLOC_MEM_ERROR,
     tuz_READ_CODE_ERROR,
     tuz_DICT_SIZE_ERROR,
-    tuz_DICT_POS_OVERFLOW_ERROR,
-    tuz_LENGTH_OVERFLOW_ERROR,
+    tuz_CODE_ERROR, //unknow code ,or len overflow tuz_length_t
 } tuz_TResult;
 
     
@@ -56,7 +55,7 @@ typedef enum tuz_TResult{
         tuz_BOOL        is_input_stream_error;
     } _tuz_TInputCache;
     typedef struct _tuz_TDict{
-        tuz_byte*       dict_buf;
+        tuz_byte*       dict_buf_end;
         tuz_size_t      dict_cur;
         tuz_size_t      dict_size;
     } _tuz_TDict;
