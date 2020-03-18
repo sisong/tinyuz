@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D6F3B7522421178E0066B989 /* unit_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7512421178E0066B989 /* unit_test.cpp */; };
+		D6F3B7582421B39A0066B989 /* tuz_dec.c in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7572421B39A0066B989 /* tuz_dec.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +26,9 @@
 /* Begin PBXFileReference section */
 		D6F3B7472421175A0066B989 /* unitTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = unitTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6F3B7512421178E0066B989 /* unit_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = unit_test.cpp; path = ../../unit_test.cpp; sourceTree = "<group>"; };
+		D6F3B7542421A70B0066B989 /* tuz_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_types.h; sourceTree = "<group>"; };
+		D6F3B7552421A70B0066B989 /* tuz_dec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_dec.h; sourceTree = "<group>"; };
+		D6F3B7572421B39A0066B989 /* tuz_dec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tuz_dec.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,6 +45,8 @@
 		D6F3B73E2421175A0066B989 = {
 			isa = PBXGroup;
 			children = (
+				D6F3B7562421A70B0066B989 /* compress */,
+				D6F3B7532421A70B0066B989 /* decompress */,
 				D6F3B7512421178E0066B989 /* unit_test.cpp */,
 				D6F3B7482421175A0066B989 /* Products */,
 			);
@@ -52,6 +58,25 @@
 				D6F3B7472421175A0066B989 /* unitTest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		D6F3B7532421A70B0066B989 /* decompress */ = {
+			isa = PBXGroup;
+			children = (
+				D6F3B7542421A70B0066B989 /* tuz_types.h */,
+				D6F3B7552421A70B0066B989 /* tuz_dec.h */,
+				D6F3B7572421B39A0066B989 /* tuz_dec.c */,
+			);
+			name = decompress;
+			path = ../../decompress;
+			sourceTree = "<group>";
+		};
+		D6F3B7562421A70B0066B989 /* compress */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = compress;
+			path = ../../compress;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -110,6 +135,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6F3B7582421B39A0066B989 /* tuz_dec.c in Sources */,
 				D6F3B7522421178E0066B989 /* unit_test.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

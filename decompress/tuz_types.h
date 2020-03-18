@@ -42,21 +42,19 @@ extern "C" {
 #define _TINYUZ_EXPAND_AND_QUOTE(str)   _TINYUZ_QUOTE(str)
 #define TINYUZ_VERSION_STRING           _TINYUZ_EXPAND_AND_QUOTE(_TINYUZ_VERSION)
 
-#ifndef tuz_int
-    typedef int                 tuz_int;
-#endif
-#ifndef tuz_uint
-    typedef unsigned int        tuz_uint;
-#endif
 #ifndef tuz_size_t
     typedef size_t              tuz_size_t;
 #endif
-
-#ifndef tuz_bool
-    typedef int tuz_bool;
+#ifndef tuz_length_t
+    typedef unsigned int        tuz_length_t;
 #endif
-#define     tuz_false    0
-#define     tuz_true     ((tuz_bool)(!tuz_false))
+    typedef unsigned char       tuz_byte;
+
+#ifndef tuz_BOOL
+    typedef tuz_byte            tuz_BOOL;
+#endif
+#define     tuz_FALSE    0
+#define     tuz_TRUE     ((tuz_BOOL)(!tuz_FALSE))
 
 #ifdef _MSC_VER
 #   define tuz_inline _inline
@@ -64,6 +62,11 @@ extern "C" {
 #   define tuz_inline inline
 #endif
 
+    
+typedef enum tuz_TCodeType{
+    tuz_codeType_dict=0,
+    tuz_codeType_data=1,
+} tuz_TCodeType;
     
 #ifdef __cplusplus
 }
