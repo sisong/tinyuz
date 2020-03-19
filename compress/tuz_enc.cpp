@@ -25,7 +25,8 @@
  OTHER DEALINGS IN THE SOFTWARE.
 */
 #include "tuz_enc.h"
-#include "tuz_enc_private/tuz_match_clip.h"
+#include "tuz_enc_private/tuz_enc_clip.h"
+using namespace _tuz_private;
 
 void tuz_defaultCompressProps(tuz_TCompressProps* out_props){
     out_props->dictSize=1024*16;
@@ -42,6 +43,8 @@ void tuz_compress(const hpatch_TStreamOutput* out_code,const hpatch_TStreamInput
     assert(props->maxStepLength>=63);
     assert(props->minDictMatchLen>=2);
     
-    
+    std::vector<tuz_byte> code;
+    compress_clip(code,data,0,data->streamSize,*props);
+    checkv(out_code->write(out_code,0,code.data(),code.data()+code.size()));
 }
 

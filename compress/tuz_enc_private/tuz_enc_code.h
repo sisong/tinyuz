@@ -1,4 +1,4 @@
-//  tuz_enc_clip.h
+//  tuz_enc_code.h
 /*
  Copyright (c) 2012-2020 HouSisong All Rights Reserved.
  (The MIT License)
@@ -24,19 +24,22 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef _tuz_enc_clip_h
-#define _tuz_enc_clip_h
-#include "../tuz_enc_types.h"
-#include <vector>
+#ifndef _tuz_enc_code_h
+#define _tuz_enc_code_h
+#include "tuz_types_private.h"
 namespace _tuz_private{
     
-    struct TMatchResult{
-        std::vector<bool>      types;
-        std::vector<tuz_byte>  lenPosCodes;
+    struct TTuzCode:public ICode{
+        explicit TTuzCode(std::vector<tuz_byte>& out_code):code(out_code){ }
+        
+        void outLen(tuz_length_t len);
+        void outData(tuz_length_t len,const tuz_byte* data,const tuz_byte* data_end);
+        void outDict(tuz_length_t len,tuz_length_t dict_pos);
+        void outCtrl_streamEnd();
+        void outCtrl_clipEnd();
+    private:
+        std::vector<tuz_byte>& code;
     };
     
-    void match_clip(TMatchResult& outResult,const hpatch_TStreamInput* data,hpatch_StreamPos_t clipBegin,
-                    hpatch_StreamPos_t clipEnd,const tuz_TCompressProps& props);
-    
 }
-#endif //_tuz_enc_clip_h
+#endif //_tuz_enc_code_h

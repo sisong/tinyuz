@@ -1,4 +1,4 @@
-//  tuz_enc_types.h
+//  tuz_enc_code.cpp
 /*
  Copyright (c) 2012-2020 HouSisong All Rights Reserved.
  (The MIT License)
@@ -24,23 +24,25 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef _tuz_enc_types_h
-#define _tuz_enc_types_h
-#include "../decompress/tuz_types.h"
-#include "libHDiffPatch/HPatch/patch_types.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    typedef struct tuz_TCompressProps{
-        //memory requires for decompress: kDecodeCacheSize + dictSize
-        tuz_length_t    dictSize;        // >=1;  default 16k;    250,1k,4k,64k,1m ...
-        tuz_length_t    maxStepLength;   // >=63; default 64k-1;  255,4k,64k-1,1m ...
-        tuz_byte        minDictMatchLen; // >=2;  default 2;      3,4,...
-        tuz_size_t      threadNum;       // >=1;  default 1;
-    } tuz_TCompressProps;
-
-#ifdef __cplusplus
+#include "tuz_enc_code.h"
+namespace _tuz_private{
+    
+void TTuzCode::outLen(tuz_length_t len){
+    assert(false);
 }
-#endif
-#endif //_tuz_enc_types_h
+void TTuzCode::outData(tuz_length_t len,const tuz_byte* data,const tuz_byte* data_end){
+    assert(false);
+}
+void TTuzCode::outDict(tuz_length_t len,tuz_length_t dict_pos){
+    assert(false);
+}
+    
+void TTuzCode::outCtrl_streamEnd(){
+    assert(false);
+}
+    
+void TTuzCode::outCtrl_clipEnd(){
+    assert(false);
+}
+
+}

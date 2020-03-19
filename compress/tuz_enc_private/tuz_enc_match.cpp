@@ -1,4 +1,4 @@
-//  tuz_enc_types.h
+//  tuz_enc_match.cpp
 /*
  Copyright (c) 2012-2020 HouSisong All Rights Reserved.
  (The MIT License)
@@ -24,23 +24,12 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef _tuz_enc_types_h
-#define _tuz_enc_types_h
-#include "../decompress/tuz_types.h"
-#include "libHDiffPatch/HPatch/patch_types.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    typedef struct tuz_TCompressProps{
-        //memory requires for decompress: kDecodeCacheSize + dictSize
-        tuz_length_t    dictSize;        // >=1;  default 16k;    250,1k,4k,64k,1m ...
-        tuz_length_t    maxStepLength;   // >=63; default 64k-1;  255,4k,64k-1,1m ...
-        tuz_byte        minDictMatchLen; // >=2;  default 2;      3,4,...
-        tuz_size_t      threadNum;       // >=1;  default 1;
-    } tuz_TCompressProps;
-
-#ifdef __cplusplus
+#include "tuz_enc_match.h"
+namespace _tuz_private{
+    
+bool TMatch::match(const tuz_byte** out_matched,tuz_length_t* out_match_len){
+    assert(false);
+    return false;
 }
-#endif
-#endif //_tuz_enc_types_h
+
+}

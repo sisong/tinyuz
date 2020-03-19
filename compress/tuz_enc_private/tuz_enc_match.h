@@ -1,4 +1,4 @@
-//  tuz_enc_types.h
+//  tuz_enc_match.h
 /*
  Copyright (c) 2012-2020 HouSisong All Rights Reserved.
  (The MIT License)
@@ -24,23 +24,22 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef _tuz_enc_types_h
-#define _tuz_enc_types_h
-#include "../decompress/tuz_types.h"
-#include "libHDiffPatch/HPatch/patch_types.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    typedef struct tuz_TCompressProps{
-        //memory requires for decompress: kDecodeCacheSize + dictSize
-        tuz_length_t    dictSize;        // >=1;  default 16k;    250,1k,4k,64k,1m ...
-        tuz_length_t    maxStepLength;   // >=63; default 64k-1;  255,4k,64k-1,1m ...
-        tuz_byte        minDictMatchLen; // >=2;  default 2;      3,4,...
-        tuz_size_t      threadNum;       // >=1;  default 1;
-    } tuz_TCompressProps;
-
-#ifdef __cplusplus
+#ifndef _tuz_enc_match_h
+#define _tuz_enc_match_h
+#include "tuz_types_private.h"
+namespace _tuz_private{
+    
+    struct TMatch{
+        explicit TMatch(const tuz_byte* _data,const tuz_byte* _data_end,
+                        const ICode& _coder,const tuz_TCompressProps& _props)
+                            :data(_data),data_end(_data_end),coder(_coder),props(_props){ }
+        bool match(const tuz_byte** out_matched,tuz_length_t* out_match_len);
+    private:
+        const tuz_byte* data;
+        const tuz_byte* data_end;
+        const ICode&    coder;
+        const tuz_TCompressProps& props;
+    };
+    
 }
-#endif
-#endif //_tuz_enc_types_h
+#endif //_tuz_enc_match_h

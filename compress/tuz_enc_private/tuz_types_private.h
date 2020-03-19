@@ -1,4 +1,4 @@
-//  tuz_enc_types.h
+//  tuz_types_private.h
 /*
  Copyright (c) 2012-2020 HouSisong All Rights Reserved.
  (The MIT License)
@@ -24,23 +24,21 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef _tuz_enc_types_h
-#define _tuz_enc_types_h
-#include "../decompress/tuz_types.h"
-#include "libHDiffPatch/HPatch/patch_types.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef _tuz_types_private_h
+#define _tuz_types_private_h
+#include "../tuz_enc_types.h"
+#include "libHDiffPatch/HDiff/private_diff/mem_buf.h"
+#include <vector>
+#include <stdexcept>
 
-    typedef struct tuz_TCompressProps{
-        //memory requires for decompress: kDecodeCacheSize + dictSize
-        tuz_length_t    dictSize;        // >=1;  default 16k;    250,1k,4k,64k,1m ...
-        tuz_length_t    maxStepLength;   // >=63; default 64k-1;  255,4k,64k-1,1m ...
-        tuz_byte        minDictMatchLen; // >=2;  default 2;      3,4,...
-        tuz_size_t      threadNum;       // >=1;  default 1;
-    } tuz_TCompressProps;
+#define check(value,info) do { if (!(value)) { throw std::runtime_error(info); } } while(0)
+#define checkv(value)     do { check(value,"check "#value" error!"); } while(0)
 
-#ifdef __cplusplus
+namespace _tuz_private{
+
+    struct ICode{
+        
+    };
+
 }
-#endif
-#endif //_tuz_enc_types_h
+#endif //_tuz_types_private_h

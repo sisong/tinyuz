@@ -149,17 +149,12 @@ static tuz_BOOL _cache_unpack_len(tuz_TStream* self,tuz_byte* half_code,tuz_leng
     }while(1);
 }
 
-static tuz_inline tuz_BOOL _read_len(tuz_TStream* self,tuz_length_t* out_len){
-    tuz_byte half_code=0; //empty
-    return _cache_unpack_len(self,&half_code,out_len);
-}
-
 tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_size_t kDecodeCacheSize){
-    tuz_size_t   mem_size;
+    tuz_size_t  mem_size;
+    tuz_byte    half_code=0; //empty
     if ( (self->_code_cache.cache_buf!=0) ||(self->read_code==0)||
          (self->alloc_mem==0)||(self->free_mem==0) || (kDecodeCacheSize==0) ) return tuz_OPEN_ERROR;
     {//head
-        tuz_byte half_code=0; //empty
         //kMinDictMatchLen
         tuz_length_t saved_len;
         if (!_cache_unpack_len(self,&half_code,&saved_len)) return tuz_OPEN_ERROR;
@@ -180,6 +175,7 @@ tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_size_t kDecodeCacheSize){
         self->_code_cache.cache_end=kDecodeCacheSize;
         self->_dict.dict_buf=self->_code_cache.cache_buf+kDecodeCacheSize;
         self->_dict.dict_size=mem_size-kDecodeCacheSize;
+        self->_state.half_code=half_code;
         memset(self->_dict.dict_buf,0,self->_dict.dict_size);
     }
     return tuz_OK;
