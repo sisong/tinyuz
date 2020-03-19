@@ -6,6 +6,7 @@
 #include <math.h>
 #include <vector>
 #include "decompress/tuz_dec.h"
+#include "compress/tuz_enc.h"
 
 int     error_count=0;
 double  sum_src_size=0;

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		D6F3B7522421178E0066B989 /* unit_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7512421178E0066B989 /* unit_test.cpp */; };
 		D6F3B7582421B39A0066B989 /* tuz_dec.c in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7572421B39A0066B989 /* tuz_dec.c */; };
+		D6F3B75C2423872C0066B989 /* tuz_enc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B75B2423872C0066B989 /* tuz_enc.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,6 +30,10 @@
 		D6F3B7542421A70B0066B989 /* tuz_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_types.h; sourceTree = "<group>"; };
 		D6F3B7552421A70B0066B989 /* tuz_dec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_dec.h; sourceTree = "<group>"; };
 		D6F3B7572421B39A0066B989 /* tuz_dec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tuz_dec.c; sourceTree = "<group>"; };
+		D6F3B7592423872C0066B989 /* tuz_enc_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc_types.h; sourceTree = "<group>"; };
+		D6F3B75A2423872C0066B989 /* tuz_enc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc.h; sourceTree = "<group>"; };
+		D6F3B75B2423872C0066B989 /* tuz_enc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tuz_enc.cpp; sourceTree = "<group>"; };
+		D6F3B75E24239B160066B989 /* tuz_match_clip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_match_clip.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,9 +79,21 @@
 		D6F3B7562421A70B0066B989 /* compress */ = {
 			isa = PBXGroup;
 			children = (
+				D6F3B75D24239B160066B989 /* tuz_enc_private */,
+				D6F3B7592423872C0066B989 /* tuz_enc_types.h */,
+				D6F3B75A2423872C0066B989 /* tuz_enc.h */,
+				D6F3B75B2423872C0066B989 /* tuz_enc.cpp */,
 			);
 			name = compress;
 			path = ../../compress;
+			sourceTree = "<group>";
+		};
+		D6F3B75D24239B160066B989 /* tuz_enc_private */ = {
+			isa = PBXGroup;
+			children = (
+				D6F3B75E24239B160066B989 /* tuz_match_clip.h */,
+			);
+			path = tuz_enc_private;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -135,6 +152,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6F3B75C2423872C0066B989 /* tuz_enc.cpp in Sources */,
 				D6F3B7582421B39A0066B989 /* tuz_dec.c in Sources */,
 				D6F3B7522421178E0066B989 /* unit_test.cpp in Sources */,
 			);
@@ -194,6 +212,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../../../../HDiffPatch;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -247,6 +266,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../../../../HDiffPatch;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;

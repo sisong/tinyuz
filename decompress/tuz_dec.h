@@ -31,21 +31,19 @@
 extern "C" {
 #endif
 
-#ifndef tuz_kCodeCacheSize
-#   define tuz_kCodeCacheSize 1024
-#endif
-
 typedef enum tuz_TResult{
     tuz_OK=0,
     tuz_STREAM_END,
     
+    tuz_CTRLTYPE_UNKNOW_ERROR=5,
+    tuz_CTRLTYPE_STREAM_END_ERROR,
+    
     tuz_OPEN_ERROR=10,
     tuz_ALLOC_MEM_ERROR,
     tuz_READ_CODE_ERROR,
-    tuz_DICT_SIZE_ERROR,
-    tuz_CODE_ERROR, //unknow code ,or len overflow tuz_length_t
+    tuz_DICT_POS_ERROR,
+    tuz_CODE_ERROR, //unknow code ,or decode len(tuz_length_t) overflow
 } tuz_TResult;
-
     
     typedef struct _tuz_TInputCache{
         tuz_byte*       cache_buf;
@@ -66,6 +64,7 @@ typedef enum tuz_TResult{
         tuz_byte        types;
         tuz_byte        type_count;
         tuz_byte        half_code;
+        tuz_BOOL        is_ctrlType_stream_end;
     } _tuz_TState;
 
 typedef struct tuz_TStream{
@@ -75,21 +74,23 @@ typedef struct tuz_TStream{
     //     if output size < input size means input stream end;
     //if read error return tuz_FALSE;
     tuz_BOOL    (*read_code) (void* listener,tuz_byte* out_code,tuz_size_t* code_size);
-    void*       (*alloc_mem) (void* listener,tuz_size_t mem_size);//mem_size==tuz_kCodeCacheSize+dictSize
+    void*       (*alloc_mem) (void* listener,tuz_size_t mem_size);//mem_size==kDecodeCacheSize+dictSize
     void        (*free_mem)  (void* listener,void* pmem);
 //private:
     _tuz_TInputCache    _code_cache;
     _tuz_TDict          _dict;
     _tuz_TState         _state;
+    tuz_byte            kMinDictMatchLen;
 } tuz_TStream;
 
 tuz_inline static void  tuz_TStream_init(tuz_TStream* self)  { memset(self,0,sizeof(*self)); }
 
 //open tuz_TStream
 //  must set listener parameters befor open;
-//  read some code & alloc mem;
+    //  read some code & alloc mem;
+//  kDecodeCacheSize >=1; 256,1k,64k,1m ...
 //  if success return tuz_OK;
-tuz_TResult             tuz_TStream_open(tuz_TStream* self);
+tuz_TResult             tuz_TStream_open(tuz_TStream* self,tuz_size_t kDecodeCacheSize);
     
 //decompress part data
 //  data_size: input out_data buf size,output decompressed data size;
