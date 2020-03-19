@@ -46,18 +46,35 @@
 //tuz_uint __debug_check_false_x=0; //for debug
 //#define _tuz_FALSE (1/__debug_check_false_x)
 
+static void memmove_order(tuz_byte* dst,const tuz_byte* src,tuz_size_t len){
+    const tuz_size_t len_fast=len&(~(tuz_size_t)3);
+    tuz_size_t i;
+    for (i=0;i<len_fast;i+=4){
+        dst[i  ]=src[i  ];
+        dst[i+1]=src[i+1];
+        dst[i+2]=src[i+2];
+        dst[i+3]=src[i+3];
+    }
+    for (;i<len;++i)
+        dst[i]=src[i];
+}
+
 static tuz_BOOL _do_cache(tuz_TStream* self){
     if (!(self->_code_cache.is_input_stream_end|self->_code_cache.is_input_stream_error)){
+        //    [                      cache  buf                           ]
+        //    | <-- len --> |cache_begin                         cache_end|
         tuz_size_t len=self->_code_cache.cache_begin;
         tuz_size_t old_size=(self->_code_cache.cache_end-len);
         tuz_byte* buf=self->_code_cache.cache_buf;
         assert(len>0);
         memmove(buf,buf+len,old_size);
+        //    |                                             | <-- len --> |
         if (!self->read_code(self->listener,buf+old_size,&len)){
             self->_code_cache.is_input_stream_error=tuz_TRUE;
             return _tuz_FALSE;
         }
         if (len<self->_code_cache.cache_begin){
+            //|                                             |        |
             tuz_size_t sub=self->_code_cache.cache_begin-len;
             self->_code_cache.cache_end-=sub;
             self->_code_cache.is_input_stream_end=tuz_TRUE;
@@ -105,6 +122,7 @@ static tuz_inline tuz_BOOL _is_safe_append_bit(tuz_byte v_bit,tuz_byte h3bit_v){
 }
 #endif
 
+//low to high bitmap: xxx?xxx? xxx?xxx? ...
 static tuz_BOOL _cache_unpack_len(tuz_TStream* self,tuz_byte* half_code,tuz_length_t* out_len){
     tuz_length_t    v=0;
     tuz_byte        v_bit=0;
@@ -152,9 +170,9 @@ tuz_TResult tuz_TStream_open(tuz_TStream* self){
         memset(&self->_state,0,sizeof(self->_state));
         self->_code_cache.cache_buf=self->alloc_mem(self->listener,mem_size);
         if (self->_code_cache.cache_buf==0) return tuz_ALLOC_MEM_ERROR;
-        self->_dict.dict_buf_end=self->_code_cache.cache_buf+mem_size;
+        self->_dict.dict_buf=self->_code_cache.cache_buf+tuz_kCodeCacheSize;
         self->_dict.dict_size=mem_size-tuz_kCodeCacheSize;
-        memset(self->_dict.dict_buf_end-self->_dict.dict_size,0,self->_dict.dict_size);
+        memset(self->_dict.dict_buf,0,self->_dict.dict_size);
     }
     return tuz_OK;
 }
@@ -164,58 +182,82 @@ tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_size
     tuz_byte*  cur_out_data=out_data;
     tuz_size_t dsize=*data_size;
     while (dsize>0){
-        if (self->_state.type_count>0){
-            tuz_length_t len;
-            _check_bk(_cache_unpack_len(self,&self->_state.half_code,&len));
-            if ((self->_state.types&1)==tuz_codeType_dict){
-                tuz_length_t saved_pos;
-                _check_bk(_cache_unpack_len(self,&self->_state.half_code,&saved_pos));
-                _SAFE_CHECK(saved_pos<self->_dict.dict_size);
-                len+=kMinDictMatchLen;
-                memcpy(cur_out_data,self->_dict.dict_buf_end-(len+saved_pos),len);
-                cur_out_data+=len;
-                dsize-=len;
-            }else{ //==tuz_codeType_data
-                len+=1;
-                _check_bk(_cache_read_bytes(self,cur_out_data,len));
-                cur_out_data+=len;
-                dsize-=len;
+        if (self->_state.dictType_len>0){
+            //  [                 dict buf                 ][[          out buf         ]              ]
+            //                                               |out_data      cur_out_data| <-- dsize -->|
+            //       dictType_pos| <-- dictType_len --> |
+            //                        dictType_pos|                  <--  dictType_len -->                 |
+            //                                     dictType_pos| <-  dictType_len -> |
+            tuz_size_t len;
+            if (self->_state.dictType_pos<self->_dict.dict_size){
+                const tuz_size_t max_len=self->_dict.dict_size-self->_state.dictType_pos;
+                len=(self->_state.dictType_len<max_len)?(tuz_size_t)self->_state.dictType_len:max_len;
+                memcpy(cur_out_data,self->_dict.dict_buf+self->_state.dictType_pos,len);
+            }else{
+                len=(self->_state.dictType_len<dsize)?(tuz_size_t)self->_state.dictType_len:dsize;
+                memmove_order(cur_out_data,out_data+(self->_state.dictType_pos-self->_dict.dict_size),len);
             }
+            self->_state.dictType_pos+=len;
+            self->_state.dictType_len-=len;
+            cur_out_data+=len;
+            dsize-=len;
+        }else if (self->_state.codeType_len>0){
+            const tuz_size_t len=(self->_state.dictType_len<dsize)?(tuz_size_t)self->_state.dictType_len:dsize;
+            _check_bk(_cache_read_bytes(self,cur_out_data,len));
+            cur_out_data+=len;
+            dsize-=len;
+        }else if (self->_state.type_count>0){
+            tuz_length_t saved_len;
+            const tuz_TCodeType type=self->_state.types&1;
             self->_state.types>>=1;
             --self->_state.type_count;
+            _check_bk(_cache_unpack_len(self,&self->_state.half_code,&saved_len));
+            if (type==tuz_codeType_dict){
+                tuz_length_t saved_dict_pos;
+                _check_bk(_cache_unpack_len(self,&self->_state.half_code,&saved_dict_pos));
+#ifdef __RUN_MEM_SAFE_CHECK
+                if (saved_dict_pos>=self->_dict.dict_size) return tuz_DICT_SIZE_ERROR;
+#endif
+                self->_state.dictType_len=saved_len+kMinDictMatchLen;
+                self->_state.dictType_pos=self->_dict.dict_size-1-(tuz_size_t)saved_dict_pos;
+            }else{ //==tuz_codeType_data
+                self->_state.codeType_len=saved_len+1;
+            }
         }else{//next types byte
-            _check_bk(_cache_read_1byte(self,&self->_state.types));
             self->_state.type_count=8;
+            _check_bk(_cache_read_1byte(self,&self->_state.types));
         }
     }
     
     //update dict
     if (out_data!=cur_out_data){
-        tuz_size_t out_len=(tuz_size_t)(cur_out_data-out_data);
-        tuz_size_t dict_size=self->_dict.dict_size;
-        tuz_byte*  dict=self->_dict.dict_buf_end-dict_size;
+        //    [           dict buf           ][       ...  out buf    ...     ]
+        //                                    |out_data           cur_out_data|
+        //          [         out buf        ]
+        // [             out buf             ]
+        const tuz_size_t out_len=(tuz_size_t)(cur_out_data-out_data);
+        const tuz_size_t dict_size=self->_dict.dict_size;
+        tuz_byte*  dict=self->_dict.dict_buf;
+        self->_state.dictType_pos-=out_len;
         if (out_len<dict_size){
             memmove(dict,dict+out_len,dict_size-out_len);
-            memcpy(self->_dict.dict_buf_end-out_len,out_data,out_len);
+            memcpy(dict+(dict_size-out_len),out_data,out_len);
         }else{
-            memcpy(dict,out_data+(out_len-dict_size),dict_size);
+            memcpy(dict,cur_out_data-dict_size,dict_size);
         }
     }
     
     //return
     if (self->_code_cache.is_input_stream_error){
         return tuz_READ_CODE_ERROR;
-    }else if (self->_code_cache.is_input_stream_end){
-        if (dsize==0){
-            return tuz_OK;
-        }else{
-            (*data_size)-=dsize;
-            return tuz_STREAM_END;
-        }
     }else if (dsize==0){
         return tuz_OK;
+    }else if ((self->_code_cache.is_input_stream_end)
+              &(self->_code_cache.cache_begin==self->_code_cache.cache_end)){
+        (*data_size)-=dsize;
+        return tuz_STREAM_END;
     }else{
-        _tuz_FALSE;
+        _tuz_FALSE;//for debug
         return tuz_CODE_ERROR;
     }
 }

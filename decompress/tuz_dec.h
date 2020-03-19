@@ -55,11 +55,14 @@ typedef enum tuz_TResult{
         tuz_BOOL        is_input_stream_error;
     } _tuz_TInputCache;
     typedef struct _tuz_TDict{
-        tuz_byte*       dict_buf_end;
+        tuz_byte*       dict_buf;
         tuz_size_t      dict_cur;
         tuz_size_t      dict_size;
     } _tuz_TDict;
     typedef struct _tuz_TState{
+        tuz_length_t    codeType_len;
+        tuz_length_t    dictType_len;
+        tuz_size_t      dictType_pos;
         tuz_byte        types;
         tuz_byte        type_count;
         tuz_byte        half_code;
