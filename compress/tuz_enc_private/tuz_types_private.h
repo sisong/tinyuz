@@ -36,6 +36,8 @@
 
 namespace _tuz_private{
 
+    static const size_t kMaxPackedLenByteSize =(sizeof(hpatch_StreamPos_t)*8+5)/(3+3);
+    
     struct ICode{
         
     };

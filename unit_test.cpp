@@ -12,21 +12,74 @@ int     error_count=0;
 double  sum_src_size=0;
 double  sum_cmz_size=0;
 
-static int test(const unsigned char* src,const unsigned char* src_end,const char* tag){
-    std::vector<unsigned char> compressedCode;
-    /*tuz_compress(compressedCode,src,src_end,0);
+
+const tuz_size_t kDecodeCacheSize=1024;
+const tuz_size_t kDictSize=1024*16;
+
+struct TTuzListener{
+    const unsigned char* src;
+    const unsigned char* src_end;
+    static tuz_BOOL read_code(void* listener,tuz_byte* out_code,tuz_size_t* code_size){
+        TTuzListener* self=(TTuzListener*)listener;
+        tuz_size_t r_size=*code_size;
+        tuz_size_t s_size=self->src_end-self->src;
+        if (r_size>s_size){
+            r_size=s_size;
+            *code_size=s_size;
+        }
+        memcpy(out_code,self->src,r_size);
+        self->src+=r_size;
+        return tuz_TRUE;
+    }
     
-    std::vector<unsigned char> uncompressedCode(src_end-src,0);
-    frz_BOOL ret=tuz_decompress(&uncompressedCode[0],&uncompressedCode[0]+uncompressedCode.size(), &compressedCode[0], &compressedCode[0]+compressedCode.size());
+    tuz_byte _mem_buf[kDictSize+kDecodeCacheSize];
+    static void* alloc_mem(void* listener,tuz_size_t mem_size){
+        //return malloc(mem_size);
+        TTuzListener* self=(TTuzListener*)listener;
+        assert(mem_size==kDictSize);
+        return self->_mem_buf;
+    }
+    static void free_mem(void* listener,void* pmem){
+        //free(pmem);
+    }
+};
+
+static int test(const unsigned char* src,const unsigned char* src_end,const char* tag){
+    std::vector<unsigned char> compressedCode(tuz_maxCompressedSize(src_end-src));
+    hpatch_TStreamOutput out_stream;
+    mem_as_hStreamOutput(&out_stream,compressedCode.data(),compressedCode.data()+compressedCode.size());
+    hpatch_TStreamInput in_stream;
+    mem_as_hStreamInput(&in_stream,src,src_end);
+    tuz_TCompressProps props;
+    tuz_defaultCompressProps(&props);
+    props.dictSize=kDictSize;
+    hpatch_StreamPos_t codeSize=tuz_compress(&out_stream,&in_stream,&props);
+    compressedCode.resize(codeSize);
+    
+    bool ret=false;
+    std::vector<unsigned char> decompressCode(src_end-src,0);
+    tuz_TStream tuz;
+    tuz_TStream_init(&tuz);
+    TTuzListener  listener={compressedCode.data(),compressedCode.data()+compressedCode.size()};
+    tuz.listener=&listener;
+    tuz.read_code=listener.read_code;
+    tuz.alloc_mem=listener.alloc_mem;
+    tuz.free_mem=listener.free_mem;
+    if (tuz_OK==tuz_TStream_open(&tuz,&listener._mem_buf[kDictSize],kDecodeCacheSize)){
+        tuz_size_t data_size=decompressCode.size();
+        tuz_TResult tret=tuz_TStream_decompress(&tuz,decompressCode.data(),&data_size);
+        tuz_TStream_close(&tuz);
+        ret=(tret==tuz_STREAM_END)&&(data_size==decompressCode.size());
+    }
     if (!ret){
         ++error_count;
-        std::cout << "\nerror_count=="<<error_count<<", "<<tuz_decompress_Name<<" result error, tag==\""<<tag<<"\"\n";
-    }else if (uncompressedCode!=std::vector<unsigned char>(src,src_end)){
+        std::cout << "\nerror_count=="<<error_count<<" result error, tag==\""<<tag<<"\"\n";
+    }else if (decompressCode!=std::vector<unsigned char>(src,src_end)){
         ++error_count;
-        std::cout << "\nerror_count=="<<error_count<<", "<<tuz_decompress_Name<<" data error, tag==\""<<tag<<"\"\n";
+        std::cout << "\nerror_count=="<<error_count<<" data error, tag==\""<<tag<<"\"\n";
     }else{
-        std::cout << "error_count=="<<error_count<<", test ok "<<tuz_compress_Name<<" frzSize/srcSize:"<<compressedCode.size()<<"/"<<src_end-src<<", tag==\""<<tag<<"\"\n";
-    }*/
+        std::cout << "error_count=="<<error_count<<", test ok  frzSize/srcSize:"<<compressedCode.size()<<"/"<<src_end-src<<", tag==\""<<tag<<"\"\n";
+    }
     return (int)compressedCode.size();
 }
 static void test_tuz(const unsigned char* src,const unsigned char* src_end,const char* tag){

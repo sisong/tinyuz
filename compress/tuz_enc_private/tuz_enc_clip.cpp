@@ -25,12 +25,11 @@
  OTHER DEALINGS IN THE SOFTWARE.
 */
 #include "tuz_enc_clip.h"
-#include "tuz_enc_code.h"
 #include "tuz_enc_match.h"
 using namespace hdiff_private;
 namespace _tuz_private{
     
-void compress_clip(std::vector<tuz_byte>& out_code,const hpatch_TStreamInput* data,hpatch_StreamPos_t clipBegin,
+void compress_clip(TTuzCode& coder,const hpatch_TStreamInput* data,hpatch_StreamPos_t clipBegin,
                        hpatch_StreamPos_t clipEnd,const tuz_TCompressProps& props){
     size_t mem_size;
     {
@@ -49,12 +48,7 @@ void compress_clip(std::vector<tuz_byte>& out_code,const hpatch_TStreamInput* da
         }
     }
     
-    TTuzCode coder(out_code);
     TMatch   matcher(data_buf.data(),data_buf.data_end(),coder,props);
-    {//head
-        coder.outLen(props.minDictMatchLen);
-        coder.outLen(props.dictSize);
-    }
     {//match loop
         const tuz_byte* cur=data_buf.data()+props.dictSize;
         const tuz_byte* back=cur;
@@ -63,11 +57,11 @@ void compress_clip(std::vector<tuz_byte>& out_code,const hpatch_TStreamInput* da
             tuz_length_t        match_len;
             if (matcher.match(&matched,&match_len)){
                 assert(matched<cur);
-                assert(match_len<=props.maxStepLength);
+                assert(match_len<=props.maxSaveLength);
                 if (cur!=back){
                     size_t data_len=cur-back;
                     while(data_len) {
-                        tuz_length_t len=(data_len<=props.maxStepLength)?(tuz_length_t)data_len:props.maxStepLength;
+                        tuz_length_t len=(data_len<=props.maxSaveLength)?(tuz_length_t)data_len:props.maxSaveLength;
                         coder.outData(len,back,back+len);
                         back+=len;
                         data_len-=len;
@@ -82,11 +76,6 @@ void compress_clip(std::vector<tuz_byte>& out_code,const hpatch_TStreamInput* da
             }
         }
     }
-    //end tag
-    if (clipEnd==data->streamSize)
-        coder.outCtrl_streamEnd();
-    else
-        coder.outCtrl_clipEnd();
 }
 
 }

@@ -30,6 +30,9 @@
 
 void tuz_defaultCompressProps(tuz_TCompressProps* out_props);
 
-void tuz_compress(const hpatch_TStreamOutput* out_code,const hpatch_TStreamInput* data,const tuz_TCompressProps* props);
+hpatch_StreamPos_t tuz_maxCompressedSize(hpatch_StreamPos_t data_size);
+
+hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatch_TStreamInput* data,
+                                const tuz_TCompressProps* props);
 
 #endif //_tuz_enc_h

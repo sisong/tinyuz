@@ -42,6 +42,7 @@ typedef enum tuz_TResult{
     tuz_ALLOC_MEM_ERROR,
     tuz_READ_CODE_ERROR,
     tuz_DICT_POS_ERROR,
+    tuz_OUT_BUF_ERROR,
     tuz_CODE_ERROR, //unknow code ,or decode len(tuz_length_t) overflow
 } tuz_TResult;
     
@@ -74,7 +75,7 @@ typedef struct tuz_TStream{
     //     if output size < input size means input stream end;
     //if read error return tuz_FALSE;
     tuz_BOOL    (*read_code) (void* listener,tuz_byte* out_code,tuz_size_t* code_size);
-    void*       (*alloc_mem) (void* listener,tuz_size_t mem_size);//mem_size==kDecodeCacheSize+dictSize
+    void*       (*alloc_mem) (void* listener,tuz_size_t mem_size);//mem_size==kDecodeCacheSize
     void        (*free_mem)  (void* listener,void* pmem);
 //private:
     _tuz_TInputCache    _code_cache;
@@ -90,7 +91,7 @@ tuz_inline static void  tuz_TStream_init(tuz_TStream* self)  { memset(self,0,siz
     //  read some code & alloc mem;
 //  kDecodeCacheSize >=1; 256,1k,64k,1m ...
 //  if success return tuz_OK;
-tuz_TResult             tuz_TStream_open(tuz_TStream* self,tuz_size_t kDecodeCacheSize);
+tuz_TResult             tuz_TStream_open(tuz_TStream* self,tuz_byte* decodeCache,tuz_size_t kDecodeCacheSize);
     
 //decompress part data
 //  data_size: input out_data buf size,output decompressed data size;
@@ -101,9 +102,9 @@ tuz_TResult             tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_d
 //close tuz_TStream
 //  free mem;
 tuz_inline static void  tuz_TStream_close(tuz_TStream* self) {
-                                if (self&&(self->_code_cache.cache_buf)){
-                                    tuz_byte* mem=self->_code_cache.cache_buf;
-                                    self->_code_cache.cache_buf=0;
+                                if (self&&(self->_dict.dict_buf)){
+                                    tuz_byte* mem=self->_dict.dict_buf;
+                                    self->_dict.dict_buf=0;
                                     self->free_mem(self->listener,mem); } }
 
 #ifdef __cplusplus

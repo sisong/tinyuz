@@ -30,7 +30,8 @@
 namespace _tuz_private{
     
     struct TTuzCode:public ICode{
-        explicit TTuzCode(std::vector<tuz_byte>& out_code):code(out_code){ }
+        explicit TTuzCode(std::vector<tuz_byte>& out_code)
+            :code(out_code),half_code_index(kNullIndex),type_count(0){ }
         
         void outLen(tuz_length_t len);
         void outData(tuz_length_t len,const tuz_byte* data,const tuz_byte* data_end);
@@ -38,7 +39,13 @@ namespace _tuz_private{
         void outCtrl_streamEnd();
         void outCtrl_clipEnd();
     private:
+        static const size_t kNullIndex=~(size_t)0;
         std::vector<tuz_byte>& code;
+        size_t    half_code_index;
+        size_t    types_index;
+        tuz_byte  type_count;
+        void outType(tuz_TCodeType type);
+        void outCtrl(tuz_TCtrlType ctrl);
     };
     
 }

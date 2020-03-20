@@ -27,22 +27,73 @@
 #include "tuz_enc_code.h"
 namespace _tuz_private{
     
+    //low to high bitmap: xxx?xxx? xxx?xxx? ...
+    static tuz_byte _pack_v(tuz_byte* half_code,tuz_byte* code,tuz_length_t v){
+        tuz_byte half_count=0;
+        do {
+            tuz_byte halfv=v&7;
+            v>>=3;
+            halfv|=(v>0)?8:0;
+            if (half_code){
+                (*half_code)|=(halfv<<4);
+                half_code=0;
+            }else{
+                *code=halfv;
+                half_code=code;
+                ++code;
+            }
+            ++half_count;
+        }while(v>0);
+        return half_count;
+    }
+    
 void TTuzCode::outLen(tuz_length_t len){
-    assert(false);
+    tuz_byte* half_code=(half_code_index!=kNullIndex)?&code[half_code_index]:0;
+    tuz_byte code_buf[kMaxPackedLenByteSize];
+    tuz_byte half_count=_pack_v(half_code,code_buf,len);
+    if (half_code) --half_count;
+    if (half_count>0)
+        code.insert(code.end(),code_buf,code_buf+(half_count+1)/2);
+    half_code_index=(half_count&1)?(code.size()-1):kNullIndex;
 }
+
+    
+void TTuzCode::outType(tuz_TCodeType type){
+    if (type_count==0){
+        types_index=code.size();
+        code.push_back(0);
+    }
+    code[types_index]|=(type<<type_count);
+    ++type_count;
+    if (type_count==8)
+        type_count=0;
+}
+
 void TTuzCode::outData(tuz_length_t len,const tuz_byte* data,const tuz_byte* data_end){
-    assert(false);
-}
-void TTuzCode::outDict(tuz_length_t len,tuz_length_t dict_pos){
-    assert(false);
+    assert(len>0);
+    outType(tuz_codeType_data);
+    outLen(len);
+    code.insert(code.end(),data,data_end);
 }
     
+void TTuzCode::outDict(tuz_length_t len,tuz_length_t dict_pos){
+    outType(tuz_codeType_dict);
+    outLen(len);
+    outLen(dict_pos);
+}
+
+void TTuzCode::outCtrl(tuz_TCtrlType ctrl){
+    outType(tuz_codeType_data);
+    outLen(0); //len==0
+    code.push_back(ctrl);
+}
+
 void TTuzCode::outCtrl_streamEnd(){
-    assert(false);
+    outCtrl(tuz_ctrlType_streamEnd);
 }
     
 void TTuzCode::outCtrl_clipEnd(){
-    assert(false);
+    outCtrl(tuz_ctrlType_clipEnd);
 }
 
 }

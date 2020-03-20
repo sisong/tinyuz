@@ -68,8 +68,8 @@ extern "C" {
     } tuz_TCodeType;
     
     typedef enum tuz_TCtrlType{
-        tuz_ctrlType_streamEnd=0,
-        tuz_ctrlType_clipEnd=1,
+        tuz_ctrlType_streamEnd=1,
+        tuz_ctrlType_clipEnd=2,
         // ...
     } tuz_TCtrlType;
 

@@ -27,9 +27,10 @@
 #ifndef _tuz_enc_clip_h
 #define _tuz_enc_clip_h
 #include "tuz_types_private.h"
+#include "tuz_enc_code.h"
 namespace _tuz_private{
     
-    void compress_clip(std::vector<tuz_byte>& out_code,const hpatch_TStreamInput* data,hpatch_StreamPos_t clipBegin,
+    void compress_clip(TTuzCode& out_code,const hpatch_TStreamInput* data,hpatch_StreamPos_t clipBegin,
                        hpatch_StreamPos_t clipEnd,const tuz_TCompressProps& props);
     
 }

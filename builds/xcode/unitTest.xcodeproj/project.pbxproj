@@ -13,6 +13,7 @@
 		D6F3B7602423BC900066B989 /* tuz_enc_clip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B75F2423BC900066B989 /* tuz_enc_clip.cpp */; };
 		D6F3B7642423C5860066B989 /* tuz_enc_code.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7622423C5860066B989 /* tuz_enc_code.cpp */; };
 		D6F3B7672423C7C90066B989 /* tuz_enc_match.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7652423C7C90066B989 /* tuz_enc_match.cpp */; };
+		D6F3B76A242454000066B989 /* patch.c in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B769242454000066B989 /* patch.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -43,6 +44,7 @@
 		D6F3B7632423C5860066B989 /* tuz_enc_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc_code.h; sourceTree = "<group>"; };
 		D6F3B7652423C7C90066B989 /* tuz_enc_match.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tuz_enc_match.cpp; sourceTree = "<group>"; };
 		D6F3B7662423C7C90066B989 /* tuz_enc_match.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc_match.h; sourceTree = "<group>"; };
+		D6F3B769242454000066B989 /* patch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = patch.c; path = ../../../../libHDiffPatch/HPatch/patch.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,9 +61,10 @@
 		D6F3B73E2421175A0066B989 = {
 			isa = PBXGroup;
 			children = (
+				D6F3B7512421178E0066B989 /* unit_test.cpp */,
 				D6F3B7562421A70B0066B989 /* compress */,
 				D6F3B7532421A70B0066B989 /* decompress */,
-				D6F3B7512421178E0066B989 /* unit_test.cpp */,
+				D6F3B768242453E00066B989 /* HDiffPatch */,
 				D6F3B7482421175A0066B989 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -109,6 +112,14 @@
 				D6F3B7652423C7C90066B989 /* tuz_enc_match.cpp */,
 			);
 			path = tuz_enc_private;
+			sourceTree = "<group>";
+		};
+		D6F3B768242453E00066B989 /* HDiffPatch */ = {
+			isa = PBXGroup;
+			children = (
+				D6F3B769242454000066B989 /* patch.c */,
+			);
+			path = HDiffPatch;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -167,6 +178,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6F3B76A242454000066B989 /* patch.c in Sources */,
 				D6F3B7642423C5860066B989 /* tuz_enc_code.cpp in Sources */,
 				D6F3B7602423BC900066B989 /* tuz_enc_clip.cpp in Sources */,
 				D6F3B75C2423872C0066B989 /* tuz_enc.cpp in Sources */,
