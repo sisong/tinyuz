@@ -13,7 +13,10 @@
 		D6F3B7602423BC900066B989 /* tuz_enc_clip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B75F2423BC900066B989 /* tuz_enc_clip.cpp */; };
 		D6F3B7642423C5860066B989 /* tuz_enc_code.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7622423C5860066B989 /* tuz_enc_code.cpp */; };
 		D6F3B7672423C7C90066B989 /* tuz_enc_match.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7652423C7C90066B989 /* tuz_enc_match.cpp */; };
-		D6F3B76A242454000066B989 /* patch.c in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B769242454000066B989 /* patch.c */; };
+		D6F3B77C2424A3B60066B989 /* patch.c in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B77B2424A3B60066B989 /* patch.c */; };
+		D6F3B78A2424A3CE0066B989 /* divsufsort.c in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7842424A3CE0066B989 /* divsufsort.c */; };
+		D6F3B78B2424A3CE0066B989 /* divsufsort64.c in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7882424A3CE0066B989 /* divsufsort64.c */; };
+		D6F3B78E2424AE850066B989 /* tuz_sstring.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B78C2424AE850066B989 /* tuz_sstring.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -44,7 +47,19 @@
 		D6F3B7632423C5860066B989 /* tuz_enc_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc_code.h; sourceTree = "<group>"; };
 		D6F3B7652423C7C90066B989 /* tuz_enc_match.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tuz_enc_match.cpp; sourceTree = "<group>"; };
 		D6F3B7662423C7C90066B989 /* tuz_enc_match.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc_match.h; sourceTree = "<group>"; };
-		D6F3B769242454000066B989 /* patch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = patch.c; path = ../../../../libHDiffPatch/HPatch/patch.c; sourceTree = "<group>"; };
+		D6F3B77B2424A3B60066B989 /* patch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = patch.c; path = ../../../libHDiffPatch/HPatch/patch.c; sourceTree = "<group>"; };
+		D6F3B77F2424A3CE0066B989 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		D6F3B7802424A3CE0066B989 /* sssort.c.inc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sssort.c.inc.h; sourceTree = "<group>"; };
+		D6F3B7812424A3CE0066B989 /* divsufsort64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = divsufsort64.h; sourceTree = "<group>"; };
+		D6F3B7822424A3CE0066B989 /* divsufsort.c.inc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = divsufsort.c.inc.h; sourceTree = "<group>"; };
+		D6F3B7832424A3CE0066B989 /* utils.c.inc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.c.inc.h; sourceTree = "<group>"; };
+		D6F3B7842424A3CE0066B989 /* divsufsort.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = divsufsort.c; sourceTree = "<group>"; };
+		D6F3B7852424A3CE0066B989 /* divsufsort_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = divsufsort_private.h; sourceTree = "<group>"; };
+		D6F3B7862424A3CE0066B989 /* divsufsort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = divsufsort.h; sourceTree = "<group>"; };
+		D6F3B7872424A3CE0066B989 /* trsort.c.inc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trsort.c.inc.h; sourceTree = "<group>"; };
+		D6F3B7882424A3CE0066B989 /* divsufsort64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = divsufsort64.c; sourceTree = "<group>"; };
+		D6F3B78C2424AE850066B989 /* tuz_sstring.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tuz_sstring.cpp; sourceTree = "<group>"; };
+		D6F3B78D2424AE850066B989 /* tuz_sstring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_sstring.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,7 +79,7 @@
 				D6F3B7512421178E0066B989 /* unit_test.cpp */,
 				D6F3B7562421A70B0066B989 /* compress */,
 				D6F3B7532421A70B0066B989 /* decompress */,
-				D6F3B768242453E00066B989 /* HDiffPatch */,
+				D6F3B77A2424A30B0066B989 /* HDiffPatch */,
 				D6F3B7482421175A0066B989 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -110,16 +125,37 @@
 				D6F3B7622423C5860066B989 /* tuz_enc_code.cpp */,
 				D6F3B7662423C7C90066B989 /* tuz_enc_match.h */,
 				D6F3B7652423C7C90066B989 /* tuz_enc_match.cpp */,
+				D6F3B78D2424AE850066B989 /* tuz_sstring.h */,
+				D6F3B78C2424AE850066B989 /* tuz_sstring.cpp */,
 			);
 			path = tuz_enc_private;
 			sourceTree = "<group>";
 		};
-		D6F3B768242453E00066B989 /* HDiffPatch */ = {
+		D6F3B77A2424A30B0066B989 /* HDiffPatch */ = {
 			isa = PBXGroup;
 			children = (
-				D6F3B769242454000066B989 /* patch.c */,
+				D6F3B77E2424A3CE0066B989 /* libdivsufsort */,
+				D6F3B77B2424A3B60066B989 /* patch.c */,
 			);
-			path = HDiffPatch;
+			name = HDiffPatch;
+			sourceTree = "<group>";
+		};
+		D6F3B77E2424A3CE0066B989 /* libdivsufsort */ = {
+			isa = PBXGroup;
+			children = (
+				D6F3B77F2424A3CE0066B989 /* config.h */,
+				D6F3B7802424A3CE0066B989 /* sssort.c.inc.h */,
+				D6F3B7812424A3CE0066B989 /* divsufsort64.h */,
+				D6F3B7822424A3CE0066B989 /* divsufsort.c.inc.h */,
+				D6F3B7832424A3CE0066B989 /* utils.c.inc.h */,
+				D6F3B7842424A3CE0066B989 /* divsufsort.c */,
+				D6F3B7852424A3CE0066B989 /* divsufsort_private.h */,
+				D6F3B7862424A3CE0066B989 /* divsufsort.h */,
+				D6F3B7872424A3CE0066B989 /* trsort.c.inc.h */,
+				D6F3B7882424A3CE0066B989 /* divsufsort64.c */,
+			);
+			name = libdivsufsort;
+			path = ../../../libHDiffPatch/HDiff/private_diff/libdivsufsort;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -178,12 +214,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D6F3B76A242454000066B989 /* patch.c in Sources */,
+				D6F3B77C2424A3B60066B989 /* patch.c in Sources */,
 				D6F3B7642423C5860066B989 /* tuz_enc_code.cpp in Sources */,
+				D6F3B78B2424A3CE0066B989 /* divsufsort64.c in Sources */,
 				D6F3B7602423BC900066B989 /* tuz_enc_clip.cpp in Sources */,
 				D6F3B75C2423872C0066B989 /* tuz_enc.cpp in Sources */,
 				D6F3B7582421B39A0066B989 /* tuz_dec.c in Sources */,
 				D6F3B7672423C7C90066B989 /* tuz_enc_match.cpp in Sources */,
+				D6F3B78E2424AE850066B989 /* tuz_sstring.cpp in Sources */,
+				D6F3B78A2424A3CE0066B989 /* divsufsort.c in Sources */,
 				D6F3B7522421178E0066B989 /* unit_test.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -242,7 +281,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../../../../HDiffPatch;
+				HEADER_SEARCH_PATHS = ../../../;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -296,7 +335,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../../../../HDiffPatch;
+				HEADER_SEARCH_PATHS = ../../../;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;

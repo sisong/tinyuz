@@ -31,16 +31,16 @@ using namespace _tuz_private;
 
 void tuz_defaultCompressProps(tuz_TCompressProps* out_props){
     out_props->dictSize=1024*16;
-    out_props->maxSaveLength=1024*64-1;
+    out_props->maxSaveLength=1024*32-1;
     out_props->minDictMatchLen=2;
     out_props->threadNum=1;
 }
 
 hpatch_StreamPos_t tuz_maxCompressedSize(hpatch_StreamPos_t data_size){
-    const size_t u_cout=(tuz_kMinClipLength+tuz_kMinSaveLength-1)/tuz_kMinSaveLength;
-    const size_t u_size=(u_cout+7)/8 + (u_cout*3+1)/2;
+    const hpatch_StreamPos_t _u_cout=(data_size+tuz_kMinSaveLength-1)/tuz_kMinSaveLength;
+    const hpatch_StreamPos_t u_size=(_u_cout+7)/8 + (_u_cout*3+1)/2;
     hpatch_StreamPos_t c_count=(data_size+tuz_kMinClipLength-1)/tuz_kMinClipLength;
-    return 1+ kMaxPackedLenByteSize + (u_size+1+2)*c_count + 2;
+    return data_size+ 1 + kMaxPackedLenByteSize + (1+2)*c_count + u_size + 2;
 }
 
 hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatch_TStreamInput* data,
@@ -48,8 +48,8 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     assert(out_code&&(out_code->write));
     assert(data&&(data->read));
     assert(props);
-    assert(props->dictSize>=1);
-    assert(props->maxSaveLength>=255);
+    assert((props->dictSize>=1)&(props->dictSize<=256*1024*1024));
+    assert((props->maxSaveLength>=255)&(_uint_is_less_2g(props->maxSaveLength)));
     assert(props->minDictMatchLen>=2);
     
     std::vector<tuz_byte> code;

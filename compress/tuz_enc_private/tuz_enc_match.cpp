@@ -27,7 +27,8 @@
 #include "tuz_enc_match.h"
 namespace _tuz_private{
     
-bool TMatch::match(const tuz_byte** out_matched,tuz_length_t* out_match_len){
+bool TMatch::match(const tuz_byte** out_matched,tuz_length_t* out_match_len,
+                   const tuz_byte* cur,size_t unmatched_len){
     assert(false);
     return false;
 }

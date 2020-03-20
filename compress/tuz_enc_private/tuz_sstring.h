@@ -1,4 +1,4 @@
-//  tuz_enc_match.h
+//  tuz_sstring.h
 /*
  Copyright (c) 2012-2020 HouSisong All Rights Reserved.
  (The MIT License)
@@ -24,24 +24,25 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef _tuz_enc_match_h
-#define _tuz_enc_match_h
+#ifndef _tuz_sstring_h
+#define _tuz_sstring_h
 #include "tuz_types_private.h"
-#include "tuz_sstring.h"
 namespace _tuz_private{
     
-    struct TMatch{
-        explicit TMatch(const tuz_byte* data,const tuz_byte* data_end,
-                        const ICode& _coder,const tuz_TCompressProps& _props,size_t _kMaxSearchDeep)
-                            :sstring(data,data_end),coder(_coder),props(_props),kMaxSearchDeep(_kMaxSearchDeep){ }
-        bool match(const tuz_byte** out_matched,tuz_length_t* out_match_len,
-                   const tuz_byte* cur,size_t unmatched_len);
+    struct TSuffixString{
+        TSuffixString(const tuz_byte* _src,const tuz_byte* _src_end) //data size < 2G
+        :src(_src),src_end(_src_end) { _init();  }
+        
+        const tuz_byte* const src;
+        const tuz_byte* const src_end;
+        typedef int32_t TInt;
+        std::vector<TInt>   SA;     // suffix string
+        std::vector<TInt>   R;      // rank of sstring
+        std::vector<TInt>   LCP;    // lcp(i,i+1), longest common prefix between adjacent sstring
+        inline size_t size()const { return src_end-src; }
     private:
-        TSuffixString               sstring;
-        const ICode&                coder;
-        const tuz_TCompressProps&   props;
-        const size_t                kMaxSearchDeep;
+        void _init();
     };
     
 }
-#endif //_tuz_enc_match_h
+#endif //_tuz_sstring_h

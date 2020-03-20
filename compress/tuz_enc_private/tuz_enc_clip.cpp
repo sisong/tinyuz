@@ -48,27 +48,26 @@ void compress_clip(TTuzCode& coder,const hpatch_TStreamInput* data,hpatch_Stream
         }
     }
     
-    TMatch   matcher(data_buf.data(),data_buf.data_end(),coder,props);
+    const int kMaxSearchDeep=1024*4; //todo: change for data size
+    TMatch   matcher(data_buf.data(),data_buf.data_end(),coder,props,kMaxSearchDeep);
     {//match loop
         const tuz_byte* cur=data_buf.data()+props.dictSize;
         const tuz_byte* back=cur;
         while (cur!=data_buf.data_end()){
             const tuz_byte*     matched;
             tuz_length_t        match_len;
-            if (matcher.match(&matched,&match_len)){
+            size_t              unmatched_len=(cur-back);
+            if (matcher.match(&matched,&match_len,cur,unmatched_len)){
                 assert(matched<cur);
                 assert(match_len<=props.maxSaveLength);
-                if (cur!=back){
-                    size_t data_len=cur-back;
-                    while(data_len) {
-                        tuz_length_t len=(data_len<=props.maxSaveLength)?(tuz_length_t)data_len:props.maxSaveLength;
-                        coder.outData(len,back,back+len);
-                        back+=len;
-                        data_len-=len;
-                    }
+                while (unmatched_len){
+                    tuz_length_t len=(unmatched_len<=props.maxSaveLength)?(tuz_length_t)unmatched_len:props.maxSaveLength;
+                    coder.outData(len,back,back+len);
+                    back+=len;
+                    unmatched_len-=len;
                 }
-                size_t dict_pos=cur-matched;
-                assert(dict_pos<=props.dictSize);
+                size_t dict_pos=(cur-matched)-1;
+                assert(dict_pos<props.dictSize);
                 coder.outDict(match_len-props.minDictMatchLen,(tuz_length_t)dict_pos);
                 back=cur+match_len;
             }else{
