@@ -43,37 +43,30 @@ namespace _tuz_private{
         for (TInt h=0,i=0; i<n; ++i){
             if (R[i]==0) continue;
             TInt j = SA[R[i]-1];
-            while ((i+h!=n)&&(j+h!=n)&&(T[i+h]==T[j+h]))
+            while (((i+h!=n)&&(j+h!=n))&&(T[i+h]==T[j+h]))
                 ++h;
             LCP[R[i]-1]=h;
             if (h>0) --h;
         }
     }
-    
-    /*
-    static void _LCP_create_withOutR(const char* T,TInt n,const TInt* SA,TInt* LCP){
-        //not need R
-        if (n>0)
-            LCP[n-1]=0;
-        for (TInt i=1; i<n; ++i) {
-            TInt h=0;
-            while (((SA[i]+h)!=n)&&((SA[i-1]+h)!=n)&&(T[SA[i]+h]==T[SA[i-1]+h]))
-                ++h;
-            LCP[i-1]=h;
-        }
-    }
-    */
 
-void TSuffixString::_init(){
+void TSuffixString::_init(TInt maxLCPValue){
     size_t sa_size=size();
     checkv(_uint_is_less_2g(sa_size));
     SA.resize(sa_size);
     R.resize(sa_size);
     LCP.resize(sa_size);
+    if (sa_size==0) return;
     
     checkv(0==divsufsort(src,(saidx_t*)SA.data(),(saidx_t)sa_size));
     _Rank_create((TInt)SA.size(),SA.data(),R.data());
     _LCP_create_withR(src,(TInt)SA.size(),SA.data(),R.data(),LCP.data());
+    for (size_t i=0; i<sa_size; ++i) {
+        if (LCP[i]<=maxLCPValue)
+            ;//continue;
+        else
+            LCP[i]=maxLCPValue;
+    }
 }
 
 }

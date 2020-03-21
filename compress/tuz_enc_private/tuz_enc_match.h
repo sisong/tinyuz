@@ -32,15 +32,19 @@ namespace _tuz_private{
     
     struct TMatch{
         explicit TMatch(const tuz_byte* data,const tuz_byte* data_end,
-                        const ICode& _coder,const tuz_TCompressProps& _props,size_t _kMaxSearchDeep)
-                            :sstring(data,data_end),coder(_coder),props(_props),kMaxSearchDeep(_kMaxSearchDeep){ }
+                        const ICode& _coder,const tuz_TCompressProps& _props)
+        :sstring(data,data_end,_props.maxSaveLength),coder(_coder),
+        props(_props){ }
         bool match(const tuz_byte** out_matched,tuz_length_t* out_match_len,
                    const tuz_byte* cur,size_t unmatched_len);
     private:
         TSuffixString               sstring;
         const ICode&                coder;
         const tuz_TCompressProps&   props;
-        const size_t                kMaxSearchDeep;
+        typedef TSuffixString::TInt TInt;
+        void _match(TInt it_inc,size_t& curBestBitScore,
+                    const tuz_byte** curBestMatched,tuz_length_t* curBestMatchLen,
+                    const TInt curString,size_t unmatched_len);
     };
     
 }

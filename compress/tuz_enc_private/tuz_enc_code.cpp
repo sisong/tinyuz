@@ -47,6 +47,15 @@ namespace _tuz_private{
         return half_count;
     }
     
+    static tuz_inline tuz_byte _pack_v_half_count(tuz_length_t v){
+        tuz_byte half_count=0;
+        do {
+            v>>=3;
+            ++half_count;
+        }while(v>0);
+        return half_count;
+    }
+
 void TTuzCode::outLen(tuz_length_t len){
     tuz_byte* half_code=(half_code_index!=kNullIndex)?&code[half_code_index]:0;
     tuz_byte code_buf[kMaxPackedLenByteSize];
@@ -57,6 +66,9 @@ void TTuzCode::outLen(tuz_length_t len){
     half_code_index=(half_count&1)?(code.size()-1):kNullIndex;
 }
 
+tuz_byte TTuzCode::getSavedLenBit(tuz_length_t len)const{
+    return _pack_v_half_count(len);
+}
     
 void TTuzCode::outType(tuz_TCodeType type){
     if (type_count==0){

@@ -86,7 +86,7 @@ static tuz_BOOL _update_cache(tuz_TStream* self){
         return tuz_FALSE;
 }
 
-static tuz_BOOL _cache_read_bytes(tuz_TStream* self,tuz_byte* out_data,tuz_size_t len){
+static tuz_inline tuz_BOOL _cache_read_bytes(tuz_TStream* self,tuz_byte* out_data,tuz_size_t len){
     while (len>0) {
         tuz_size_t clen=self->_code_cache.cache_end-self->_code_cache.cache_begin;
         if (clen>0){
@@ -175,7 +175,7 @@ tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_byte* decodeCache,tuz_size_t 
     {//mem
         self->_dict.dict_buf=self->alloc_mem(self->listener,self->_dict.dict_size);
         if (self->_dict.dict_buf==0) return tuz_ALLOC_MEM_ERROR;
-        memset(self->_dict.dict_buf,0,self->_dict.dict_size);
+        self->_dict.dict_buf[self->_dict.dict_size-1]=0; //must have a 0 data
     }
     return tuz_OK;
 }
@@ -227,7 +227,7 @@ static tuz_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* out_data,tuz_byte*
     return len;
 }
 
-#define _check_return(v)  { if (!(v)) goto return_pos; }
+#define _check_return(v)  { if (!(v)) goto return_process; }
 #define _next_types(self) {     \
             self->_state.type_count=8;  \
             _check_return(_cache_read_1byte(self,&self->_state.types)); }
@@ -235,32 +235,48 @@ static tuz_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* out_data,tuz_byte*
 tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_size_t* data_size){
     tuz_byte*  cur_out_data=out_data;
     tuz_size_t dsize=*data_size;
-    while (1){
+    do{
+        copyDict_cmp_process:
         if (self->_state.dictType_len>0){ //copy from dict or out_data
-            //  [                 dict buf                 ]|[          out buf        |              ]
-            //             |dict_cur               dict_size|out_data      cur_out_data| <-- dsize -->|
-            //       dictType_pos| <-- dictType_len --> |
-            //                        dictType_pos|                  <--  dictType_len -->                 |
-            //                                     dictType_pos| <-  dictType_len -> |
-            tuz_size_t len;
-            if (dsize==0) return tuz_OUT_BUF_ERROR;
-            if (self->_state.dictType_pos<self->_dict.dict_size){
-                len=_copy_from_dict(self,out_data,cur_out_data,dsize);
+        copyDict_process:
+            if (dsize>0){
+                //  [                 dict buf                 ]|[          out buf        |              ]
+                //             |dict_cur               dict_size|out_data      cur_out_data| <-- dsize -->|
+                //       dictType_pos| <-- dictType_len --> |
+                //                        dictType_pos|                  <--  dictType_len -->                 |
+                //                                     dictType_pos| <-  dictType_len -> |
+                tuz_size_t len;
+                if (self->_state.dictType_pos<self->_dict.dict_size){
+                    len=_copy_from_dict(self,out_data,cur_out_data,dsize);
+                }else{
+                    len=(self->_state.dictType_len<dsize)?(tuz_size_t)self->_state.dictType_len:dsize;
+                    memmove_order(cur_out_data,out_data+(self->_state.dictType_pos-self->_dict.dict_size),len);
+                }
+                self->_state.dictType_pos+=len;
+                self->_state.dictType_len-=len;
+                cur_out_data+=len;
+                dsize-=len;
+                goto copyDict_cmp_process;
             }else{
-                len=(self->_state.dictType_len<dsize)?(tuz_size_t)self->_state.dictType_len:dsize;
-                memmove_order(cur_out_data,out_data+(self->_state.dictType_pos-self->_dict.dict_size),len);
+                break;
             }
-            self->_state.dictType_pos+=len;
-            self->_state.dictType_len-=len;
-            cur_out_data+=len;
-            dsize-=len;
-        }else if (self->_state.codeType_len>0){// copy from code
-            const tuz_size_t len=(self->_state.codeType_len<dsize)?(tuz_size_t)self->_state.codeType_len:dsize;
-            if (dsize==0) return tuz_OUT_BUF_ERROR;
-            _check_return(_cache_read_bytes(self,cur_out_data,len));
-            cur_out_data+=len;
-            dsize-=len;
-        }else if (self->_state.type_count>0){ //next type
+        }
+    copyCode_cmp_process:
+        if (self->_state.codeType_len>0){// copy from code
+        copyCode_process:
+            if (dsize>0){
+                const tuz_size_t len=(self->_state.codeType_len<dsize)?(tuz_size_t)self->_state.codeType_len:dsize;
+                _check_return(_cache_read_bytes(self,cur_out_data,len));
+                self->_state.codeType_len-=len;
+                cur_out_data+=len;
+                dsize-=len;
+                goto copyCode_cmp_process;
+            }else{
+                break;
+            }
+        }
+        if (self->_state.type_count>0){ //next type
+        type_process: {
             tuz_length_t saved_len;
             const tuz_TCodeType type=self->_state.types&1;
             self->_state.types>>=1;
@@ -273,10 +289,12 @@ tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_size
                 if (saved_dict_pos>=self->_dict.dict_size) return tuz_DICT_POS_ERROR;
 #endif
                 self->_state.dictType_len=saved_len+self->kMinDictMatchLen;
-                self->_state.dictType_pos=self->_dict.dict_size-1-(tuz_size_t)saved_dict_pos;
+                self->_state.dictType_pos=(self->_dict.dict_size-1-(tuz_size_t)saved_dict_pos)+(cur_out_data-out_data);
+                goto copyDict_process;
             }else{ //==tuz_codeType_data or ctrlType
                 if (saved_len!=0){
                     self->_state.codeType_len=saved_len;
+                    goto copyCode_process;
                 }else{ // ctrlType
                     tuz_byte ctrlType;
                     _check_return(_cache_read_1byte(self,&ctrlType));
@@ -286,29 +304,32 @@ tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_size
 #endif
                         self->_state.type_count=0;
                         self->_state.is_ctrlType_stream_end=tuz_TRUE;
-                        _check_return(tuz_FALSE); //return
+                        _update_cache(self); //for is_input_stream_end
+                        break;
                     }else if (tuz_ctrlType_clipEnd==ctrlType){ //clip end
                         self->_state.half_code=0; //empty;
-                        _next_types(self);
+                        goto types_process;
                     }else{
                         return tuz_CTRLTYPE_UNKNOW_ERROR;
                     }
                 }
-            }
+            } }
         }else{
+        types_process:
             _next_types(self);
+            goto type_process;
         }
-    }
+    }while(1);
 
-return_pos:
+return_process:
     {
-        tuz_BOOL is_stream_end=self->_state.is_ctrlType_stream_end|self->_code_cache.is_input_stream_end;
-        if ((!is_stream_end)&(out_data!=cur_out_data))
+        tuz_BOOL is_decode_end=self->_state.is_ctrlType_stream_end|self->_code_cache.is_input_stream_end;
+        if ((!is_decode_end)&(out_data!=cur_out_data))
             _update_dict(self,out_data,cur_out_data);
 
         if (self->_code_cache.is_input_stream_error){
             return tuz_READ_CODE_ERROR;
-        }else if (is_stream_end){
+        }else if (is_decode_end){
             if (self->_state.is_ctrlType_stream_end&&self->_code_cache.is_input_stream_end
                 &&(self->_code_cache.cache_begin==self->_code_cache.cache_end)){
                 (*data_size)-=dsize;

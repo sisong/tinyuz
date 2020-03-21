@@ -30,18 +30,18 @@
 namespace _tuz_private{
     
     struct TSuffixString{
-        TSuffixString(const tuz_byte* _src,const tuz_byte* _src_end) //data size < 2G
-        :src(_src),src_end(_src_end) { _init();  }
+        typedef int32_t TInt;
+        TSuffixString(const tuz_byte* _src,const tuz_byte* _src_end,TInt maxLCPValue) //data size < 2G
+        :src(_src),src_end(_src_end) { _init(maxLCPValue);  }
         
         const tuz_byte* const src;
         const tuz_byte* const src_end;
-        typedef int32_t TInt;
         std::vector<TInt>   SA;     // suffix string
         std::vector<TInt>   R;      // rank of sstring
         std::vector<TInt>   LCP;    // lcp(i,i+1), longest common prefix between adjacent sstring
         inline size_t size()const { return src_end-src; }
     private:
-        void _init();
+        void _init(TInt maxLCPValue);
     };
     
 }

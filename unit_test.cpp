@@ -57,7 +57,7 @@ static int test(const unsigned char* src,const unsigned char* src_end,const char
     compressedCode.resize(codeSize);
     
     bool ret=false;
-    std::vector<unsigned char> decompressCode(src_end-src,0);
+    std::vector<unsigned char> decompressedData(src_end-src,0);
     tuz_TStream tuz;
     tuz_TStream_init(&tuz);
     TTuzListener  listener={compressedCode.data(),compressedCode.data()+compressedCode.size()};
@@ -66,15 +66,15 @@ static int test(const unsigned char* src,const unsigned char* src_end,const char
     tuz.alloc_mem=listener.alloc_mem;
     tuz.free_mem=listener.free_mem;
     if (tuz_OK==tuz_TStream_open(&tuz,&listener._mem_buf[kDictSize],kDecodeCacheSize)){
-        tuz_size_t data_size=decompressCode.size();
-        tuz_TResult tret=tuz_TStream_decompress(&tuz,decompressCode.data(),&data_size);
+        tuz_size_t data_size=decompressedData.size();
+        tuz_TResult tret=tuz_TStream_decompress(&tuz,decompressedData.data(),&data_size);
         tuz_TStream_close(&tuz);
-        ret=(tret==tuz_STREAM_END)&&(data_size==decompressCode.size());
+        ret=(tret==tuz_STREAM_END)&&(data_size==decompressedData.size());
     }
     if (!ret){
         ++error_count;
         std::cout << "\nerror_count=="<<error_count<<" result error, tag==\""<<tag<<"\"\n";
-    }else if (decompressCode!=std::vector<unsigned char>(src,src_end)){
+    }else if (decompressedData!=std::vector<unsigned char>(src,src_end)){
         ++error_count;
         std::cout << "\nerror_count=="<<error_count<<" data error, tag==\""<<tag<<"\"\n";
     }else{
@@ -96,6 +96,7 @@ static void test_tuz(const char* src,const char* tag){
 
 int main(int argc, const char * argv[]){
     std::cout <<"tinyuz " TINYUZ_VERSION_STRING "\n";
+    //*
     test_tuz(0,"null");
     test_tuz("","tag0");
     test_tuz("1","tag1");
@@ -112,6 +113,7 @@ int main(int argc, const char * argv[]){
              "hjerfuy34gfbehjfberuiyg734gfbhj34fjh34bf","tag12");
     test_tuz("234546457568792341354645756867782334253464576576857235346457658768768769789872342354"
              "35465476587698797436547658763254364575647568","tag13");
+    //*/
     
     const int kRandTestCount=10000;
     const int kMaxDataSize=1024*65;
@@ -120,8 +122,8 @@ int main(int argc, const char * argv[]){
     //srand( (unsigned int)time(0) );
     for (int i=0; i<kRandTestCount; ++i)
         seeds[i]=rand();
-    
-    
+
+    //seeds[0]=?; //for debug error testSeed
     for (int i=0; i<kRandTestCount; ++i) {
         char tag[50];
         sprintf(tag, "testSeed=%d",seeds[i]);

@@ -29,51 +29,66 @@
 using namespace hdiff_private;
 namespace _tuz_private{
     
+    static void _outData(const tuz_byte* back,size_t unmatched_len,
+                         _tuz_private::TTuzCode& coder,const tuz_TCompressProps& props){
+        while (unmatched_len){
+            tuz_length_t len=(unmatched_len<=props.maxSaveLength)?(tuz_length_t)unmatched_len:props.maxSaveLength;
+            coder.outData(len,back,back+len);
+            back+=len;
+            unmatched_len-=len;
+        }
+    }
+    
 void compress_clip(TTuzCode& coder,const hpatch_TStreamInput* data,hpatch_StreamPos_t clipBegin,
-                       hpatch_StreamPos_t clipEnd,const tuz_TCompressProps& props){
+                   hpatch_StreamPos_t clipEnd,const tuz_TCompressProps& props){
+    //            [           |clipBegin       endPos|
+    //       |     dict       |
+    //               | dict   |
     size_t mem_size;
     {
-        hpatch_StreamPos_t _mem_size=props.dictSize+(clipEnd-clipBegin);
+        hpatch_StreamPos_t _mem_size;
+        if (clipBegin==0)
+            _mem_size=1+(clipEnd-clipBegin); //must have a 0 data
+        else if (props.dictSize>=clipBegin)
+            _mem_size=clipEnd;
+        else
+            _mem_size=props.dictSize+(clipEnd-clipBegin);
         mem_size=(size_t)_mem_size;
         checkv(mem_size==_mem_size);
     }
     TAutoMem data_buf(mem_size);
-    { //    [    |clipBegin      endPos|
-        if (clipBegin<props.dictSize){
-            size_t empty_size=props.dictSize-clipBegin;
-            memset(data_buf.data(),0,empty_size);
-            checkv(data->read(data,0,data_buf.data()+empty_size,data_buf.data_end()));
-        }else{
-            checkv(data->read(data,clipBegin-props.dictSize,data_buf.data(),data_buf.data_end()));
-        }
+    {
+        if (clipBegin==0) data_buf.data()[0]=0;
+        checkv(data->read(data,0,data_buf.data()+((clipBegin==0)?1:0),data_buf.data_end()));
     }
     
-    const int kMaxSearchDeep=1024*4; //todo: change for data size
-    TMatch   matcher(data_buf.data(),data_buf.data_end(),coder,props,kMaxSearchDeep);
+    TMatch   matcher(data_buf.data(),data_buf.data_end(),coder,props);
     {//match loop
-        const tuz_byte* cur=data_buf.data()+props.dictSize;
+        const tuz_byte* end=data_buf.data_end();
+        const tuz_byte* cur=end-(clipEnd-clipBegin);
         const tuz_byte* back=cur;
-        while (cur!=data_buf.data_end()){
+        while (cur!=end){
             const tuz_byte*     matched;
             tuz_length_t        match_len;
             size_t              unmatched_len=(cur-back);
             if (matcher.match(&matched,&match_len,cur,unmatched_len)){
                 assert(matched<cur);
+                assert(cur+match_len<=end);
                 assert(match_len<=props.maxSaveLength);
-                while (unmatched_len){
-                    tuz_length_t len=(unmatched_len<=props.maxSaveLength)?(tuz_length_t)unmatched_len:props.maxSaveLength;
-                    coder.outData(len,back,back+len);
-                    back+=len;
-                    unmatched_len-=len;
-                }
+                if (unmatched_len>0)
+                    _outData(back,unmatched_len,coder,props);
                 size_t dict_pos=(cur-matched)-1;
                 assert(dict_pos<props.dictSize);
                 coder.outDict(match_len-props.minDictMatchLen,(tuz_length_t)dict_pos);
-                back=cur+match_len;
+                cur+=match_len;
+                back=cur;
             }else{
                 ++cur;
             }
         }
+        size_t unmatched_len=(cur-back);
+        if (unmatched_len>0)
+            _outData(back,unmatched_len,coder,props);
     }
 }
 
