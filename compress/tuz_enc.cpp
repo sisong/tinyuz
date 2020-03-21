@@ -40,7 +40,7 @@ hpatch_StreamPos_t tuz_maxCompressedSize(hpatch_StreamPos_t data_size){
     const hpatch_StreamPos_t _u_cout=(data_size+tuz_kMinSaveLength-1)/tuz_kMinSaveLength;
     const hpatch_StreamPos_t u_size=(_u_cout+7)/8 + (_u_cout*3+1)/2;
     hpatch_StreamPos_t c_count=(data_size+kMinClipLength-1)/kMinClipLength;
-    return data_size+ 1 + kMaxPackedLenByteSize + (1+2)*c_count + u_size + 2;
+    return data_size+ 1 + kMaxPackedLenByteSize + (1+2)*c_count + u_size +1+2;
 }
 
 hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatch_TStreamInput* data,
@@ -53,16 +53,23 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     checkv((props->maxSaveLength>=255)&(_uint_is_less_2g(props->maxSaveLength)));
     checkv(props->minDictMatchLen>=3);
     
+    tuz_TCompressProps selfProps=*props;
+    if (selfProps.dictSize>data->streamSize){
+        selfProps.dictSize=(tuz_length_t)(data->streamSize);
+        if (selfProps.dictSize==0)
+            selfProps.dictSize=1;
+    }
+    
     std::vector<tuz_byte> code;
     {//head
         TTuzCode coder(code);
-        coder.outLen(props->minDictMatchLen);
-        coder.outLen(props->dictSize);
+        coder.outLen(selfProps.minDictMatchLen);
+        coder.outLen(selfProps.dictSize);
     }
     {
         TTuzCode coder(code);
         hpatch_StreamPos_t clipEnd=data->streamSize;
-        compress_clip(coder,data,0,clipEnd,*props);
+        compress_clip(coder,data,0,clipEnd,selfProps);
         //end tag
         if (clipEnd==data->streamSize)
             coder.outCtrl_streamEnd();

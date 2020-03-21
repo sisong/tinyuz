@@ -67,7 +67,7 @@ void TTuzCode::outLen(tuz_length_t len){
 }
 
 tuz_byte TTuzCode::getSavedLenBit(tuz_length_t len)const{
-    return _pack_v_half_count(len);
+    return _pack_v_half_count(len)*4;
 }
     
 void TTuzCode::outType(tuz_TCodeType type){

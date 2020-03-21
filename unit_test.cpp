@@ -5,17 +5,18 @@
 #include <string.h>
 #include <math.h>
 #include <vector>
+#include "_clock_for_demo.h" //in HDiffPatch
 #include "decompress/tuz_dec.h"
 #include "compress/tuz_enc.h"
 
+bool    is_log_tag=false;
 int     error_count=0;
 double  sum_src_size=0;
 double  sum_cmz_size=0;
 
 
-const tuz_size_t kDecodeCacheSize=1024;
-const tuz_size_t kDictSize=1024*16;
-
+const tuz_size_t kDecodeCacheSize=1024*4;
+const tuz_size_t kDictSize=1024*128;
 struct TTuzListener{
     const unsigned char* src;
     const unsigned char* src_end;
@@ -36,7 +37,7 @@ struct TTuzListener{
     static void* alloc_mem(void* listener,tuz_size_t mem_size){
         //return malloc(mem_size);
         TTuzListener* self=(TTuzListener*)listener;
-        assert(mem_size==kDictSize);
+        assert(mem_size<=kDictSize);
         return self->_mem_buf;
     }
     static void free_mem(void* listener,void* pmem){
@@ -77,7 +78,7 @@ static int test(const unsigned char* src,const unsigned char* src_end,const char
     }else if (decompressedData!=std::vector<unsigned char>(src,src_end)){
         ++error_count;
         std::cout << "\nerror_count=="<<error_count<<" data error, tag==\""<<tag<<"\"\n";
-    }else{
+    }else if(is_log_tag){
         std::cout << "error_count=="<<error_count<<", test ok  frzSize/srcSize:"<<compressedCode.size()<<"/"<<src_end-src<<", tag==\""<<tag<<"\"\n";
     }
     return (int)compressedCode.size();
@@ -95,6 +96,7 @@ static void test_tuz(const char* src,const char* tag){
 }
 
 int main(int argc, const char * argv[]){
+    double  time0=clock_s();
     std::cout <<"tinyuz " TINYUZ_VERSION_STRING "\n";
     //*
     test_tuz(0,"null");
@@ -115,7 +117,7 @@ int main(int argc, const char * argv[]){
              "35465476587698797436547658763254364575647568","tag13");
     //*/
     
-    const int kRandTestCount=10000;
+    const int kRandTestCount=2000;
     const int kMaxDataSize=1024*65;
     const int kMaxCopyCount=5000;
     std::vector<int> seeds(kRandTestCount);
@@ -151,6 +153,7 @@ int main(int argc, const char * argv[]){
     std::cout << "\n  error_count=="<<error_count<<"\n";
     std::cout <<"  tinyuz: "<<" sum compressedSize/srcSize:"<<sum_cmz_size/sum_src_size<<"\n";
     std::cout << "\ndone!\n";
+    printf("\n time: %.3f s\n",(clock_s()-time0));
     return error_count;
 }
 

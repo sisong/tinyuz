@@ -46,36 +46,32 @@ namespace _tuz_private{
         }
         
         TInt curMinLcp=(TInt)tuz_ui2G_sub_1;
-        //const int kMinZipLoseBitLength=8*props.minDictMatchLen-coder.minSavedLenBit;
-        //TInt curMinLcp=curBestMatchLen;
-        const int kMaxSearchDeep=1024*4; //todo: change for data size
+        const size_t kMinDictStoreBit=1+coder.minSavedLenBit*2+((unmatched_len>0)?6:0);
+        const TInt minDictMatchLen=props.minDictMatchLen;
+        const int kMaxSearchDeep=1024*32; //todo: change for data size
         for (size_t deep=kMaxSearchDeep;(deep>0)&(it!=it_end);it+=it_inc,LCP+=it_inc,--deep){
             TInt curLCP=*LCP;
-            if (curLCP<props.minDictMatchLen)
+            if (curLCP<minDictMatchLen)
                 break;
-            if (curLCP<curMinLcp){
+            if (curLCP<curMinLcp)
                 curMinLcp=curLCP;
-                //if (curMinLcp*8<curBestBitScore+kMinZipLoseBitLength)//不可能压缩了.
-                //    break;
-            }else{
-                curLCP=curMinLcp;
-            }
+            size_t  dataStoreBit=(size_t)curMinLcp*8+((unmatched_len>0)?0:6);
+            if (dataStoreBit<=curBestBitScore+kMinDictStoreBit)
+                break;
             TInt matchString=sstring.SA[it];
             const TInt dict_pos=(curString-matchString)-1;
             if ((dict_pos<0)|(dict_pos>=props.dictSize)) continue;
             
             --deep;//for speed
-            size_t  dictStoreBit=(size_t)1+coder.getSavedLenBit(curLCP-props.minDictMatchLen)
-                                +coder.getSavedLenBit(dict_pos);
-            size_t  dataStoreBit=(size_t)curLCP*8+((unmatched_len>0)?(1+2):0);
-            if (dictStoreBit>=dataStoreBit) continue;
+            size_t  dictStoreBit=(size_t)1+coder.getSavedLenBit(curMinLcp-props.minDictMatchLen)
+                        +coder.getSavedLenBit(dict_pos)+((unmatched_len>0)?6:0);
+            if (dataStoreBit<=curBestBitScore+dictStoreBit) continue;
             size_t  curBitScore=dataStoreBit-dictStoreBit;
-            if (curBitScore<=curBestBitScore) continue;
             
-            deep-=(kMaxSearchDeep/64); //for speed
+            deep-=(kMaxSearchDeep/16); //for speed
             curBestBitScore=curBitScore;
             *curBestMatched=sstring.src+matchString;
-            *curBestMatchLen=curLCP;
+            *curBestMatchLen=curMinLcp;
         }
     }
     

@@ -47,9 +47,7 @@ void compress_clip(TTuzCode& coder,const hpatch_TStreamInput* data,hpatch_Stream
     size_t mem_size;
     {
         hpatch_StreamPos_t _mem_size;
-        if (clipBegin==0)
-            _mem_size=1+(clipEnd-clipBegin); //must have a 0 data
-        else if (props.dictSize>=clipBegin)
+        if (props.dictSize>=clipBegin)
             _mem_size=clipEnd;
         else
             _mem_size=props.dictSize+(clipEnd-clipBegin);
@@ -58,8 +56,7 @@ void compress_clip(TTuzCode& coder,const hpatch_TStreamInput* data,hpatch_Stream
     }
     TAutoMem data_buf(mem_size);
     {
-        if (clipBegin==0) data_buf.data()[0]=0;
-        checkv(data->read(data,0,data_buf.data()+((clipBegin==0)?1:0),data_buf.data_end()));
+        checkv(data->read(data,clipEnd-mem_size,data_buf.data(),data_buf.data_end()));
     }
     
     TMatch   matcher(data_buf.data(),data_buf.data_end(),coder,props);

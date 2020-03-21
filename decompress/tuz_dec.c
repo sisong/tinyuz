@@ -175,7 +175,6 @@ tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_byte* decodeCache,tuz_size_t 
     {//mem
         self->_dict.dict_buf=self->alloc_mem(self->listener,self->_dict.dict_size);
         if (self->_dict.dict_buf==0) return tuz_ALLOC_MEM_ERROR;
-        self->_dict.dict_buf[self->_dict.dict_size-1]=0; //must have a 0 data
     }
     return tuz_OK;
 }
