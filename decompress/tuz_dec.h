@@ -42,6 +42,7 @@ typedef enum tuz_TResult{
     tuz_ALLOC_MEM_ERROR,
     tuz_READ_CODE_ERROR,
     tuz_DICT_POS_ERROR,
+    tuz_OUT_SIZE_OR_CODE_ERROR,
     tuz_CODE_ERROR, //unknow code ,or decode len(tuz_length_t) overflow
 } tuz_TResult;
     

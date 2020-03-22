@@ -234,6 +234,9 @@ static tuz_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* out_data,tuz_byte*
 tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_size_t* data_size){
     tuz_byte*  cur_out_data=out_data;
     tuz_size_t dsize=*data_size;
+#ifdef __RUN_MEM_SAFE_CHECK
+    if ((dsize==0)&(self->_state.dictType_len+self->_state.codeType_len>0)) return tuz_OUT_SIZE_OR_CODE_ERROR;
+#endif
     do{
         copyDict_cmp_process:
         if (self->_state.dictType_len>0){ //copy from dict or out_data
@@ -299,14 +302,15 @@ tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_size
                     _check_return(_cache_read_1byte(self,&ctrlType));
                     if (tuz_ctrlType_streamEnd==ctrlType){ //stream end
 #ifdef __RUN_MEM_SAFE_CHECK
-                        if (self->_state.is_ctrlType_stream_end) return tuz_CODE_ERROR;
+                        if (self->_state.is_ctrlType_stream_end) return tuz_CTRLTYPE_STREAM_END_ERROR;
 #endif
                         self->_state.type_count=0;
+                        self->_state.half_code=0;
                         self->_state.is_ctrlType_stream_end=tuz_TRUE;
                         _update_cache(self); //for is_input_stream_end
                         break;
                     }else if (tuz_ctrlType_clipEnd==ctrlType){ //clip end
-                        self->_state.half_code=0; //empty;
+                        self->_state.half_code=0;
                         goto types_process;
                     }else{
                         return tuz_CTRLTYPE_UNKNOW_ERROR;
@@ -322,14 +326,13 @@ tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_size
 
 return_process:
     {
-        tuz_BOOL is_decode_end=self->_state.is_ctrlType_stream_end|self->_code_cache.is_input_stream_end;
-        if ((!is_decode_end)&(out_data!=cur_out_data))
+        if ((!self->_state.is_ctrlType_stream_end)&(out_data!=cur_out_data))
             _update_dict(self,out_data,cur_out_data);
 
         if (self->_code_cache.is_input_stream_error){
             return tuz_READ_CODE_ERROR;
-        }else if (is_decode_end){
-            if (self->_state.is_ctrlType_stream_end&&self->_code_cache.is_input_stream_end
+        }else if (self->_state.is_ctrlType_stream_end){
+            if (self->_code_cache.is_input_stream_end
                 &&(self->_code_cache.cache_begin==self->_code_cache.cache_end)){
                 (*data_size)-=dsize;
                 return tuz_STREAM_END;

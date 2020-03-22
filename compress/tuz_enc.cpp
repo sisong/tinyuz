@@ -30,7 +30,7 @@
 using namespace _tuz_private;
 
 void tuz_defaultCompressProps(tuz_TCompressProps* out_props){
-    out_props->dictSize=1024*16;
+    out_props->dictSize=1024*32-1;
     out_props->maxSaveLength=1024*32-1;
     out_props->minDictMatchLen=4;
     out_props->threadNum=1;
@@ -67,6 +67,7 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
         coder.outLen(selfProps.dictSize);
     }
     {
+        //todo: clip streamSize
         TTuzCode coder(code);
         hpatch_StreamPos_t clipEnd=data->streamSize;
         compress_clip(coder,data,0,clipEnd,selfProps);

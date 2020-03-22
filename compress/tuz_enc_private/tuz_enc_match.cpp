@@ -45,8 +45,9 @@ namespace _tuz_private{
             LCP=sstring.LCP.data()+it_cur-1;
         }
         
+        const size_t kBreakCodeScore=1+coder.minSavedLenBit;
         TInt curMinLcp=(TInt)tuz_ui2G_sub_1;
-        const size_t kMinDictStoreBit=1+coder.minSavedLenBit*2+((unmatched_len>0)?6:0);
+        const size_t kMinDictStoreBit=1+coder.minSavedLenBit*2+((unmatched_len>0)?kBreakCodeScore:0);
         const TInt minDictMatchLen=props.minDictMatchLen;
         const int kMaxSearchDeep=1024*32; //todo: change for data size
         for (size_t deep=kMaxSearchDeep;(deep>0)&(it!=it_end);it+=it_inc,LCP+=it_inc,--deep){
@@ -55,7 +56,7 @@ namespace _tuz_private{
                 break;
             if (curLCP<curMinLcp)
                 curMinLcp=curLCP;
-            size_t  dataStoreBit=(size_t)curMinLcp*8+((unmatched_len>0)?0:6);
+            size_t  dataStoreBit=(size_t)curMinLcp*8+((unmatched_len>0)?0:kBreakCodeScore);
             if (dataStoreBit<=curBestBitScore+kMinDictStoreBit)
                 break;
             TInt matchString=sstring.SA[it];
@@ -64,7 +65,7 @@ namespace _tuz_private{
             
             --deep;//for speed
             size_t  dictStoreBit=(size_t)1+coder.getSavedLenBit(curMinLcp-props.minDictMatchLen)
-                        +coder.getSavedLenBit(dict_pos)+((unmatched_len>0)?6:0);
+                        +coder.getSavedLenBit(dict_pos)+((unmatched_len>0)?kBreakCodeScore:0);
             if (dataStoreBit<=curBestBitScore+dictStoreBit) continue;
             size_t  curBitScore=dataStoreBit-dictStoreBit;
             

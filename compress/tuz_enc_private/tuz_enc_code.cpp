@@ -102,10 +102,14 @@ void TTuzCode::outCtrl(tuz_TCtrlType ctrl){
 
 void TTuzCode::outCtrl_streamEnd(){
     outCtrl(tuz_ctrlType_streamEnd);
+    half_code_index=kNullIndex;
+    type_count=0;
 }
     
 void TTuzCode::outCtrl_clipEnd(){
     outCtrl(tuz_ctrlType_clipEnd);
+    half_code_index=kNullIndex;
+    type_count=0;
 }
 
 }
