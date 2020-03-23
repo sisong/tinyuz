@@ -46,9 +46,9 @@
 //tuz_uint __debug_check_false_x=0; //for debug
 //#define _tuz_FALSE (1/__debug_check_false_x)
 
-static void memmove_order(tuz_byte* dst,const tuz_byte* src,tuz_size_t len){
-    const tuz_size_t len_fast=len&(~(tuz_size_t)3);
-    tuz_size_t i;
+static void memmove_order(tuz_byte* dst,const tuz_byte* src,tuz_dict_size_t len){
+    const tuz_dict_size_t len_fast=len&(~(tuz_dict_size_t)3);
+    tuz_dict_size_t i;
     for (i=0;i<len_fast;i+=4){
         dst[i  ]=src[i  ];
         dst[i+1]=src[i+1];
@@ -63,8 +63,8 @@ static tuz_BOOL _update_cache(tuz_TStream* self){
     if (!(self->_code_cache.is_input_stream_end|self->_code_cache.is_input_stream_error)){
         //    [                      cache  buf                           ]
         //    | <-- len --> |cache_begin                         cache_end|
-        tuz_size_t len=self->_code_cache.cache_begin;
-        tuz_size_t old_size=(self->_code_cache.cache_end-len);
+        tuz_dict_size_t len=self->_code_cache.cache_begin;
+        tuz_dict_size_t old_size=(self->_code_cache.cache_end-len);
         tuz_byte* buf=self->_code_cache.cache_buf;
         assert(len>0);
         memmove(buf,buf+len,old_size);
@@ -75,7 +75,7 @@ static tuz_BOOL _update_cache(tuz_TStream* self){
         }
         if (len<self->_code_cache.cache_begin){
             //|                                             |        |
-            tuz_size_t sub=self->_code_cache.cache_begin-len;
+            tuz_dict_size_t sub=self->_code_cache.cache_begin-len;
             self->_code_cache.cache_end-=sub;
             self->_code_cache.is_input_stream_end=tuz_TRUE;
         }else
@@ -86,9 +86,9 @@ static tuz_BOOL _update_cache(tuz_TStream* self){
         return tuz_FALSE;
 }
 
-static tuz_inline tuz_BOOL _cache_read_bytes(tuz_TStream* self,tuz_byte* out_data,tuz_size_t len){
+static tuz_inline tuz_BOOL _cache_read_bytes(tuz_TStream* self,tuz_byte* out_data,tuz_dict_size_t len){
     while (len>0) {
-        tuz_size_t clen=self->_code_cache.cache_end-self->_code_cache.cache_begin;
+        tuz_dict_size_t clen=self->_code_cache.cache_end-self->_code_cache.cache_begin;
         if (clen>0){
             if (clen>len) clen=len;
             memcpy(out_data,self->_code_cache.cache_buf+self->_code_cache.cache_begin,clen);
@@ -128,7 +128,7 @@ static tuz_BOOL _cache_unpack_len(tuz_TStream* self,tuz_byte* half_code,tuz_leng
     tuz_byte        v_bit=0;
     tuz_byte        code=*half_code;
     do {
-        tuz_size_t next;
+        tuz_dict_size_t next;
         if (code){
             next=0;
         }else{
@@ -149,7 +149,7 @@ static tuz_BOOL _cache_unpack_len(tuz_TStream* self,tuz_byte* half_code,tuz_leng
     }while(1);
 }
 
-tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_byte* decodeCache,tuz_size_t kDecodeCacheSize){
+tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_byte* decodeCache,tuz_dict_size_t kDecodeCacheSize){
     if ( (self->_code_cache.cache_buf!=0) ||(self->read_code==0)||
          (self->alloc_mem==0)||(self->free_mem==0) || (kDecodeCacheSize==0) ) return tuz_OPEN_ERROR;
     memset(&self->_code_cache,0,sizeof(self->_code_cache));
@@ -169,7 +169,7 @@ tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_byte* decodeCache,tuz_size_t 
         if ((saved_len==0)||(self->kMinDictMatchLen!=saved_len)) return tuz_OPEN_ERROR;
         //dict_size
         if (!_cache_unpack_len(self,&half_code,&saved_len)) return tuz_OPEN_ERROR;
-        self->_dict.dict_size=(tuz_size_t)saved_len;
+        self->_dict.dict_size=(tuz_dict_size_t)saved_len;
         if (self->_dict.dict_size!=saved_len) return tuz_OPEN_ERROR;
     }
     {//mem
@@ -184,42 +184,49 @@ static void _update_dict(tuz_TStream *self,const tuz_byte* out_data,const tuz_by
     //           |dict_cur               dict_size|out_data      cur_out_data]
     //           [         out buf         ]
     //           [                      out buf                ]
-    const tuz_size_t out_len=(tuz_size_t)(cur_out_data-out_data);
-    const tuz_size_t dict_size=self->_dict.dict_size;
+    const tuz_dict_size_t out_len=(tuz_dict_size_t)(cur_out_data-out_data);
+    const tuz_dict_size_t dict_size=self->_dict.dict_size;
     tuz_byte*  dict=self->_dict.dict_buf;
-    self->_state.dictType_pos-=out_len;
+    if (self->_state.dictType_pos_inc>=out_len){
+        self->_state.dictType_pos_inc-=out_len;
+    }else{
+        self->_state.dictType_pos-=(tuz_dict_size_t)(out_len-self->_state.dictType_pos_inc);
+        self->_state.dictType_pos_inc=0;
+    }
     if (out_len>=dict_size){
         memcpy(dict,cur_out_data-dict_size,dict_size);
         self->_dict.dict_cur=0;
     }else{
-        tuz_size_t dict_cur=self->_dict.dict_cur;
-        if (dict_cur+out_len<=dict_size){
+        tuz_dict_size_t dict_cur=self->_dict.dict_cur;
+        if (out_len<=(dict_size-dict_cur)){
             memcpy(dict+dict_cur,out_data,out_len);
         }else{
-            const tuz_size_t sub_len=dict_size-dict_cur;
+            const tuz_dict_size_t sub_len=dict_size-dict_cur;
             memcpy(dict+dict_cur,out_data,sub_len);
             memcpy(dict,out_data+sub_len,out_len-sub_len);
         }
-        dict_cur+=out_len;
-        self->_dict.dict_cur=(dict_cur<dict_size)?dict_cur:(dict_cur-dict_size);
+        self->_dict.dict_cur=(out_len<(dict_size-dict_cur))?
+                             (out_len+dict_cur):(out_len-(dict_size-dict_cur));
     }
 }
 
-static tuz_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* out_data,tuz_byte* cur_out_data,tuz_size_t dsize) {
+static tuz_dict_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* out_data,tuz_byte* cur_out_data,tuz_dict_size_t dsize) {
     // [                       dict buf                      ]
     //              dict_cur+dictType_pos|   <-- len -->  |
     //                                     dict_cur+dictType_pos|   <-- len -->  |
     //                       dict_cur+dictType_pos|   <-- len -->  |
-    tuz_size_t max_len=self->_dict.dict_size-self->_state.dictType_pos;
+    tuz_dict_size_t max_len=self->_dict.dict_size-self->_state.dictType_pos;
     max_len=(max_len<dsize)?max_len:dsize;
-    tuz_size_t len=(self->_state.dictType_len<max_len)?(tuz_size_t)self->_state.dictType_len:max_len;
-    tuz_size_t pos=self->_dict.dict_cur+self->_state.dictType_pos;
-    if (pos>=self->_dict.dict_size)
-        pos-=self->_dict.dict_size;
-    if (pos+len<=self->_dict.dict_size){
+    tuz_dict_size_t len=(self->_state.dictType_len<max_len)?(tuz_dict_size_t)self->_state.dictType_len:max_len;
+    tuz_dict_size_t pos=self->_dict.dict_size-self->_dict.dict_cur;
+    if (self->_state.dictType_pos>=pos)
+        pos=self->_state.dictType_pos-pos;
+    else
+        pos=self->_dict.dict_cur+self->_state.dictType_pos;
+    if (len<=(self->_dict.dict_size-pos)){
         memcpy(cur_out_data,self->_dict.dict_buf+pos,len);
     }else{
-        tuz_size_t part_len=self->_dict.dict_size-pos;
+        tuz_dict_size_t part_len=self->_dict.dict_size-pos;
         memcpy(cur_out_data,self->_dict.dict_buf+pos,part_len);
         memcpy(cur_out_data+part_len,self->_dict.dict_buf,len-part_len);
     }
@@ -231,11 +238,11 @@ static tuz_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* out_data,tuz_byte*
             self->_state.type_count=8;  \
             _check_return(_cache_read_1byte(self,&self->_state.types)); }
 
-tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_size_t* data_size){
+tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_dict_size_t* data_size){
     tuz_byte*  cur_out_data=out_data;
-    tuz_size_t dsize=*data_size;
+    tuz_dict_size_t dsize=*data_size;
 #ifdef __RUN_MEM_SAFE_CHECK
-    if ((dsize==0)&(self->_state.dictType_len+self->_state.codeType_len>0)) return tuz_OUT_SIZE_OR_CODE_ERROR;
+    if ((dsize==0)&&((self->_state.dictType_len|self->_state.codeType_len)>0)) return tuz_OUT_SIZE_OR_CODE_ERROR;
 #endif
     do{
         copyDict_cmp_process:
@@ -247,14 +254,15 @@ tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_size
                 //       dictType_pos| <-- dictType_len --> |
                 //                        dictType_pos|                  <--  dictType_len -->                 |
                 //                                     dictType_pos| <-  dictType_len -> |
-                tuz_size_t len;
+                tuz_dict_size_t len;
                 if (self->_state.dictType_pos<self->_dict.dict_size){
                     len=_copy_from_dict(self,out_data,cur_out_data,dsize);
+                    self->_state.dictType_pos+=len;
                 }else{
-                    len=(self->_state.dictType_len<dsize)?(tuz_size_t)self->_state.dictType_len:dsize;
-                    memmove_order(cur_out_data,out_data+(self->_state.dictType_pos-self->_dict.dict_size),len);
+                    len=(self->_state.dictType_len<dsize)?(tuz_dict_size_t)self->_state.dictType_len:dsize;
+                    memmove_order(cur_out_data,out_data+self->_state.dictType_pos_inc,len);
+                    self->_state.dictType_pos_inc+=len;
                 }
-                self->_state.dictType_pos+=len;
                 self->_state.dictType_len-=len;
                 cur_out_data+=len;
                 dsize-=len;
@@ -267,7 +275,7 @@ tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_size
         if (self->_state.codeType_len>0){// copy from code
         copyCode_process:
             if (dsize>0){
-                const tuz_size_t len=(self->_state.codeType_len<dsize)?(tuz_size_t)self->_state.codeType_len:dsize;
+                const tuz_dict_size_t len=(self->_state.codeType_len<dsize)?(tuz_dict_size_t)self->_state.codeType_len:dsize;
                 _check_return(_cache_read_bytes(self,cur_out_data,len));
                 self->_state.codeType_len-=len;
                 cur_out_data+=len;
@@ -285,13 +293,21 @@ tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_size
             --self->_state.type_count;
             _check_return(_cache_unpack_len(self,&self->_state.half_code,&saved_len));
             if (type==tuz_codeType_dict){
+                tuz_dict_size_t   outed_size=(tuz_dict_size_t)(cur_out_data-out_data);
                 tuz_length_t saved_dict_pos;
                 _check_return(_cache_unpack_len(self,&self->_state.half_code,&saved_dict_pos));
 #ifdef __RUN_MEM_SAFE_CHECK
                 if (saved_dict_pos>=self->_dict.dict_size) return tuz_DICT_POS_ERROR;
 #endif
                 self->_state.dictType_len=saved_len+self->kMinDictMatchLen;
-                self->_state.dictType_pos=(self->_dict.dict_size-1-(tuz_size_t)saved_dict_pos)+(cur_out_data-out_data);
+                saved_dict_pos=(self->_dict.dict_size-1-(tuz_dict_size_t)saved_dict_pos);
+                if (outed_size<self->_dict.dict_size-saved_dict_pos){
+                    self->_state.dictType_pos=outed_size+saved_dict_pos;
+                    self->_state.dictType_pos_inc=0;
+                }else{
+                    self->_state.dictType_pos=self->_dict.dict_size;
+                    self->_state.dictType_pos_inc=outed_size+saved_dict_pos-self->_dict.dict_size;
+                }
                 goto copyDict_process;
             }else{ //==tuz_codeType_data or ctrlType
                 if (saved_len!=0){

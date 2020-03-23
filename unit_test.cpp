@@ -19,18 +19,20 @@ double  sum_src_size=0;
 double  sum_cmz_size=0;
 
 
-const tuz_size_t kDecodeCacheSize=1024*4;
-const tuz_size_t kDictSize=1024*64;
+const tuz_dict_size_t kDecodeCacheSize=1024;
+const tuz_dict_size_t kDictSize=1024*1024;
+const tuz_dict_size_t kMaxSaveLength=1024*16;
+
 struct TTuzListener{
     const unsigned char* src;
     const unsigned char* src_end;
-    static tuz_BOOL read_code(void* listener,tuz_byte* out_code,tuz_size_t* code_size){
+    static tuz_BOOL read_code(void* listener,tuz_byte* out_code,tuz_dict_size_t* code_size){
         TTuzListener* self=(TTuzListener*)listener;
-        tuz_size_t r_size=*code_size;
-        tuz_size_t s_size=self->src_end-self->src;
+        tuz_dict_size_t r_size=*code_size;
+        size_t s_size=self->src_end-self->src;
         if (r_size>s_size){
-            r_size=s_size;
-            *code_size=s_size;
+            r_size=(tuz_dict_size_t)s_size;
+            *code_size=r_size;
         }
         memcpy(out_code,self->src,r_size);
         self->src+=r_size;
@@ -38,7 +40,7 @@ struct TTuzListener{
     }
     
     tuz_byte _mem_buf[kDictSize+kDecodeCacheSize];
-    static void* alloc_mem(void* listener,tuz_size_t mem_size){
+    static void* alloc_mem(void* listener,tuz_dict_size_t mem_size){
         //return malloc(mem_size);
         TTuzListener* self=(TTuzListener*)listener;
         if (mem_size>kDictSize) return 0;
@@ -51,14 +53,10 @@ struct TTuzListener{
 
 
 tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
-                                  tuz_byte* out_uncompress,tuz_size_t* uncompress_size){
-    tuz_TStream tuz;
-    tuz_TStream_init(&tuz);
+                                  tuz_byte* out_uncompress,size_t* uncompress_size){
     TTuzListener  listener={code,code_end};
-    tuz.listener=&listener;
-    tuz.read_code=listener.read_code;
-    tuz.alloc_mem=listener.alloc_mem;
-    tuz.free_mem=listener.free_mem;
+    tuz_TStream tuz;
+    tuz_TStream_init(&tuz,&listener,listener.read_code,listener.alloc_mem,listener.free_mem);
     tuz_TResult result=tuz_TStream_open(&tuz,&listener._mem_buf[kDictSize],kDecodeCacheSize);
     if (tuz_OK!=result) return result;
 
@@ -66,22 +64,26 @@ tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
         const size_t buf_size=*uncompress_size;
         size_t data_size=0;
         while (result==tuz_OK) {
-            tuz_size_t step_size=kDecodeCacheSize/3; //for test
+            tuz_dict_size_t step_size=kDecodeCacheSize/3; //for test
             if (data_size+step_size>buf_size)
-                step_size=buf_size-data_size;
+                step_size=(tuz_dict_size_t)(buf_size-data_size);
             result=tuz_TStream_decompress(&tuz,out_uncompress,&step_size);
             data_size+=step_size;
             out_uncompress+=step_size;
         }
         *uncompress_size=data_size;
-    }else
-        result=tuz_TStream_decompress(&tuz,out_uncompress,uncompress_size);
+    }else{
+        tuz_dict_size_t usize=*uncompress_size;
+        assert(usize==*uncompress_size);
+        result=tuz_TStream_decompress(&tuz,out_uncompress,&usize);
+        *uncompress_size=usize;
+    }
     tuz_TStream_close(&tuz);
     return result;
 }
 
 int _attack_seed=111111111;
-long attack_decompress(const tuz_byte* _code,const tuz_byte* _code_end,tuz_size_t uncompress_size,
+long attack_decompress(const tuz_byte* _code,const tuz_byte* _code_end,tuz_dict_size_t uncompress_size,
                        const char* error_tag){
     char tag[250]="\0";
     srand(_attack_seed);
@@ -129,6 +131,7 @@ static int test(const unsigned char* src,const unsigned char* src_end,const char
     tuz_TCompressProps props;
     tuz_defaultCompressProps(&props);
     props.dictSize=kDictSize;
+    props.maxSaveLength=kMaxSaveLength;
     hpatch_StreamPos_t codeSize=tuz_compress(&out_stream,&in_stream,&props);
     compressedCode.resize(codeSize);
     
@@ -139,7 +142,7 @@ static int test(const unsigned char* src,const unsigned char* src_end,const char
         bool ret=false;
         std::vector<unsigned char> decompressedData(src_end-src,0);
         {
-            tuz_size_t uncompress_size=decompressedData.size();
+            size_t uncompress_size=decompressedData.size();
             tuz_TResult tret=tuz_decompress_stream(compressedCode.data(),compressedCode.data()+compressedCode.size(),
                                                    decompressedData.data(),&uncompress_size);
             ret=(tret==tuz_STREAM_END)&&(uncompress_size==decompressedData.size());
@@ -195,7 +198,7 @@ int main(int argc, const char * argv[]){
     for (int i=0; i<kRandTestCount; ++i)
         seeds[i]=rand();
 
-    seeds[0]=282475249; //for debug error testSeed
+    //seeds[0]=?; //for debug error testSeed
     for (int i=0; i<kRandTestCount; ++i) {
         char tag[50];
         sprintf(tag, "testSeed=%d",seeds[i]);

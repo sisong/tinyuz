@@ -42,13 +42,13 @@ extern "C" {
 #define _TINYUZ_EXPAND_AND_QUOTE(str)   _TINYUZ_QUOTE(str)
 #define TINYUZ_VERSION_STRING           _TINYUZ_EXPAND_AND_QUOTE(_TINYUZ_VERSION)
 
-#ifndef tuz_size_t
-    typedef size_t              tuz_size_t;
+    typedef unsigned char       tuz_byte;
+#ifndef tuz_dict_size_t
+    typedef  unsigned int       tuz_dict_size_t;
 #endif
 #ifndef tuz_length_t
-    typedef unsigned int        tuz_length_t;
+    typedef  unsigned int       tuz_length_t;
 #endif
-    typedef unsigned char       tuz_byte;
 
 #ifndef tuz_BOOL
     typedef tuz_byte            tuz_BOOL;

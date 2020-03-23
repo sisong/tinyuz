@@ -34,13 +34,13 @@ extern "C" {
 
     typedef struct tuz_TCompressProps{
         //memory requires for decompress: kDecodeCacheSize + dictSize
-        tuz_length_t    dictSize;        // >=1 & <=256m; default 32k-1;  220,1k,4k,64k-1,1m ...
+        tuz_dict_size_t dictSize;        // >=1 & <=16m;  default 32k-1;  220,1k,4k,64k-1,1m ...
         tuz_length_t    maxSaveLength;   // >=255 & <2g;  default 32k-1;  511,4k-1,64k-1,1m-1 ...
-        tuz_byte        minDictMatchLen; // >=3;          default 4;      6,8,...
-        tuz_size_t      threadNum;       // >=1;          default 1;
+        tuz_byte        minDictMatchLen; // >=3;          default 4;      5,6,7,8,...
+        int             threadNum;       // >=1;          default 1;
     } tuz_TCompressProps;
     
-    const tuz_length_t tuz_kMinSaveLength = 255;
+    const tuz_length_t tuz_kMinSaveLength = 255; //for tuz_length_t==uint8_t
 
 #ifdef __cplusplus
 }

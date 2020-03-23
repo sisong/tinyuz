@@ -25,6 +25,67 @@
  OTHER DEALINGS IN THE SOFTWARE.
 */
 #include "tuz_enc_code.h"
+#define _TEST_COUNT     0
+
+#if (_TEST_COUNT)
+#include <math.h>
+const int kMCount=256;
+long  mdict_count=0;
+double  mdict_len_bit[32]={0};
+double  mdict_len[kMCount]={0};
+double  mdict_pos_bit[32]={0};
+double  mdict_pos[kMCount]={0};
+long  mdata_count=0;
+double  mdata_len_bit[32]={0};
+double  mdata_len[kMCount]={0};
+inline int get_bit(size_t len) { int result=0;  do {  ++result; len>>=1; }while(len>0); return result; }
+
+double dict_len_bit=0;
+double data_len_bit=0;
+
+struct _debug_log {
+    ~_debug_log(){
+        for (size_t i=0;i<32;++i){
+            mdict_len_bit[i]=mdict_len_bit[i]/mdict_count+((i>0)?mdict_len_bit[i-1]:0);
+            mdict_pos_bit[i]=mdict_pos_bit[i]/mdict_count+((i>0)?mdict_pos_bit[i-1]:0);
+            mdata_len_bit[i]=mdata_len_bit[i]/mdata_count+((i>0)?mdata_len_bit[i-1]:0);
+        }
+        for (size_t i=0;i<kMCount;++i){
+            mdict_len[i]=mdict_len[i]/mdict_count+((i>0)?mdict_len[i-1]:0);
+            mdict_pos[i]=mdict_pos[i]/mdict_count+((i>0)?mdict_pos[i-1]:0);
+            mdata_len[i]=mdata_len[i]/mdata_count+((i>0)?mdata_len[i-1]:0);
+        }
+        /*
+        const int h_bit=3;
+        const int v=(1<<h_bit)-2;
+        double dict_len_bit_r=mdict_len[v]*(1+h_bit)+(1-mdict_len[v])*(1+h_bit+8);
+        double data_len_bit_r=mdata_len[v]*(1+h_bit)+(1-mdata_len[v])*(1+h_bit+8);
+        //*/
+        //*
+        const int h_bit=4;
+        const int v=(1<<h_bit)-2;
+        double dict_len_bit_r=mdict_len[v]*(1+h_bit)+(1-mdict_len[v])*(1+h_bit+8);
+        double data_len_bit_r=mdata_len[v]*(1+h_bit)+(1-mdata_len[v])*(1+h_bit+8);
+        //*/
+        /*const int h_bit=2;
+        const int v1=(1<<h_bit)-1;
+        const int v2=(1<<(h_bit*2+1))-1;
+        double dict_len_bit_r=mdict_len[v1]*4+(mdict_len[v2]-mdict_len[v1])*(4+4)+(1-mdict_len[v2])*(4+4+4);
+        double data_len_bit_r=mdata_len[v1]*4+(mdata_len[v2]-mdata_len[v1])*(4+4)+(1-mdata_len[v2])*(4+4+4);
+        //*/
+        double mlen_bit_r=(dict_len_bit_r*mdict_count+data_len_bit_r*mdata_count)/(mdict_count+mdata_count);
+        printf("mlen_bit_r=r(%f,%f)= %f\n",dict_len_bit_r,data_len_bit_r,mlen_bit_r);
+        
+        dict_len_bit/=mdict_count;
+        data_len_bit/=mdata_count;
+        double len_bit_r=(dict_len_bit*mdict_count+data_len_bit*mdata_count)/(mdict_count+mdata_count);
+        printf("mlen_bit_r=r(%f,%f)= %f\n",dict_len_bit,data_len_bit,len_bit_r);
+        
+    }
+};
+_debug_log _;
+#endif
+
 namespace _tuz_private{
     
     //low to high bitmap: xxx?xxx? xxx?xxx? ...
@@ -82,6 +143,12 @@ void TTuzCode::outType(tuz_TCodeType type){
 }
 
 void TTuzCode::outData(tuz_length_t len,const tuz_byte* data,const tuz_byte* data_end){
+#if (_TEST_COUNT)
+    mdata_count++;
+    mdata_len_bit[get_bit(len-1)]++;
+    if (len-1<kMCount) mdata_len[len-1]++;
+    data_len_bit+=getSavedLenBit(len)+1;
+#endif
     assert(len>0);
     outType(tuz_codeType_data);
     outLen(len);
@@ -89,6 +156,14 @@ void TTuzCode::outData(tuz_length_t len,const tuz_byte* data,const tuz_byte* dat
 }
     
 void TTuzCode::outDict(tuz_length_t len,tuz_length_t dict_pos){
+#if (_TEST_COUNT)
+    mdict_count++;
+    mdict_len_bit[get_bit(len)]++;
+    if (len<kMCount) mdict_len[len]++;
+    mdict_pos_bit[get_bit(dict_pos)]++;
+    if (dict_pos<kMCount) mdict_pos[dict_pos]++;
+    dict_len_bit+=getSavedLenBit(len)+1;
+#endif
     outType(tuz_codeType_dict);
     outLen(len);
     outLen(dict_pos);

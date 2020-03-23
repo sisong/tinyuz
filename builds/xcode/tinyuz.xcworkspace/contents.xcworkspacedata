@@ -4,4 +4,10 @@
    <FileRef
       location = "group:unitTest.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:speedTest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:tinyuz.xcodeproj">
+   </FileRef>
 </Workspace>
