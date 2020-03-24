@@ -33,7 +33,7 @@ namespace _tuz_private{
                          _tuz_private::TTuzCode& coder,const tuz_TCompressProps& props){
         while (unmatched_len){
             tuz_length_t len=(unmatched_len<=props.maxSaveLength)?(tuz_length_t)unmatched_len:props.maxSaveLength;
-            coder.outData(len,back,back+len);
+            coder.outData(back,back+len);
             back+=len;
             unmatched_len-=len;
         }

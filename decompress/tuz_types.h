@@ -26,8 +26,10 @@
 */
 #ifndef _tuz_types_h
 #define _tuz_types_h
-#include <string.h> //for size_t memset memcpy memmove
-#include <assert.h>
+
+#ifndef _IS_USED_C_MEM_FUN
+#   define  _IS_USED_C_MEM_FUN 1
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,19 +44,15 @@ extern "C" {
 #define _TINYUZ_EXPAND_AND_QUOTE(str)   _TINYUZ_QUOTE(str)
 #define TINYUZ_VERSION_STRING           _TINYUZ_EXPAND_AND_QUOTE(_TINYUZ_VERSION)
 
-    typedef unsigned char       tuz_byte;
-#ifndef tuz_dict_size_t
-    typedef  unsigned int       tuz_dict_size_t;
-#endif
+    typedef  unsigned char      tuz_byte;
 #ifndef tuz_length_t
+    //if tuz_length_t==tuz_byte, must set CompressProps.maxSaveLength & dictSize <= 255
     typedef  unsigned int       tuz_length_t;
 #endif
-
-#ifndef tuz_BOOL
-    typedef tuz_byte            tuz_BOOL;
-#endif
-#define     tuz_FALSE    0
-#define     tuz_TRUE     ((tuz_BOOL)(!tuz_FALSE))
+    typedef  tuz_length_t       tuz_dict_size_t;
+    typedef  tuz_byte           tuz_BOOL;
+#define      tuz_FALSE      0
+#define      tuz_TRUE       ((tuz_BOOL)(!tuz_FALSE))
 
 #ifdef _MSC_VER
 #   define tuz_inline _inline
@@ -70,7 +68,6 @@ extern "C" {
     typedef enum tuz_TCtrlType{
         tuz_ctrlType_streamEnd=1,
         tuz_ctrlType_clipEnd=2,
-        // ...
     } tuz_TCtrlType;
 
 #ifdef __cplusplus

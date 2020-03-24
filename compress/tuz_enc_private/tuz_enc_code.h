@@ -34,7 +34,7 @@ namespace _tuz_private{
         :code(out_code),half_code_index(kNullIndex),type_count(0){ minSavedLenBit=4; }
         
         void outLen(tuz_length_t len);
-        void outData(tuz_length_t len,const tuz_byte* data,const tuz_byte* data_end);
+        void outData(const tuz_byte* data,const tuz_byte* data_end);
         void outDict(tuz_length_t len,tuz_length_t dict_pos);
         void outCtrl_streamEnd();
         void outCtrl_clipEnd();

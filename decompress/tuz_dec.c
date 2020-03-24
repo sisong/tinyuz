@@ -26,6 +26,37 @@
 */
 #include "tuz_dec.h"
 
+#if (_IS_USED_C_MEM_FUN)
+#   include <string.h> //for memset memcpy memmove
+#   define  _memset  memset
+#else
+
+#ifdef memmove
+#   undef memmove
+#endif
+#ifdef memcpy
+#   undef memcpy
+#endif
+
+#define  memmove  memmove_order
+#define  memcpy   memmove_order
+
+unsigned int v=0;
+static void _memset(tuz_byte* dst,tuz_byte v,unsigned int len){
+    const tuz_dict_size_t len_fast=len&(~(tuz_dict_size_t)3);
+    tuz_dict_size_t i;
+    for (i=0;i<len_fast;i+=4){
+        dst[i  ]=v;
+        dst[i+1]=v;
+        dst[i+2]=v;
+        dst[i+3]=v;
+    }
+    for (;i<len;++i)
+        dst[i]=v;
+}
+
+#endif
+
 #ifndef _IS_RUN_MEM_SAFE_CHECK
 #   define _IS_RUN_MEM_SAFE_CHECK  1
 #endif
@@ -59,6 +90,15 @@ static void memmove_order(tuz_byte* dst,const tuz_byte* src,tuz_dict_size_t len)
         dst[i]=src[i];
 }
 
+void  tuz_TStream_init(tuz_TStream* self,void* listener,tuz_TInputstream read_code,
+                       tuz_TAllocMem alloc_mem,tuz_TFreeMem free_mem) {
+    _memset((tuz_byte*)self,0,sizeof(*self));
+    self->listener=listener;
+    self->read_code=read_code;
+    self->alloc_mem=alloc_mem;
+    self->free_mem=free_mem;
+}
+
 static tuz_BOOL _update_cache(tuz_TStream* self){
     if (!(self->_code_cache.is_input_stream_end|self->_code_cache.is_input_stream_error)){
         //    [                      cache  buf                           ]
@@ -66,7 +106,7 @@ static tuz_BOOL _update_cache(tuz_TStream* self){
         tuz_dict_size_t len=self->_code_cache.cache_begin;
         tuz_dict_size_t old_size=(self->_code_cache.cache_end-len);
         tuz_byte* buf=self->_code_cache.cache_buf;
-        assert(len>0);
+        //assert(len>0);
         memmove(buf,buf+len,old_size);
         //    |                                             | <-- len --> |
         if (!self->read_code(self->listener,buf+old_size,&len)){
@@ -78,8 +118,7 @@ static tuz_BOOL _update_cache(tuz_TStream* self){
             tuz_dict_size_t sub=self->_code_cache.cache_begin-len;
             self->_code_cache.cache_end-=sub;
             self->_code_cache.is_input_stream_end=tuz_TRUE;
-        }else
-            assert(len==self->_code_cache.cache_begin);
+        }//else assert(len==self->_code_cache.cache_begin);
         self->_code_cache.cache_begin=0;
         return (len>0)?tuz_TRUE:tuz_FALSE;
     }else
@@ -152,9 +191,6 @@ static tuz_BOOL _cache_unpack_len(tuz_TStream* self,tuz_byte* half_code,tuz_leng
 tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_byte* decodeCache,tuz_dict_size_t kDecodeCacheSize){
     if ( (self->_code_cache.cache_buf!=0) ||(self->read_code==0)||
          (self->alloc_mem==0)||(self->free_mem==0) || (kDecodeCacheSize==0) ) return tuz_OPEN_ERROR;
-    memset(&self->_code_cache,0,sizeof(self->_code_cache));
-    memset(&self->_dict,0,sizeof(self->_dict));
-    memset(&self->_state,0,sizeof(self->_state));
     {//cache
         self->_code_cache.cache_buf=decodeCache;
         self->_code_cache.cache_begin=kDecodeCacheSize;

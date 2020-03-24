@@ -131,15 +131,11 @@ static void outResult(const TTestResult& rt){
 
 ////
 
-/**
- * 对内容进行压缩和编码工作
- */
 int zip_compress(unsigned char* out_data,unsigned char* out_data_end,
                  const unsigned char* src,const unsigned char* src_end,int zip_parameter){
     const unsigned char* _zipSrc=&src[0];
     unsigned char* _zipDst=&out_data[0];
-    
-    //先对原始内容进行压缩工作
+ 
     z_stream c_stream;
     c_stream.zalloc = (alloc_func)0;
     c_stream.zfree = (free_func)0;
@@ -148,42 +144,28 @@ int zip_compress(unsigned char* out_data,unsigned char* out_data_end,
     c_stream.avail_in = (int)(src_end-src);
     c_stream.next_out = (Bytef*)_zipDst;
     c_stream.avail_out = (unsigned int)(out_data_end-out_data);
-    int ret = deflateInit2(&c_stream, zip_parameter,Z_DEFLATED,-15,MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY);
-    if(ret != Z_OK)
-    {
-        std::cout <<"|"<<"deflateInit2 error "<<std::endl;
-        return 0;
-    }
-    ret = deflate(&c_stream, Z_FINISH);
-    if (ret != Z_STREAM_END)
-    {
-        deflateEnd(&c_stream);
-        std::cout <<"|"<<"ret != Z_STREAM_END err="<< ret <<std::endl;
-        return 0;
-    }
-    
+    int ret = deflateInit2(&c_stream,zip_parameter,Z_DEFLATED,-15,MAX_MEM_LEVEL,Z_DEFAULT_STRATEGY);
+    if(ret!=Z_OK)
+        throw "deflateInit2 error !";
+    ret = deflate(&c_stream,Z_FINISH);
+    if (ret!=Z_STREAM_END)
+        throw "deflate error !";
     int zipLen = (int)c_stream.total_out;
     ret = deflateEnd(&c_stream);
-    if (ret != Z_OK)
-    {
-        std::cout <<"|"<<"deflateEnd error "<<std::endl;
-        return 0;
-    }
-    //压缩完毕进行返回包组织
+    if (ret!=Z_OK)
+        throw "deflateEnd error !";
     return zipLen;
 }
 
 bool zip_decompress(unsigned char* out_data,unsigned char* out_data_end,
                     const unsigned char* zip_code,const unsigned char* zip_code_end){
-#define CHUNK 100000
-
+#define CHUNK (64*1024)
     int ret;
     unsigned have;
     z_stream strm;
     unsigned char out[CHUNK];
     int totalsize = 0;
     
-    /* allocate inflate state */
     strm.zalloc = Z_NULL;
     strm.zfree = Z_NULL;
     strm.opaque = Z_NULL;
@@ -193,12 +175,11 @@ bool zip_decompress(unsigned char* out_data,unsigned char* out_data_end,
     ret = inflateInit2(&strm,-15);
     
     if (ret != Z_OK)
-        return ret;
+        return false;
     
     strm.avail_in = (int)(zip_code_end-zip_code);
     strm.next_in = (unsigned char*)zip_code;
     
-    /* run inflate() on input until output buffer not full */
     do {
         strm.avail_out = CHUNK;
         strm.next_out = out;
@@ -210,7 +191,7 @@ bool zip_decompress(unsigned char* out_data,unsigned char* out_data_end,
             case Z_DATA_ERROR:
             case Z_MEM_ERROR:
                 inflateEnd(&strm);
-                return ret;
+                return false;
         }
         
         have = CHUNK - strm.avail_out;
@@ -219,19 +200,16 @@ bool zip_decompress(unsigned char* out_data,unsigned char* out_data_end,
         assert(out_data+totalsize<=out_data_end);
     } while (strm.avail_out == 0);
     
-    /* clean up and return */
     inflateEnd(&strm);
-    assert( ret == Z_STREAM_END );
-    return true;
+    return ret == Z_STREAM_END;
 }
 
 
 
 
 const bool is_decode_step=true;
-const tuz_dict_size_t kDecodeCacheSize=1024;
-tuz_dict_size_t kMaxSaveLength=0;
-tuz_dict_size_t kDictSize=0;
+const tuz_dict_size_t kDecodeCacheSize=1024*4;
+const tuz_dict_size_t kDictSize=1024*1024*8;
 
 int _test_tuz_compress(unsigned char* out_data,unsigned char* out_data_end,
                        const unsigned char* src,const unsigned char* src_end,int zip_parameter){
@@ -243,7 +221,6 @@ int _test_tuz_compress(unsigned char* out_data,unsigned char* out_data_end,
     tuz_defaultCompressProps(&props);
     props.dictSize=kDictSize;
     props.minDictMatchLen=zip_parameter;
-    props.maxSaveLength=kMaxSaveLength;
     hpatch_StreamPos_t codeSize=tuz_compress(&out_stream,&in_stream,&props);
     return (int)codeSize;
 }
@@ -334,8 +311,6 @@ int main(int argc, const char * argv[]){
     std::cout << "start> \n";
     assert(argc==2);
     TEST_FILE_DIR=argv[1];
-    kDictSize=1024*1024;
-    kMaxSaveLength=255*1024;
     
     //*
     testFile("world95.txt");

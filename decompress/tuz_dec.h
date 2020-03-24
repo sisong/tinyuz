@@ -93,18 +93,12 @@ typedef struct tuz_TStream{
     tuz_byte            kMinDictMatchLen;
 } tuz_TStream;
 
-tuz_inline static void  tuz_TStream_init(tuz_TStream* self,void* listener,tuz_TInputstream read_code,
-                                         tuz_TAllocMem alloc_mem,tuz_TFreeMem free_mem)  {
-    memset(self,0,sizeof(*self));
-    self->listener=listener;
-    self->read_code=read_code;
-    self->alloc_mem=alloc_mem;
-    self->free_mem=free_mem;
-}
+void  tuz_TStream_init(tuz_TStream* self,void* listener,tuz_TInputstream read_code,
+                       tuz_TAllocMem alloc_mem,tuz_TFreeMem free_mem);
 
 //open tuz_TStream
-    //  read some code & alloc mem;
-//  kDecodeCacheSize >=1; 256,1k,64k,1m ...
+    //  read some code & alloc mem for dict;
+//  kDecodeCacheSize >=1; 64,250,1k,8k,32k, ...
 //  if success return tuz_OK;
 tuz_TResult             tuz_TStream_open(tuz_TStream* self,tuz_byte* decodeCache,tuz_dict_size_t kDecodeCacheSize);
 
