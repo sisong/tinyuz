@@ -26,6 +26,7 @@
 */
 #include "tuz_dec.h"
 
+
 #if (_IS_USED_C_MEM_FUN)
 #   include <string.h> //for memset memcpy memmove
 #   define  _memset  memset
@@ -42,17 +43,8 @@
 #define  memcpy   memmove_order
 
 unsigned int v=0;
-static void _memset(tuz_byte* dst,tuz_byte v,unsigned int len){
-    const tuz_dict_size_t len_fast=len&(~(tuz_dict_size_t)3);
-    tuz_dict_size_t i;
-    for (i=0;i<len_fast;i+=4){
-        dst[i  ]=v;
-        dst[i+1]=v;
-        dst[i+2]=v;
-        dst[i+3]=v;
-    }
-    for (;i<len;++i)
-        dst[i]=v;
+static tuz_inline void _memset(tuz_byte* dst,tuz_byte v,tuz_dict_size_t len){
+    while(len--) *dst++=v;
 }
 
 #endif
@@ -77,17 +69,53 @@ static void _memset(tuz_byte* dst,tuz_byte v,unsigned int len){
 //tuz_uint __debug_check_false_x=0; //for debug
 //#define _tuz_FALSE (1/__debug_check_false_x)
 
+
+#define _TEST_COUNT     0
+#if (_TEST_COUNT)
+double _g_count=0;
+const int _g_len=32;
+double _g_count_o[_g_len]={0};
+double _g_count_d[_g_len]={0};
+double _g_count_c[_g_len]={0};
+#   define _debug_count_o(len)  { ++_g_count; if (len<_g_len) ++_g_count_o[len]; else ++_g_count_o[_g_len-1]; }
+#   define _debug_count_d(len)  { ++_g_count; if (len<_g_len) ++_g_count_d[len]; else ++_g_count_d[_g_len-1]; }
+#   define _debug_count_c(len)  { ++_g_count; if (len<_g_len) ++_g_count_c[len]; else ++_g_count_c[_g_len-1]; }
+static void _debug_log_(double* counts){
+    double sum=0; for (int i=0;i<_g_len;++i) sum+=counts[i];
+    for (int i=0;i<_g_len;++i) counts[i]=counts[i]/sum+((i>0)?counts[i-1]:0);
+    //for (int i=0;i<_g_len;++i) counts[i]=counts[i]/_g_count;
+}
+
+void _debug_log(){
+    _debug_log_(_g_count_o);
+    _debug_log_(_g_count_d);
+    _debug_log_(_g_count_c);
+}
+#else
+#   define _debug_count_o(len)
+#   define _debug_count_d(len)
+#   define _debug_count_c(len)
+#endif
+
 static void memmove_order(tuz_byte* dst,const tuz_byte* src,tuz_dict_size_t len){
-    const tuz_dict_size_t len_fast=len&(~(tuz_dict_size_t)3);
-    tuz_dict_size_t i;
-    for (i=0;i<len_fast;i+=4){
-        dst[i  ]=src[i  ];
-        dst[i+1]=src[i+1];
-        dst[i+2]=src[i+2];
-        dst[i+3]=src[i+3];
+case_process:
+    switch (len) {
+        case 4: *dst++=*src++;
+        case 3: *dst++=*src++;
+        case 2: *dst++=*src++;
+        case 1: *dst++=*src++;
+        case 0: return;
+        default:{
+            do{
+                *dst++=*src++;
+                *dst++=*src++;
+                *dst++=*src++;
+                *dst++=*src++;
+                len-=4;
+            }while(len>4);
+            goto case_process;
+        }
     }
-    for (;i<len;++i)
-        dst[i]=src[i];
 }
 
 void  tuz_TStream_init(tuz_TStream* self,void* listener,tuz_TInputstream read_code,
@@ -107,7 +135,8 @@ static tuz_BOOL _update_cache(tuz_TStream* self){
         tuz_dict_size_t old_size=(self->_code_cache.cache_end-len);
         tuz_byte* buf=self->_code_cache.cache_buf;
         //assert(len>0);
-        memmove(buf,buf+len,old_size);
+        if (old_size>0)
+            memmove(buf,buf+len,old_size);
         //    |                                             | <-- len --> |
         if (!self->read_code(self->listener,buf+old_size,&len)){
             self->_code_cache.is_input_stream_error=tuz_TRUE;
@@ -131,6 +160,7 @@ static tuz_inline tuz_BOOL _cache_read_bytes(tuz_TStream* self,tuz_byte* out_dat
         if (clen>0){
             if (clen>len) clen=len;
             memcpy(out_data,self->_code_cache.cache_buf+self->_code_cache.cache_begin,clen);
+            _debug_count_c(clen);
             self->_code_cache.cache_begin+=clen;
             out_data+=clen;
             len-=clen;
@@ -152,7 +182,7 @@ static tuz_inline tuz_BOOL _cache_read_1byte(tuz_TStream* self,tuz_byte* code){
     }while(1);
 }
 
-
+/*
 #ifdef __RUN_MEM_SAFE_CHECK
 static const tuz_byte _k_max_length_t_bit=(sizeof(tuz_length_t)<<3);
 static const tuz_byte _v_to_bit[8]={0,1,2,2,3,3,3,3};
@@ -160,6 +190,7 @@ static tuz_inline tuz_BOOL _is_safe_append_bit(tuz_byte v_bit,tuz_byte h3bit_v){
     return (v_bit+(_v_to_bit[h3bit_v]))<=_k_max_length_t_bit;
 }
 #endif
+*/
 
 //low to high bitmap: xxx?xxx? xxx?xxx? ...
 static tuz_BOOL _cache_unpack_len(tuz_TStream* self,tuz_byte* half_code,tuz_length_t* out_len){
@@ -179,11 +210,11 @@ static tuz_BOOL _cache_unpack_len(tuz_TStream* self,tuz_byte* half_code,tuz_leng
         if ((code&(1<<3))==0) {
             *half_code=next;
             *out_len=v;
-            _SAFE_CHECK((v_bit<=_k_max_length_t_bit)||_is_safe_append_bit(v_bit-3,code&7));
+            //_SAFE_CHECK((v_bit<=_k_max_length_t_bit)||_is_safe_append_bit(v_bit-3,code&7));
             return tuz_TRUE;
         }else{
             code=next;
-            _SAFE_CHECK(v_bit<=_k_max_length_t_bit);
+            //_SAFE_CHECK(v_bit<=_k_max_length_t_bit);
         }
     }while(1);
 }
@@ -261,6 +292,7 @@ static tuz_dict_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* out_data,tuz_
         pos=self->_dict.dict_cur+self->_state.dictType_pos;
     if (len<=(self->_dict.dict_size-pos)){
         memcpy(cur_out_data,self->_dict.dict_buf+pos,len);
+        _debug_count_d(len);
     }else{
         tuz_dict_size_t part_len=self->_dict.dict_size-pos;
         memcpy(cur_out_data,self->_dict.dict_buf+pos,part_len);
@@ -297,6 +329,7 @@ tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_dict
                 }else{
                     len=(self->_state.dictType_len<dsize)?(tuz_dict_size_t)self->_state.dictType_len:dsize;
                     memmove_order(cur_out_data,out_data+self->_state.dictType_pos_inc,len);
+                    _debug_count_o(len);
                     self->_state.dictType_pos_inc+=len;
                 }
                 self->_state.dictType_len-=len;

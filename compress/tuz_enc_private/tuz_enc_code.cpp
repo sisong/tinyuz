@@ -28,7 +28,6 @@
 #define _TEST_COUNT     0
 
 #if (_TEST_COUNT)
-#include <math.h>
 const int kMCount=256;
 long  mdict_count=0;
 double  mdict_len_bit[32]={0};
