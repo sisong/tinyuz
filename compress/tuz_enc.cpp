@@ -26,7 +26,6 @@
 */
 #include "tuz_enc.h"
 #include "tuz_enc_private/tuz_enc_clip.h"
-#include "tuz_enc_private/tuz_types_private.h"
 using namespace _tuz_private;
 
 void tuz_defaultCompressProps(tuz_TCompressProps* out_props){
@@ -37,7 +36,7 @@ void tuz_defaultCompressProps(tuz_TCompressProps* out_props){
 }
 
 hpatch_StreamPos_t tuz_maxCompressedSize(hpatch_StreamPos_t data_size){
-    const hpatch_StreamPos_t _u_cout=(data_size+tuz_kLimitOfMaxSaveLength-1)/tuz_kLimitOfMaxSaveLength;
+    const hpatch_StreamPos_t _u_cout=(data_size+tuz_kMinOfMaxSaveLength-1)/tuz_kMinOfMaxSaveLength;
     const hpatch_StreamPos_t u_size=(_u_cout+7)/8 + (_u_cout*3+1)/2;
     hpatch_StreamPos_t c_count=(data_size+kMinClipLength-1)/kMinClipLength;
     return data_size+ 1+kMaxPackedLenByteSize + (1+2)*c_count + u_size +1+2;

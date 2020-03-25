@@ -25,7 +25,7 @@
  OTHER DEALINGS IN THE SOFTWARE.
 */
 #include "tuz_dec.h"
-
+#include "tuz_types_private.h"
 
 #if (_IS_USED_C_MEM_FUN)
 #   include <string.h> //for memset memcpy memmove
@@ -58,17 +58,12 @@ static tuz_inline void _memset(tuz_byte* dst,tuz_byte v,tuz_dict_size_t len){
 #endif
 
 #ifdef __RUN_MEM_SAFE_CHECK
-#   define  _SAFE_CHECK_DO(code)    { if (!(code)) return _tuz_FALSE; }
-#   define  _SAFE_CHECK(cmp)        { if (!(cmp)) return _tuz_FALSE; }
+#   define  _SAFE_CHECK_DO(code)    { if (!(code)) return tuz_FALSE; }
+#   define  _SAFE_CHECK(cmp)        { if (!(cmp)) return tuz_FALSE; }
 #else
 #   define  _SAFE_CHECK_DO(code)    { code; }
 #   define  _SAFE_CHECK(cmp)
 #endif
-
-#define _tuz_FALSE   tuz_FALSE
-//tuz_uint __debug_check_false_x=0; //for debug
-//#define _tuz_FALSE (1/__debug_check_false_x)
-
 
 #define _TEST_COUNT     0
 #if (_TEST_COUNT)
@@ -140,7 +135,7 @@ static tuz_BOOL _update_cache(tuz_TStream* self){
         //    |                                             | <-- len --> |
         if (!self->read_code(self->listener,buf+old_size,&len)){
             self->_code_cache.is_input_stream_error=tuz_TRUE;
-            return _tuz_FALSE;
+            return tuz_FALSE;
         }
         if (len<self->_code_cache.cache_begin){
             //|                                             |        |
@@ -165,7 +160,7 @@ static tuz_inline tuz_BOOL _cache_read_bytes(tuz_TStream* self,tuz_byte* out_dat
             out_data+=clen;
             len-=clen;
         }else{
-            if(!_update_cache(self)) return _tuz_FALSE;
+            if(!_update_cache(self)) return tuz_FALSE;
         }
     }
     return tuz_TRUE;
@@ -237,7 +232,7 @@ tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_byte* decodeCache,tuz_dict_si
         //dict_size
         if (!_cache_unpack_len(self,&half_code,&saved_len)) return tuz_OPEN_ERROR;
         self->_dict.dict_size=(tuz_dict_size_t)saved_len;
-        if (self->_dict.dict_size!=saved_len) return tuz_OPEN_ERROR;
+        if ((saved_len==0)||(self->_dict.dict_size!=saved_len)) return tuz_OPEN_ERROR;
     }
     {//mem
         self->_dict.dict_buf=self->alloc_mem(self->listener,self->_dict.dict_size);
@@ -328,7 +323,12 @@ tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_dict
                     self->_state.dictType_pos+=len;
                 }else{
                     len=(self->_state.dictType_len<dsize)?(tuz_dict_size_t)self->_state.dictType_len:dsize;
-                    memmove_order(cur_out_data,out_data+self->_state.dictType_pos_inc,len);
+#if (_IS_USED_C_MEM_FUN)
+                    if (cur_out_data-out_data>=self->_state.dictType_pos_inc+len)
+                        memcpy(cur_out_data,out_data+self->_state.dictType_pos_inc,len);
+                    else
+#endif
+                        memmove_order(cur_out_data,out_data+self->_state.dictType_pos_inc,len);
                     _debug_count_o(len);
                     self->_state.dictType_pos_inc+=len;
                 }
@@ -369,7 +369,7 @@ tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_dict
                 if (saved_dict_pos>=self->_dict.dict_size) return tuz_DICT_POS_ERROR;
 #endif
                 self->_state.dictType_len=saved_len+self->kMinDictMatchLen;
-                saved_dict_pos=(self->_dict.dict_size-1-(tuz_dict_size_t)saved_dict_pos);
+                saved_dict_pos=(self->_dict.dict_size-1-saved_dict_pos);
                 if (outed_size<self->_dict.dict_size-saved_dict_pos){
                     self->_state.dictType_pos=outed_size+saved_dict_pos;
                     self->_state.dictType_pos_inc=0;
@@ -427,7 +427,6 @@ return_process:
         }else if (dsize==0){
             return tuz_OK;
         }else{
-            _tuz_FALSE;//for debug
             return tuz_CODE_ERROR;
         }
     }

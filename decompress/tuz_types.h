@@ -60,16 +60,6 @@ extern "C" {
 #   define tuz_inline inline
 #endif
 
-    typedef enum tuz_TCodeType{
-        tuz_codeType_dict=0,
-        tuz_codeType_data=1,
-    } tuz_TCodeType;
-    
-    typedef enum tuz_TCtrlType{
-        tuz_ctrlType_streamEnd=1,
-        tuz_ctrlType_clipEnd=2,
-    } tuz_TCtrlType;
-
 #ifdef __cplusplus
 }
 #endif

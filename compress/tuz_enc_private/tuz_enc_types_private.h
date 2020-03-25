@@ -1,4 +1,4 @@
-//  tuz_types_private.h
+//  tuz_enc_types_private.h
 /*
  Copyright (c) 2012-2020 HouSisong All Rights Reserved.
  (The MIT License)
@@ -24,9 +24,10 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef _tuz_types_private_h
-#define _tuz_types_private_h
+#ifndef _tuz_enc_types_private_h
+#define _tuz_enc_types_private_h
 #include "../tuz_enc_types.h"
+#include "../../decompress/tuz_types_private.h"
 #include "libHDiffPatch/HDiff/private_diff/mem_buf.h"
 #include <vector>
 #include <stdexcept>
@@ -36,7 +37,7 @@
 
 namespace _tuz_private{
 
-    static const size_t   kMaxPackedLenByteSize =(sizeof(hpatch_StreamPos_t)*8+5)/(3+3);
+    static const size_t   kMaxSavedDictPosByteSize =3; //16m
     static const uint32_t kMinClipLength = 1024*64;
     
     static const uint32_t tuz_ui2G_sub_1=(~(uint32_t)0)>>1;
@@ -45,7 +46,8 @@ namespace _tuz_private{
     struct ICode{
         tuz_byte  minSavedLenBit;
         virtual tuz_byte getSavedLenBit(tuz_length_t len)const=0;
+        virtual tuz_byte getSavedPosBit(tuz_dict_size_t pos)const=0;
     };
 
 }
-#endif //_tuz_types_private_h
+#endif //_tuz_enc_types_private_h

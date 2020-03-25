@@ -26,7 +26,7 @@
 */
 #ifndef _tuz_sstring_h
 #define _tuz_sstring_h
-#include "tuz_types_private.h"
+#include "tuz_enc_types_private.h"
 namespace _tuz_private{
     
     struct TSuffixString{

@@ -82,8 +82,8 @@ bool TMatch::match(const tuz_byte** out_matched,tuz_length_t* out_match_len,
     *out_matched=0;
     *out_match_len=0;
     size_t curBestBitScore=0;
-    _match( 1,curBestBitScore, out_matched,out_match_len,curString,unmatched_len);
     _match(-1,curBestBitScore, out_matched,out_match_len,curString,unmatched_len);
+        _match(1,curBestBitScore, out_matched,out_match_len,curString,unmatched_len);
     return (*out_matched)!=0;
 }
 

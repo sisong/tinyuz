@@ -26,7 +26,6 @@
 */
 #ifndef _tuz_enc_match_h
 #define _tuz_enc_match_h
-#include "tuz_types_private.h"
 #include "tuz_sstring.h"
 namespace _tuz_private{
     

@@ -26,7 +26,6 @@
 */
 #ifndef _tuz_enc_clip_h
 #define _tuz_enc_clip_h
-#include "tuz_types_private.h"
 #include "tuz_enc_code.h"
 namespace _tuz_private{
     

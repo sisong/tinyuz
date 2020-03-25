@@ -51,18 +51,19 @@ struct TTestResult {
     int             zipSize;
 };
 
-
+double minEncTestTime=1.0;
+double minDecTestTime=1.0;
 double testDecodeProc(T_decompress proc_decompress,unsigned char* out_data,unsigned char* out_data_end,const unsigned char* zip_code,const unsigned char* zip_code_end){
     int testDecompressCount=0;
     double time1=clock_s();
-    for (;(clock_s()-time1)<1.0;) {
+    do {
         for (int i=0; i<10; ++i){
             bool ret=proc_decompress(out_data,out_data_end,zip_code,zip_code_end);
             ++testDecompressCount;
             if (!ret)
                 throw "error result!";
         }
-    }
+    }while ((clock_s()-time1)<minDecTestTime);
     double time2=clock_s();
     double decompressTime_s=(time2-time1)/testDecompressCount;
     return  decompressTime_s;
@@ -74,10 +75,10 @@ double testEncodeProc(T_compress proc_compress,std::vector<unsigned char>& compr
     compressedCode.resize((src_end-src)*1.2+1024);
     int dstCodeSize=0;
     double time1=clock_s();
-    for (;(clock_s()-time1)<1.0;) {
+    do{
         dstCodeSize=proc_compress(&compressedCode[0],&compressedCode[0]+compressedCode.size(),src,src_end,zip_parameter);
         ++testCompressCount;
-    }
+    }while ((clock_s()-time1)<minEncTestTime);
     double time2=clock_s();
     compressedCode.resize(dstCodeSize);
     double compressTime_s=(time2-time1)/testCompressCount;
@@ -307,10 +308,20 @@ static void testFile(const char* srcFileName){
     //std::cout << "\n";
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    extern void _debug_log();
+#ifdef __cplusplus
+}
+#endif
+
 int main(int argc, const char * argv[]){
     std::cout << "start> \n";
     assert(argc==2);
     TEST_FILE_DIR=argv[1];
+    minEncTestTime=0.0;
+    minDecTestTime=0.1;
     
     //*
     testFile("world95.txt");
@@ -325,6 +336,7 @@ int main(int argc, const char * argv[]){
     testFile("A10.jpg");
     //*/
 
+    //_debug_log();
     std::cout << "done!\n";
     return 0;
 }

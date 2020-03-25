@@ -1,4 +1,4 @@
-//  tuz_enc_code.h
+//  tuz_types_private.h
 /*
  Copyright (c) 2012-2020 HouSisong All Rights Reserved.
  (The MIT License)
@@ -24,31 +24,24 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef _tuz_enc_code_h
-#define _tuz_enc_code_h
-#include "tuz_enc_types_private.h"
-namespace _tuz_private{
+#ifndef _tuz_types_private_h
+#define _tuz_types_private_h
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+    typedef enum tuz_TCodeType{
+        tuz_codeType_dict=0,
+        tuz_codeType_data=1,
+    } tuz_TCodeType;
     
-    struct TTuzCode:public ICode{
-        explicit TTuzCode(std::vector<tuz_byte>& out_code)
-        :code(out_code),half_code_index(kNullIndex),type_count(0){ minSavedLenBit=4; }
-        
-        void outLen(tuz_length_t len);
-        void outData(const tuz_byte* data,const tuz_byte* data_end);
-        void outDict(tuz_length_t len,tuz_length_t dict_pos);
-        void outCtrl_streamEnd();
-        void outCtrl_clipEnd();
-        
-        virtual tuz_byte getSavedLenBit(tuz_length_t len)const;
-    private:
-        static const size_t kNullIndex=~(size_t)0;
-        std::vector<tuz_byte>& code;
-        size_t    half_code_index;
-        size_t    types_index;
-        tuz_byte  type_count;
-        void outType(tuz_TCodeType type);
-        void outCtrl(tuz_TCtrlType ctrl);
-    };
-    
+    typedef enum tuz_TCtrlType{
+        tuz_ctrlType_streamEnd=1,
+        tuz_ctrlType_clipEnd=2,
+    } tuz_TCtrlType;
+
+#ifdef __cplusplus
 }
-#endif //_tuz_enc_code_h
+#endif
+#endif //_tuz_types_private_h
