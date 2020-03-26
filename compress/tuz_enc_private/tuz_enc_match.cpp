@@ -65,7 +65,7 @@ namespace _tuz_private{
             
             --deep;//for speed
             size_t  dictStoreBit=(size_t)1+coder.getSavedLenBit(curMinLcp-props.minDictMatchLen)
-                        +coder.getSavedLenBit(dict_pos)+((unmatched_len>0)?kBreakCodeScore:0);
+                        +coder.getSavedPosBit(dict_pos)+((unmatched_len>0)?kBreakCodeScore:0);
             if (dataStoreBit<=curBestBitScore+dictStoreBit) continue;
             size_t  curBitScore=dataStoreBit-dictStoreBit;
             

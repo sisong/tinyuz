@@ -37,7 +37,7 @@
 
 namespace _tuz_private{
 
-    static const size_t   kMaxSavedDictPosByteSize =3; //16m
+    static const size_t   kMaxPackedLenByteSize =(sizeof(hpatch_StreamPos_t)*8+5)/(3+3);
     static const uint32_t kMinClipLength = 1024*64;
     
     static const uint32_t tuz_ui2G_sub_1=(~(uint32_t)0)>>1;

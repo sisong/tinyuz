@@ -63,7 +63,7 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     {//head
         TTuzCode coder(code);
         coder.outLen(selfProps.minDictMatchLen);
-        coder.outLen(selfProps.dictSize);
+        coder.outDictPos(selfProps.dictSize);
     }
     {
         //todo: clip streamSize

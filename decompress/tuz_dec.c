@@ -27,28 +27,6 @@
 #include "tuz_dec.h"
 #include "tuz_types_private.h"
 
-#if (_IS_USED_C_MEM_FUN)
-#   include <string.h> //for memset memcpy memmove
-#   define  _memset  memset
-#else
-
-#ifdef memmove
-#   undef memmove
-#endif
-#ifdef memcpy
-#   undef memcpy
-#endif
-
-#define  memmove  memmove_order
-#define  memcpy   memmove_order
-
-unsigned int v=0;
-static tuz_inline void _memset(tuz_byte* dst,tuz_byte v,tuz_dict_size_t len){
-    while(len--) *dst++=v;
-}
-
-#endif
-
 #ifndef _IS_RUN_MEM_SAFE_CHECK
 #   define _IS_RUN_MEM_SAFE_CHECK  1
 #endif
@@ -65,53 +43,61 @@ static tuz_inline void _memset(tuz_byte* dst,tuz_byte v,tuz_dict_size_t len){
 #   define  _SAFE_CHECK(cmp)
 #endif
 
-#define _TEST_COUNT     0
-#if (_TEST_COUNT)
-double _g_count=0;
-const int _g_len=32;
-double _g_count_o[_g_len]={0};
-double _g_count_d[_g_len]={0};
-double _g_count_c[_g_len]={0};
-#   define _debug_count_o(len)  { ++_g_count; if (len<_g_len) ++_g_count_o[len]; else ++_g_count_o[_g_len-1]; }
-#   define _debug_count_d(len)  { ++_g_count; if (len<_g_len) ++_g_count_d[len]; else ++_g_count_d[_g_len-1]; }
-#   define _debug_count_c(len)  { ++_g_count; if (len<_g_len) ++_g_count_c[len]; else ++_g_count_c[_g_len-1]; }
-static void _debug_log_(double* counts){
-    double sum=0; for (int i=0;i<_g_len;++i) sum+=counts[i];
-    for (int i=0;i<_g_len;++i) counts[i]=counts[i]/sum+((i>0)?counts[i-1]:0);
-    //for (int i=0;i<_g_len;++i) counts[i]=counts[i]/_g_count;
+#define  _memcpy    memcpy_tiny8
+#define  _memmove(dst,_src,len){  \
+    const tuz_byte* src=_src;   \
+    if (src-dst>=8) \
+        memcpy_tiny8(dst,src,len); \
+    else    \
+        memmove_order(dst,src,len); }
+#define  _memmove_order(dst,_src,len){  \
+    const tuz_byte* src=_src;   \
+    if (dst-src>=8) \
+        memcpy_tiny8(dst,src,len); \
+    else    \
+        memmove_order(dst,src,len); }
+
+static tuz_inline void _memset(tuz_byte* dst,tuz_byte v,tuz_dict_size_t len){
+    while(len--) *dst++=v;
 }
 
-void _debug_log(){
-    _debug_log_(_g_count_o);
-    _debug_log_(_g_count_d);
-    _debug_log_(_g_count_c);
+static tuz_inline void memmove_order(tuz_byte* dst,const tuz_byte* src,tuz_dict_size_t len){
+    while (len--) *dst++=*src++;
 }
-#else
-#   define _debug_count_o(len)
-#   define _debug_count_d(len)
-#   define _debug_count_c(len)
-#endif
 
-static void memmove_order(tuz_byte* dst,const tuz_byte* src,tuz_dict_size_t len){
+struct _t_data8{ tuz_byte _[8]; };
+struct _t_data4{ tuz_byte _[4]; };
+struct _t_data2{ tuz_byte _[2]; };
+#define _COPY_t(dst,src,T)  { *(T*)(dst)=*(const T*)(src); }
+#define _COPY_8(dst,src)    _COPY_t(dst,src,struct _t_data8)
+#define _COPY_4(dst,src)    _COPY_t(dst,src,struct _t_data4)
+#define _COPY_2(dst,src)    _COPY_t(dst,src,struct _t_data2)
+
+static void memcpy_tiny8(tuz_byte* dst,const tuz_byte* src,tuz_dict_size_t len){
 case_process:
     switch (len) {
-        case 4: *dst++=*src++;
+        /*case 16: case 15: case 14: case 13:{ len-=8;
+            _COPY_8(dst,src); _COPY_8(dst+len,src+len); } return;
+        case 12: case 11: case 10: case 9:{ len-=4;
+            _COPY_8(dst,src); _COPY_4(dst+len,src+len); } return;*/
+        case 8: _COPY_8(dst,src); return;
+        case 7: case 6: case 5:{ len-=4;
+            _COPY_4(dst,src); _COPY_4(dst+len,src+len); } return;
+        case 4: _COPY_4(dst,src); return;
         case 3: *dst++=*src++;
-        case 2: *dst++=*src++;
-        case 1: *dst++=*src++;
+        case 2: _COPY_2(dst,src); return;
+        case 1: *dst=*src;
         case 0: return;
-        default:{
-            do{
-                *dst++=*src++;
-                *dst++=*src++;
-                *dst++=*src++;
-                *dst++=*src++;
-                len-=4;
-            }while(len>4);
+        default: {
+            do {
+                _COPY_8(dst,src);
+                dst+=8; src+=8; len-=8;
+            }while (len>=8);
             goto case_process;
         }
     }
 }
+
 
 void  tuz_TStream_init(tuz_TStream* self,void* listener,tuz_TInputstream read_code,
                        tuz_TAllocMem alloc_mem,tuz_TFreeMem free_mem) {
@@ -131,7 +117,7 @@ static tuz_BOOL _update_cache(tuz_TStream* self){
         tuz_byte* buf=self->_code_cache.cache_buf;
         //assert(len>0);
         if (old_size>0)
-            memmove(buf,buf+len,old_size);
+            _memmove(buf,buf+len,old_size);
         //    |                                             | <-- len --> |
         if (!self->read_code(self->listener,buf+old_size,&len)){
             self->_code_cache.is_input_stream_error=tuz_TRUE;
@@ -154,8 +140,7 @@ static tuz_inline tuz_BOOL _cache_read_bytes(tuz_TStream* self,tuz_byte* out_dat
         tuz_dict_size_t clen=self->_code_cache.cache_end-self->_code_cache.cache_begin;
         if (clen>0){
             if (clen>len) clen=len;
-            memcpy(out_data,self->_code_cache.cache_buf+self->_code_cache.cache_begin,clen);
-            _debug_count_c(clen);
+            _memcpy(out_data,self->_code_cache.cache_buf+self->_code_cache.cache_begin,clen);
             self->_code_cache.cache_begin+=clen;
             out_data+=clen;
             len-=clen;
@@ -256,23 +241,23 @@ static void _update_dict(tuz_TStream *self,const tuz_byte* out_data,const tuz_by
         self->_state.dictType_pos_inc=0;
     }
     if (out_len>=dict_size){
-        memcpy(dict,cur_out_data-dict_size,dict_size);
+        _memcpy(dict,cur_out_data-dict_size,dict_size);
         self->_dict.dict_cur=0;
     }else{
         tuz_dict_size_t dict_cur=self->_dict.dict_cur;
         if (out_len<=(dict_size-dict_cur)){
-            memcpy(dict+dict_cur,out_data,out_len);
+            _memcpy(dict+dict_cur,out_data,out_len);
         }else{
             const tuz_dict_size_t sub_len=dict_size-dict_cur;
-            memcpy(dict+dict_cur,out_data,sub_len);
-            memcpy(dict,out_data+sub_len,out_len-sub_len);
+            _memcpy(dict+dict_cur,out_data,sub_len);
+            _memcpy(dict,out_data+sub_len,out_len-sub_len);
         }
         self->_dict.dict_cur=(out_len<(dict_size-dict_cur))?
                              (out_len+dict_cur):(out_len-(dict_size-dict_cur));
     }
 }
 
-static tuz_dict_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* out_data,tuz_byte* cur_out_data,tuz_dict_size_t dsize) {
+static tuz_dict_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* cur_out_data,tuz_dict_size_t dsize) {
     // [                       dict buf                      ]
     //              dict_cur+dictType_pos|   <-- len -->  |
     //                                     dict_cur+dictType_pos|   <-- len -->  |
@@ -286,12 +271,11 @@ static tuz_dict_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* out_data,tuz_
     else
         pos=self->_dict.dict_cur+self->_state.dictType_pos;
     if (len<=(self->_dict.dict_size-pos)){
-        memcpy(cur_out_data,self->_dict.dict_buf+pos,len);
-        _debug_count_d(len);
+        _memcpy(cur_out_data,self->_dict.dict_buf+pos,len);
     }else{
         tuz_dict_size_t part_len=self->_dict.dict_size-pos;
-        memcpy(cur_out_data,self->_dict.dict_buf+pos,part_len);
-        memcpy(cur_out_data+part_len,self->_dict.dict_buf,len-part_len);
+        _memcpy(cur_out_data,self->_dict.dict_buf+pos,part_len);
+        _memcpy(cur_out_data+part_len,self->_dict.dict_buf,len-part_len);
     }
     return len;
 }
@@ -319,17 +303,11 @@ tuz_TResult tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_dict
                 //                                     dictType_pos| <-  dictType_len -> |
                 tuz_dict_size_t len;
                 if (self->_state.dictType_pos<self->_dict.dict_size){
-                    len=_copy_from_dict(self,out_data,cur_out_data,dsize);
+                    len=_copy_from_dict(self,cur_out_data,dsize);
                     self->_state.dictType_pos+=len;
                 }else{
                     len=(self->_state.dictType_len<dsize)?(tuz_dict_size_t)self->_state.dictType_len:dsize;
-#if (_IS_USED_C_MEM_FUN)
-                    if (cur_out_data-out_data>=self->_state.dictType_pos_inc+len)
-                        memcpy(cur_out_data,out_data+self->_state.dictType_pos_inc,len);
-                    else
-#endif
-                        memmove_order(cur_out_data,out_data+self->_state.dictType_pos_inc,len);
-                    _debug_count_o(len);
+                    _memmove_order(cur_out_data,out_data+self->_state.dictType_pos_inc,len);
                     self->_state.dictType_pos_inc+=len;
                 }
                 self->_state.dictType_len-=len;

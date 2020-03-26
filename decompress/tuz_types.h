@@ -27,10 +27,6 @@
 #ifndef _tuz_types_h
 #define _tuz_types_h
 
-#ifndef _IS_USED_C_MEM_FUN
-#   define  _IS_USED_C_MEM_FUN 1
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

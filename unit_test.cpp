@@ -154,7 +154,7 @@ static int test(const unsigned char* src,const unsigned char* src_end,const char
             ++error_count;
             std::cout << "\nerror_count=="<<error_count<<" data error, tag==\""<<tag<<"\"\n";
         }else if(is_log_tag){
-            std::cout << "error_count=="<<error_count<<", test ok  frzSize/srcSize:"<<compressedCode.size()<<"/"<<src_end-src<<", tag==\""<<tag<<"\"\n";
+            std::cout << "error_count=="<<error_count<<", test ok  cmpSize/srcSize:"<<compressedCode.size()<<"/"<<src_end-src<<", tag==\""<<tag<<"\"\n";
         }
     }
     return (int)compressedCode.size();
@@ -172,7 +172,7 @@ static void test_tuz(const char* src,const char* tag){
 int main(int argc, const char * argv[]){
     double  time0=clock_s();
     std::cout <<"tinyuz " TINYUZ_VERSION_STRING "\n";
-    /*
+    //*
     test_tuz(0,"null");
     test_tuz("","tag0");
     test_tuz("1","tag1");

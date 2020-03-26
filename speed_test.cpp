@@ -290,38 +290,16 @@ bool _test_tuz_decompress_stream(unsigned char* out_data,unsigned char* out_data
 static void testFile(const char* srcFileName){
     //*
     outResult(testProc(srcFileName,zip_compress,"",zip_decompress,"zlib",9));
-    outResult(testProc(srcFileName,zip_compress,"",zip_decompress,"zlib",6));
-    outResult(testProc(srcFileName,zip_compress,"",zip_decompress,"zlib",3));
-    outResult(testProc(srcFileName,zip_compress,"",zip_decompress,"zlib",1));
-    std::cout << "\n";
-    //*/
-    
-    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tuz_stream",3));
     outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tuz_stream",4));
-    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tuz_stream",5));
-    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tuz_stream",6));
-    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tuz_stream",7));
-    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tuz_stream",8));
-    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tuz_stream",9));
-    std::cout << "\n";
-    
     //std::cout << "\n";
 }
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-    extern void _debug_log();
-#ifdef __cplusplus
-}
-#endif
 
 int main(int argc, const char * argv[]){
     std::cout << "start> \n";
     assert(argc==2);
     TEST_FILE_DIR=argv[1];
     minEncTestTime=0.0;
-    minDecTestTime=0.1;
+    minDecTestTime=0.2;
     
     //*
     testFile("world95.txt");
@@ -336,7 +314,6 @@ int main(int argc, const char * argv[]){
     testFile("A10.jpg");
     //*/
 
-    //_debug_log();
     std::cout << "done!\n";
     return 0;
 }
