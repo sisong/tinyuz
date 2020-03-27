@@ -49,7 +49,7 @@ namespace _tuz_private{
         TInt curMinLcp=(TInt)tuz_ui2G_sub_1;
         const size_t kMinDictStoreBit=1+coder.minSavedLenBit*2+((unmatched_len>0)?kBreakCodeScore:0);
         const TInt minDictMatchLen=props.minDictMatchLen;
-        const int kMaxSearchDeep=1024*32; //todo: change for data size
+        const int kMaxSearchDeep=1024*64; //todo: change for data size
         for (size_t deep=kMaxSearchDeep;(deep>0)&(it!=it_end);it+=it_inc,LCP+=it_inc,--deep){
             TInt curLCP=*LCP;
             if (curLCP<minDictMatchLen)
@@ -63,13 +63,12 @@ namespace _tuz_private{
             const TInt dict_pos=(curString-matchString)-1;
             if ((dict_pos<0)|(dict_pos>=props.dictSize)) continue;
             
-            --deep;//for speed
             size_t  dictStoreBit=(size_t)1+coder.getSavedLenBit(curMinLcp-props.minDictMatchLen)
                         +coder.getSavedPosBit(dict_pos)+((unmatched_len>0)?kBreakCodeScore:0);
             if (dataStoreBit<=curBestBitScore+dictStoreBit) continue;
             size_t  curBitScore=dataStoreBit-dictStoreBit;
             
-            deep-=(kMaxSearchDeep/16); //for speed
+            deep-=(kMaxSearchDeep/32); //for speed
             curBestBitScore=curBitScore;
             *curBestMatched=sstring.src+matchString;
             *curBestMatchLen=curMinLcp;
@@ -82,8 +81,8 @@ bool TMatch::match(const tuz_byte** out_matched,tuz_length_t* out_match_len,
     *out_matched=0;
     *out_match_len=0;
     size_t curBestBitScore=0;
-    _match(-1,curBestBitScore, out_matched,out_match_len,curString,unmatched_len);
-        _match(1,curBestBitScore, out_matched,out_match_len,curString,unmatched_len);
+    _match(-1,curBestBitScore,out_matched,out_match_len,curString,unmatched_len);
+    _match( 1,curBestBitScore,out_matched,out_match_len,curString,unmatched_len);
     return (*out_matched)!=0;
 }
 

@@ -39,24 +39,23 @@ typedef enum tuz_TResult{
     tuz_CTRLTYPE_STREAM_END_ERROR,
     
     tuz_OPEN_ERROR=10,
-    tuz_ALLOC_MEM_ERROR,
     tuz_READ_CODE_ERROR,
+    tuz_DICT_BUF_ERROR,
     tuz_DICT_POS_ERROR,
     tuz_OUT_SIZE_OR_CODE_ERROR,
     tuz_CODE_ERROR, //unknow code ,or decode len(tuz_length_t) overflow
 } tuz_TResult;
     
     typedef struct _tuz_TInputCache{
-        tuz_byte*       cache_buf;
         tuz_dict_size_t cache_begin;
         tuz_dict_size_t cache_end;
-        tuz_BOOL        is_input_stream_end;
-        tuz_BOOL        is_input_stream_error;
+        tuz_byte*       cache_buf;
+        tuz_byte        input_state;
     } _tuz_TInputCache;
     typedef struct _tuz_TDict{
-        tuz_byte*       dict_buf;
         tuz_dict_size_t dict_cur;
         tuz_dict_size_t dict_size;
+        tuz_byte*       dict_buf;
     } _tuz_TDict;
     typedef struct _tuz_TState{
         tuz_length_t    codeType_len;
@@ -72,20 +71,12 @@ typedef enum tuz_TResult{
 //data_size: input out_data buf's size,output readed data size,
 //     if output size < input size means input stream end;
 //if read error return tuz_FALSE;
-typedef tuz_BOOL (*tuz_TInputstream)(void* listener,tuz_byte* out_data,tuz_dict_size_t* data_size);
-    
-typedef void*    (*tuz_TAllocMem)   (void* listener,tuz_dict_size_t mem_size);
-typedef void     (*tuz_TFreeMem)    (void* listener,void* pmem);
+typedef void*    tuz_TInputStreamHandle;
+typedef tuz_BOOL (*tuz_TInputStream_read)(tuz_TInputStreamHandle inputStream,tuz_byte* out_data,tuz_dict_size_t* data_size);
 
 typedef struct tuz_TStream{
-//listener parameters
-    void*               listener;
-    //code_size: input out_code buf size,output readed code size,
-    //     if output size < input size means input stream end;
-    //if read error return tuz_FALSE;
-    tuz_TInputstream    read_code;
-    tuz_TAllocMem       alloc_mem; //alloc mem size==dict size
-    tuz_TFreeMem        free_mem;
+    tuz_TInputStreamHandle  inputStream;
+    tuz_TInputStream_read   read_code;
     
     _tuz_TInputCache    _code_cache;
     _tuz_TDict          _dict;
@@ -93,28 +84,25 @@ typedef struct tuz_TStream{
     tuz_byte            kMinDictMatchLen;
 } tuz_TStream;
 
-void  tuz_TStream_init(tuz_TStream* self,void* listener,tuz_TInputstream read_code,
-                       tuz_TAllocMem alloc_mem,tuz_TFreeMem free_mem);
 
 //open tuz_TStream
-    //  read some code & alloc mem for dict;
-//  kDecodeCacheSize >=1; 64,250,1k,8k,32k, ...
+//  kCodeCacheSize >=1; 64,250,1k,4k,32k,...  only affect decompress speed
+//  read saved dictSize from inputStream to out_dictSize;
 //  if success return tuz_OK;
-tuz_TResult             tuz_TStream_open(tuz_TStream* self,tuz_byte* decodeCache,tuz_dict_size_t kDecodeCacheSize);
+tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
+                             tuz_byte* codeCache,tuz_dict_size_t kCodeCacheSize,tuz_dict_size_t* out_dictSize);
 
-//decompress part data
-//  data_size: input out_data buf size,output decompressed data size;
-//  if success return tuz_OK or tuz_STREAM_END;
-//    return tuz_STREAM_END means decompress finish;
-tuz_TResult             tuz_TStream_decompress(tuz_TStream* self,tuz_byte* out_data,tuz_dict_size_t* data_size);
+//set dict buf
+//  dict_buf lifetime need holding by caller
+//  if success return tuz_OK;
+tuz_TResult tuz_TStream_decompress_begin(tuz_TStream* self,tuz_byte* dict_buf,tuz_dict_size_t dictSize);
 
-//close tuz_TStream
-//  free mem;
-tuz_inline static void  tuz_TStream_close(tuz_TStream* self) {
-                                if (self&&(self->_dict.dict_buf)){
-                                    tuz_byte* mem=self->_dict.dict_buf;
-                                    self->_dict.dict_buf=0;
-                                    self->free_mem(self->listener,mem); } }
+//decompress partial to out_data
+//  data_size: input out_data buf's size,output decompressed data size;
+//  if success return tuz_OK or tuz_STREAM_END, tuz_STREAM_END means decompress finish;
+tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,tuz_dict_size_t* data_size);
+
+//not need clear tuz_TStream;
 
 #ifdef __cplusplus
 }

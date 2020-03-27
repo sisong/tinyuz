@@ -132,7 +132,7 @@ static void outResult(const TTestResult& rt){
 
 ////
 
-int zip_compress(unsigned char* out_data,unsigned char* out_data_end,
+int zlib_compress(unsigned char* out_data,unsigned char* out_data_end,
                  const unsigned char* src,const unsigned char* src_end,int zip_parameter){
     const unsigned char* _zipSrc=&src[0];
     unsigned char* _zipDst=&out_data[0];
@@ -158,7 +158,7 @@ int zip_compress(unsigned char* out_data,unsigned char* out_data_end,
     return zipLen;
 }
 
-bool zip_decompress(unsigned char* out_data,unsigned char* out_data_end,
+bool zlib_decompress(unsigned char* out_data,unsigned char* out_data_end,
                     const unsigned char* zip_code,const unsigned char* zip_code_end){
 #define CHUNK (64*1024)
     int ret;
@@ -209,8 +209,8 @@ bool zip_decompress(unsigned char* out_data,unsigned char* out_data_end,
 
 
 const bool is_decode_step=true;
-const tuz_dict_size_t kDecodeCacheSize=1024*4;
-const tuz_dict_size_t kDictSize=1024*1024*8;
+const tuz_dict_size_t kCodeCacheSize=1024*4;
+const tuz_dict_size_t kDictSize=1024*1024*4-1;
 
 int _test_tuz_compress(unsigned char* out_data,unsigned char* out_data_end,
                        const unsigned char* src,const unsigned char* src_end,int zip_parameter){
@@ -241,32 +241,29 @@ struct TTuzListener{
         self->src+=r_size;
         return tuz_TRUE;
     }
-    
-    static void* alloc_mem(void* listener,tuz_dict_size_t mem_size){
-        return malloc(mem_size);
-    }
-    static void free_mem(void* listener,void* pmem){
-        free(pmem);
-    }
 };
 
 tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
                                   tuz_byte* out_uncompress,size_t* uncompress_size){
+    tuz_byte _mem_buf[kCodeCacheSize];
     TTuzListener  listener={code,code_end};
+    tuz_dict_size_t dictSize;
+    tuz_byte* _dict_buf=0;
     tuz_TStream tuz;
-    tuz_TStream_init(&tuz,&listener,listener.read_code,listener.alloc_mem,listener.free_mem);
-    tuz_byte _mem_buf[kDecodeCacheSize];
-    tuz_TResult result=tuz_TStream_open(&tuz,_mem_buf,kDecodeCacheSize);
+    tuz_TResult result=tuz_TStream_open(&tuz,&listener,listener.read_code,_mem_buf,kCodeCacheSize,&dictSize);
     if (tuz_OK!=result) return result;
-    
+    _dict_buf=(tuz_byte*)malloc(dictSize);
+    assert(_dict_buf!=0);
+    result=tuz_TStream_decompress_begin(&tuz,_dict_buf,dictSize);
+    if (tuz_OK!=result) return result;
     if (is_decode_step){
         const size_t buf_size=*uncompress_size;
         size_t data_size=0;
         while (result==tuz_OK) {
-            tuz_dict_size_t step_size=kDecodeCacheSize; //for test
+            tuz_dict_size_t step_size=kCodeCacheSize; //for test
             if (data_size+step_size>buf_size)
                 step_size=(tuz_dict_size_t)(buf_size-data_size);
-            result=tuz_TStream_decompress(&tuz,out_uncompress,&step_size);
+            result=tuz_TStream_decompress_partial(&tuz,out_uncompress,&step_size);
             data_size+=step_size;
             out_uncompress+=step_size;
         }
@@ -274,10 +271,10 @@ tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
     }else{
         tuz_dict_size_t usize=*uncompress_size;
         assert(usize==*uncompress_size);
-        result=tuz_TStream_decompress(&tuz,out_uncompress,&usize);
+        result=tuz_TStream_decompress_partial(&tuz,out_uncompress,&usize);
         *uncompress_size=usize;
     }
-    tuz_TStream_close(&tuz);
+    free(_dict_buf);
     return result;
 }
 
@@ -289,7 +286,7 @@ bool _test_tuz_decompress_stream(unsigned char* out_data,unsigned char* out_data
 
 static void testFile(const char* srcFileName){
     //*
-    outResult(testProc(srcFileName,zip_compress,"",zip_decompress,"zlib",9));
+    outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"      zlib",9));
     outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tuz_stream",4));
     //std::cout << "\n";
 }

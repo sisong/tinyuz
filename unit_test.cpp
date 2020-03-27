@@ -9,7 +9,7 @@
 #include "decompress/tuz_dec.h"
 #include "compress/tuz_enc.h"
 
-const int   kRandTestCount=4000;
+const int   kRandTestCount=5000;
 const bool  is_attack_decompress=false;
 const bool  is_log_tag=false;
 const bool  is_all_rand=false;
@@ -19,7 +19,7 @@ double  sum_src_size=0;
 double  sum_cmz_size=0;
 
 
-const tuz_dict_size_t kDecodeCacheSize=1024;
+const tuz_dict_size_t kCodeCacheSize=1024;
 const tuz_dict_size_t kDictSize=1024*1024;
 const tuz_dict_size_t kMaxSaveLength=1024*16;
 
@@ -39,35 +39,37 @@ struct TTuzListener{
         return tuz_TRUE;
     }
     
-    tuz_byte _mem_buf[kDictSize+kDecodeCacheSize];
-    static void* alloc_mem(void* listener,tuz_dict_size_t mem_size){
+    tuz_byte _mem_buf[kCodeCacheSize+kDictSize];
+    tuz_byte* alloc_mem(tuz_dict_size_t mem_size){
         //return malloc(mem_size);
-        TTuzListener* self=(TTuzListener*)listener;
         if (mem_size>kDictSize) return 0;
-        return self->_mem_buf;
+        return (&_mem_buf[0])+kCodeCacheSize;
     }
-    static void free_mem(void* listener,void* pmem){
+    void free_mem(tuz_byte* pmem){
         //free(pmem);
     }
 };
 
-
 tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
                                   tuz_byte* out_uncompress,size_t* uncompress_size){
     TTuzListener  listener={code,code_end};
+    tuz_dict_size_t dictSize;
+    tuz_byte* _dict_buf=0;
     tuz_TStream tuz;
-    tuz_TStream_init(&tuz,&listener,listener.read_code,listener.alloc_mem,listener.free_mem);
-    tuz_TResult result=tuz_TStream_open(&tuz,&listener._mem_buf[kDictSize],kDecodeCacheSize);
+    tuz_TResult result=tuz_TStream_open(&tuz,&listener,listener.read_code,listener._mem_buf,kCodeCacheSize,&dictSize);
     if (tuz_OK!=result) return result;
-
+    _dict_buf=listener.alloc_mem(dictSize);
+    assert(_dict_buf!=0);
+    result=tuz_TStream_decompress_begin(&tuz,_dict_buf,dictSize);
+    if (tuz_OK!=result) return result;
     if (is_decode_step){
         const size_t buf_size=*uncompress_size;
         size_t data_size=0;
         while (result==tuz_OK) {
-            tuz_dict_size_t step_size=kDecodeCacheSize/3; //for test
+            tuz_dict_size_t step_size=kCodeCacheSize; //for test
             if (data_size+step_size>buf_size)
                 step_size=(tuz_dict_size_t)(buf_size-data_size);
-            result=tuz_TStream_decompress(&tuz,out_uncompress,&step_size);
+            result=tuz_TStream_decompress_partial(&tuz,out_uncompress,&step_size);
             data_size+=step_size;
             out_uncompress+=step_size;
         }
@@ -75,10 +77,10 @@ tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
     }else{
         tuz_dict_size_t usize=*uncompress_size;
         assert(usize==*uncompress_size);
-        result=tuz_TStream_decompress(&tuz,out_uncompress,&usize);
+        result=tuz_TStream_decompress_partial(&tuz,out_uncompress,&usize);
         *uncompress_size=usize;
     }
-    tuz_TStream_close(&tuz);
+    listener.free_mem(_dict_buf);
     return result;
 }
 
