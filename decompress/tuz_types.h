@@ -41,9 +41,13 @@ extern "C" {
 #define TINYUZ_VERSION_STRING           _TINYUZ_EXPAND_AND_QUOTE(_TINYUZ_VERSION)
 
     typedef  unsigned char      tuz_byte;
+    typedef  unsigned short     tuz_ushort;
+    typedef  unsigned int       tuz_uint;
+    typedef  unsigned long      tuz_ulong;
+
 #ifndef tuz_length_t
     //if tuz_length_t==tuz_byte, must set CompressProps.maxSaveLength & dictSize <= 255
-    typedef  unsigned int       tuz_length_t;
+    typedef  tuz_uint           tuz_length_t;
 #endif
     typedef  tuz_length_t       tuz_dict_size_t;
     typedef  tuz_byte           tuz_BOOL;

@@ -41,7 +41,7 @@ namespace _tuz_private{
         const ICode&                coder;
         const tuz_TCompressProps&   props;
         typedef TSuffixString::TInt TInt;
-        void _match(TInt it_inc,size_t& curBestBitScore,
+        void _match(TInt it_inc,TInt& curBestBitScore,
                     const tuz_byte** curBestMatched,tuz_length_t* curBestMatchLen,
                     const TInt curString,size_t unmatched_len);
     };

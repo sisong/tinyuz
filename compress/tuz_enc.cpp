@@ -38,7 +38,7 @@ void tuz_defaultCompressProps(tuz_TCompressProps* out_props){
 hpatch_StreamPos_t tuz_maxCompressedSize(hpatch_StreamPos_t data_size){
     const hpatch_StreamPos_t _u_cout=(data_size+tuz_kMinOfMaxSaveLength-1)/tuz_kMinOfMaxSaveLength;
     const hpatch_StreamPos_t u_size=(_u_cout+7)/8 + (_u_cout*3+1)/2;
-    hpatch_StreamPos_t c_count=(data_size+kMinClipLength-1)/kMinClipLength;
+    hpatch_StreamPos_t c_count=(data_size+kMinBestClipSize-1)/kMinBestClipSize+1;
     return data_size+ 1+kMaxPackedLenByteSize + (1+2)*c_count + u_size +1+2;
 }
 
@@ -66,15 +66,20 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
         coder.outDictPos(selfProps.dictSize);
     }
     {
-        //todo: clip streamSize
+        hpatch_StreamPos_t clipSize=selfProps.dictSize*16;
+        if (clipSize<kMinBestClipSize) clipSize=kMinBestClipSize;
+        hpatch_StreamPos_t clipCount=(data->streamSize+clipSize)/clipSize;
+        clipSize=(data->streamSize+clipCount-1)/clipCount;
+        
         TTuzCode coder(code);
-        hpatch_StreamPos_t clipEnd=data->streamSize;
-        compress_clip(coder,data,0,clipEnd,selfProps);
-        //end tag
-        if (clipEnd==data->streamSize)
-            coder.outCtrl_streamEnd();
-        else
-            coder.outCtrl_clipEnd();
+        for (hpatch_StreamPos_t clipBegin=0;clipBegin<data->streamSize;clipBegin+=clipSize) {
+            hpatch_StreamPos_t clipEnd=clipBegin+clipSize;
+            bool isToStreamEnd=(clipEnd>=data->streamSize);
+            if (isToStreamEnd) clipEnd=data->streamSize;
+            compress_clip(coder,data,clipBegin,clipEnd,selfProps);
+            //if (!isToStreamEnd) coder.outCtrl_clipEnd();
+        }
+        coder.outCtrl_streamEnd();
     }
     checkv(out_code->write(out_code,0,code.data(),code.data()+code.size()));
     return code.size();

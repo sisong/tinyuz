@@ -288,7 +288,7 @@ tuz_TResult tuz_TStream_decompress_begin(tuz_TStream* self,tuz_byte* dict_buf,tu
 }
 
 
-#define _check_return(v)  { if (!(v)) goto return_process; }
+#define _check_return(v)  { if (!(v)) return tuz_CODE_ERROR; }
 
 tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,tuz_dict_size_t* data_size){
     tuz_byte*  cur_out_data=out_data;

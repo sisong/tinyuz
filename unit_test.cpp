@@ -58,8 +58,9 @@ tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
     tuz_TStream tuz;
     tuz_TResult result=tuz_TStream_open(&tuz,&listener,listener.read_code,listener._mem_buf,kCodeCacheSize,&dictSize);
     if (tuz_OK!=result) return result;
+    if (!is_attack_decompress) assert(dictSize<=kDictSize);
     _dict_buf=listener.alloc_mem(dictSize);
-    assert(_dict_buf!=0);
+    if (!is_attack_decompress) assert(_dict_buf!=0);
     result=tuz_TStream_decompress_begin(&tuz,_dict_buf,dictSize);
     if (tuz_OK!=result) return result;
     if (is_decode_step){
