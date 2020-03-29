@@ -39,7 +39,8 @@ namespace _tuz_private{
 
     static const size_t   kMaxPackedLenByteSize =(sizeof(hpatch_StreamPos_t)*8+5)/(3+3);
     static const size_t   kMinBestClipSize = 1024*32;
-    
+    static const size_t   kMaxBestClipSize = 1024*1024*16*2;
+
     static const uint32_t tuz_ui2G_sub_1=(~(uint32_t)0)>>1;
     #define _uint_is_less_2g(v) ((v)<=tuz_ui2G_sub_1)  // < 2G ?
     

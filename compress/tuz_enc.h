@@ -31,7 +31,7 @@
 extern "C" {
 #endif
 
-void tuz_defaultCompressProps(tuz_TCompressProps* out_props);
+extern const tuz_TCompressProps tuz_kDefaultCompressProps;
 
 hpatch_StreamPos_t tuz_maxCompressedSize(hpatch_StreamPos_t data_size);
 

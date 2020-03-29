@@ -131,8 +131,7 @@ static int test(const unsigned char* src,const unsigned char* src_end,const char
     mem_as_hStreamOutput(&out_stream,compressedCode.data(),compressedCode.data()+compressedCode.size());
     hpatch_TStreamInput in_stream;
     mem_as_hStreamInput(&in_stream,src,src_end);
-    tuz_TCompressProps props;
-    tuz_defaultCompressProps(&props);
+    tuz_TCompressProps props=tuz_kDefaultCompressProps;
     props.dictSize=kDictSize;
     props.maxSaveLength=kMaxSaveLength;
     hpatch_StreamPos_t codeSize=tuz_compress(&out_stream,&in_stream,&props);
