@@ -28,6 +28,7 @@
 #define _tuz_enc_types_h
 #include "../decompress/tuz_types.h"
 #include "libHDiffPatch/HPatch/patch_types.h"
+#include <stdint.h> //for int type
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -231,10 +231,11 @@ static tuz_dict_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* cur_out_data,
     //              dict_cur+dictType_pos|   <-- len -->  |
     //                                     dict_cur+dictType_pos|   <-- len -->  |
     //                       dict_cur+dictType_pos|   <-- len -->  |
-    tuz_dict_size_t max_len=self->_dict.dict_size-self->_state.dictType_pos;
+    tuz_dict_size_t max_len,len,pos;
+    max_len=self->_dict.dict_size-self->_state.dictType_pos;
     max_len=(max_len<dsize)?max_len:dsize;
-    tuz_dict_size_t len=(self->_state.dictType_len<max_len)?(tuz_dict_size_t)self->_state.dictType_len:max_len;
-    tuz_dict_size_t pos=self->_dict.dict_size-self->_dict.dict_cur;
+    len=(self->_state.dictType_len<max_len)?(tuz_dict_size_t)self->_state.dictType_len:max_len;
+    pos=self->_dict.dict_size-self->_dict.dict_cur;
     if (self->_state.dictType_pos>=pos)
         pos=self->_state.dictType_pos-pos;
     else
@@ -280,8 +281,8 @@ tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStrea
 }
 
 tuz_TResult tuz_TStream_decompress_begin(tuz_TStream* self,tuz_byte* dict_buf,tuz_dict_size_t dictSize){
-    if ((dict_buf==0)||(dictSize==0)||(dictSize<self->_dict.dict_size))
-        return tuz_DICT_BUF_ERROR;
+    if ((dict_buf==0)||(dictSize==0)||(dictSize<self->_dict.dict_size)||
+        (self->_dict.dict_buf!=0)) return tuz_DICT_BUF_ERROR;
     self->_dict.dict_buf=dict_buf;
     self->_dict.dict_size=dictSize;
     return tuz_OK;
@@ -340,7 +341,7 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
         if (self->_state.type_count>0){ //next type
         type_process: {
             tuz_length_t saved_len;
-            const tuz_TCodeType type=self->_state.types&1;
+            const tuz_TCodeType type=(tuz_TCodeType)(self->_state.types&1);
             self->_state.types>>=1;
             --self->_state.type_count;
             _check_return(_cache_unpack_len(self,&self->_state.half_code,&saved_len));
@@ -393,7 +394,7 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
         }
     }while(1);
 
-return_process:
+//return_process:
     {
         if ((!self->_state.is_ctrlType_stream_end)&(out_data!=cur_out_data))
             _update_dict(self,out_data,cur_out_data);
