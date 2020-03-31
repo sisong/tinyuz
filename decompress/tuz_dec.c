@@ -27,6 +27,10 @@
 #include "tuz_dec.h"
 #include "tuz_types_private.h"
 
+#ifndef  _IS_NEED_MIN_CODE_SIZE
+#   define _IS_NEED_MIN_CODE_SIZE  0  //default used fast code
+#endif
+
 #ifndef _IS_RUN_MEM_SAFE_CHECK
 #   define _IS_RUN_MEM_SAFE_CHECK  1
 #endif
@@ -43,6 +47,20 @@
 #   define  _SAFE_CHECK(cmp)
 #endif
 
+static tuz_inline void _memset(tuz_byte* dst,tuz_byte v,tuz_dict_size_t len){
+    while(len--) *dst++=v;
+}
+
+static tuz_inline void memmove_order(tuz_byte* dst,const tuz_byte* src,tuz_dict_size_t len){
+    while (len--) *dst++=*src++;
+}
+
+#if _IS_NEED_MIN_CODE_SIZE
+#define  _memcpy        memmove_order
+#define  _memmove       memmove_order
+#define  _memmove_order memmove_order
+#else
+
 #define  _memcpy    memcpy_tiny8
 #define  _memmove(dst,_src,len){  \
     const tuz_byte* src=_src;   \
@@ -56,14 +74,6 @@
         memcpy_tiny8(dst,src,len); \
     else    \
         memmove_order(dst,src,len); }
-
-static tuz_inline void _memset(tuz_byte* dst,tuz_byte v,tuz_dict_size_t len){
-    while(len--) *dst++=v;
-}
-
-static tuz_inline void memmove_order(tuz_byte* dst,const tuz_byte* src,tuz_dict_size_t len){
-    while (len--) *dst++=*src++;
-}
 
 struct _t_data8{ tuz_byte _[8]; };
 struct _t_data4{ tuz_byte _[4]; };
@@ -97,6 +107,7 @@ case_process:
         }
     }
 }
+#endif
 
 enum _TInputState{
     kInputState_default=0,
@@ -158,20 +169,9 @@ static tuz_inline tuz_BOOL _cache_read_1byte(tuz_TStream* self,tuz_byte* code){
     }while(1);
 }
 
-/*
-#ifdef __RUN_MEM_SAFE_CHECK
-static const tuz_byte _k_max_length_t_bit=(sizeof(tuz_length_t)<<3);
-static const tuz_byte _v_to_bit[8]={0,1,2,2,3,3,3,3};
-static tuz_inline tuz_BOOL _is_safe_append_bit(tuz_byte v_bit,tuz_byte h3bit_v){
-    return (v_bit+(_v_to_bit[h3bit_v]))<=_k_max_length_t_bit;
-}
-#endif
-*/
-
 //low to high bitmap: xxx?xxx? xxx?xxx? ...
 static tuz_BOOL _cache_unpack_len(tuz_TStream* self,tuz_byte* half_code,tuz_length_t* out_len){
     tuz_length_t    v=0;
-    tuz_byte        v_bit=0;
     tuz_byte        code=*half_code;
     do {
         tuz_dict_size_t next;
@@ -181,16 +181,14 @@ static tuz_BOOL _cache_unpack_len(tuz_TStream* self,tuz_byte* half_code,tuz_leng
             _SAFE_CHECK_DO(_cache_read_1byte(self,&code));
             next=(code>>4)|(1<<7);
         }
-        v|=(code&7)<<v_bit;
-        v_bit+=3;
+        //_SAFE_CHECK((v>>(sizeof(v)*8-3))==0);
+        v=(v<<3)|(code&7);
         if ((code&(1<<3))==0) {
             *half_code=next;
             *out_len=v;
-            //_SAFE_CHECK((v_bit<=_k_max_length_t_bit)||_is_safe_append_bit(v_bit-3,code&7));
             return tuz_TRUE;
         }else{
             code=next;
-            //_SAFE_CHECK(v_bit<=_k_max_length_t_bit);
         }
     }while(1);
 }

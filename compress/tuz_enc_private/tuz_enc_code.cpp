@@ -60,25 +60,6 @@ _debug_log _;
 namespace _tuz_private{
     
     //low to high bitmap: xxx?xxx? xxx?xxx? ...
-    static tuz_byte _pack_v(tuz_byte* half_code,tuz_byte* code,tuz_length_t v){
-        tuz_byte half_count=0;
-        do {
-            tuz_byte halfv=v&7;
-            v>>=3;
-            halfv|=(v>0)?8:0;
-            if (half_code){
-                (*half_code)|=(halfv<<4);
-                half_code=0;
-            }else{
-                *code=halfv;
-                half_code=code;
-                ++code;
-            }
-            ++half_count;
-        }while(v>0);
-        return half_count;
-    }
-    
     static tuz_inline tuz_byte _pack_v_half_count(tuz_length_t v){
         tuz_byte half_count=0;
         do {
@@ -88,6 +69,24 @@ namespace _tuz_private{
         return half_count;
     }
 
+    static tuz_byte _pack_v(tuz_byte* half_code,tuz_byte* code,tuz_length_t v){
+        const tuz_byte half_count=_pack_v_half_count(v);
+        tuz_byte i=half_count;
+        for (;i>0;--i) {
+            tuz_byte halfv=(v>>((i-1)*3))&7;
+            halfv|=(i>1)?8:0;
+            if (half_code){
+                (*half_code)|=(halfv<<4);
+                half_code=0;
+            }else{
+                *code=halfv;
+                half_code=code;
+                ++code;
+            }
+        };
+        return half_count;
+    }
+    
 void TTuzCode::outLen(tuz_length_t len){
     tuz_byte* half_code=(half_code_index!=kNullIndex)?&code[half_code_index]:0;
     tuz_byte code_buf[kMaxPackedLenByteSize];
