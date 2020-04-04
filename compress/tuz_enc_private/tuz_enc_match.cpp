@@ -29,7 +29,7 @@ namespace _tuz_private{
     
     typedef TSuffixString::TInt TInt;
     
-    void TMatch::_match(TInt it_inc,TInt& curBestBitScore,
+    void TMatch::_match(TInt it_inc,TInt* curBestBitScore,
                         const tuz_byte** curBestMatched,tuz_length_t* curBestMatchLen,
                         const TInt curString,size_t unmatched_len){
         const TInt it_cur=sstring.R[curString];
@@ -53,29 +53,28 @@ namespace _tuz_private{
         const TInt minDictMatchLen=props.minDictMatchLen;
         const unsigned int props_dictSize=props.dictSize;
         const TInt* SA=sstring.SA.data();
+        TInt  bestBitScore=*curBestBitScore;
         for (;(it!=it_end);it+=it_inc,LCP+=it_inc){
             TInt curLCP=*LCP;
-            if (curLCP>=minDictMatchLen){
-                curMinLcp=(curLCP<curMinLcp)?curLCP:curMinLcp;
-            }else
-                break;
-            TInt matchString=SA[it];
-            const unsigned int dict_pos=(curString-matchString)-1;
+            if (curLCP<minDictMatchLen) break;
+            curMinLcp=(curLCP<curMinLcp)?curLCP:curMinLcp;
+            TInt matchedString=SA[it];
+            const unsigned int dict_pos=(curString-matchedString)-1;
             if (dict_pos>=props_dictSize) continue; //same as ((TInt)dict_pos<0)|(dict_pos>=props.dictSize)
-            
+
             TInt  dataStoreBit=curMinLcp*8+kBreakCodeScore_data;
-            if (dataStoreBit<=curBestBitScore+kMinDictStoreBit)
+            if (dataStoreBit<=bestBitScore+kMinDictStoreBit)
                 break;
             
             TInt  dictStoreBit=coder.getSavedLenBit(curMinLcp-props.minDictMatchLen)
                                 +coder.getSavedPosBit((tuz_dict_size_t)dict_pos)+kBreakCodeScore_dict;
             TInt  curBitScore=dataStoreBit-dictStoreBit;
-            if (curBitScore<=curBestBitScore) continue;
-            
-            curBestBitScore=curBitScore;
-            *curBestMatched=sstring.src+matchString;
+            if (curBitScore<=bestBitScore) continue;
+            bestBitScore=curBitScore;
+            *curBestMatched=sstring.src+matchedString;
             *curBestMatchLen=curMinLcp;
         }
+        *curBestBitScore=bestBitScore;
     }
     
 bool TMatch::match(const tuz_byte** out_matched,tuz_length_t* out_match_len,
@@ -84,8 +83,8 @@ bool TMatch::match(const tuz_byte** out_matched,tuz_length_t* out_match_len,
     *out_matched=0;
     *out_match_len=0;
     TInt curBestBitScore=0;
-    _match(-1,curBestBitScore,out_matched,out_match_len,curString,unmatched_len);
-    _match( 1,curBestBitScore,out_matched,out_match_len,curString,unmatched_len);
+    _match(-1,&curBestBitScore,out_matched,out_match_len,curString,unmatched_len);
+    _match( 1,&curBestBitScore,out_matched,out_match_len,curString,unmatched_len);
     return (*out_matched)!=0;
 }
 

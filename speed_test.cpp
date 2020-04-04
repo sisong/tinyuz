@@ -122,7 +122,7 @@ static void outResult(const TTestResult& rt){
     std::cout<<"\""<<rt.srcFileName<<"\"\t";
     std::cout<<rt.srcSize/1024.0/1024<<"M\t";
     std::cout<<rt.procName<<"_"<<rt.zip_parameter<<"\t";
-    std::cout<<rt.zipSize*100.0/rt.srcSize<<"%\t";
+    std::cout<<rt.zipSize*100.0/rt.srcSize<<"% ("<<rt.zipSize<<") \t";
     //std::cout<<rt.compressTime_s<<"S\t";
     std::cout<<rt.srcSize/rt.compressTime_s/1024/1024<<"M/S\t";
     //std::cout<<rt.decompressTime_s<<"S\t";
