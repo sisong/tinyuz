@@ -9,7 +9,7 @@
 #include "decompress/tuz_dec.h"
 #include "compress/tuz_enc.h"
 
-const int   kRandTestCount=5000;
+const int   kRandTestCount=1000;
 const bool  is_attack_decompress=false;
 const bool  is_log_tag=false;
 const bool  is_all_rand=false;
