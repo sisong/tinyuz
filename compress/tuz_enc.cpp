@@ -28,7 +28,8 @@
 #include "tuz_enc_private/tuz_enc_clip.h"
 using namespace _tuz_private;
 
-const tuz_TCompressProps tuz_kDefaultCompressProps={1024*32-1,1024*32-1,4,1};
+
+const tuz_TCompressProps tuz_kDefaultCompressProps={tuz_kMaxOfMaxSaveLength,tuz_kMaxOfMaxSaveLength,4,1};
 
 hpatch_StreamPos_t tuz_maxCompressedSize(hpatch_StreamPos_t data_size){
     const hpatch_StreamPos_t _u_cout=(data_size+tuz_kMinOfMaxSaveLength-1)/tuz_kMinOfMaxSaveLength;
@@ -42,9 +43,9 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     assert(out_code&&(out_code->write));
     assert(data&&(data->read));
     if (props){
-        checkv((props->dictSize>=1)&(props->dictSize<=1024*1024*16));
+        checkv((props->dictSize>=1)&(props->dictSize<=tuz_kMaxOfDictSize));
         checkv(props->dictSize==(tuz_dict_size_t)props->dictSize);
-        checkv((props->maxSaveLength>=255)&(_uint_is_less_2g(props->maxSaveLength)));
+        checkv((props->maxSaveLength>=tuz_kMinOfMaxSaveLength)&(props->maxSaveLength<=tuz_kMaxOfMaxSaveLength));
         checkv(props->minDictMatchLen>=3);
     }
     
@@ -65,7 +66,7 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     {
         hpatch_StreamPos_t clipSize=selfProps.dictSize*16;
         if (clipSize<kMinBestClipSize) clipSize=kMinBestClipSize;
-        if (clipSize>-kMaxBestClipSize) clipSize=kMaxBestClipSize;
+        if (clipSize>kMaxBestClipSize) clipSize=kMaxBestClipSize;
         hpatch_StreamPos_t clipCount=(data->streamSize+clipSize)/clipSize;
         clipSize=(data->streamSize+clipCount-1)/clipCount;
         

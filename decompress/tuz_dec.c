@@ -192,6 +192,16 @@ static tuz_BOOL _cache_unpack_len(tuz_TStream* self,tuz_byte* half_code,tuz_leng
         }
     }while(1);
 }
+static tuz_inline tuz_BOOL _cache_unpack_dict_pos(tuz_TStream* self,tuz_byte* half_code,tuz_length_t* out_pos){
+    if (_cache_unpack_len(self,half_code,out_pos)){
+        tuz_byte bpos;
+        _SAFE_CHECK_DO(_cache_read_1byte(self,&bpos));
+        *out_pos=((*out_pos)<<8) | bpos;
+        return tuz_TRUE;
+    }else
+        return tuz_FALSE;
+}
+
 
 static void _update_dict(tuz_TStream *self,const tuz_byte* out_data,const tuz_byte* cur_out_data) {
     //  [               dict buf                 ]|[          out buf        ]
@@ -269,7 +279,7 @@ tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStrea
         self->kMinDictMatchLen=(tuz_byte)saved_len;
         if ((saved_len==0)||(self->kMinDictMatchLen!=saved_len)) return tuz_OPEN_ERROR;
         //dict_size
-        if (!_cache_unpack_len(self,&half_code,&saved_len)) return tuz_OPEN_ERROR;
+        if (!_cache_unpack_dict_pos(self,&half_code,&saved_len)) return tuz_OPEN_ERROR;
         self->_dict.dict_size=(tuz_dict_size_t)saved_len;
         if ((saved_len==0)||(self->_dict.dict_size!=saved_len)) return tuz_OPEN_ERROR;
     }
@@ -346,7 +356,7 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
             if (type==tuz_codeType_dict){
                 tuz_dict_size_t   outed_size=(tuz_dict_size_t)(cur_out_data-out_data);
                 tuz_length_t saved_dict_pos;
-                _check_return(_cache_unpack_len(self,&self->_state.half_code,&saved_dict_pos));
+                _check_return(_cache_unpack_dict_pos(self,&self->_state.half_code,&saved_dict_pos));
 #ifdef __RUN_MEM_SAFE_CHECK
                 if (saved_dict_pos>=self->_dict.dict_size) return tuz_DICT_POS_ERROR;
 #endif

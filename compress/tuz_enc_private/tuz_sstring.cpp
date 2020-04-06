@@ -29,7 +29,8 @@
 
 namespace _tuz_private{
     
-    typedef TSuffixString::TInt TInt;
+    typedef TSuffixString::TInt     TInt;
+    typedef TSuffixString::TLCPInt  TLCPInt;
     
     static void _Rank_create(TInt n,const TInt* SA,TInt* R){
         for (TInt i=0;i<n;++i){
@@ -37,20 +38,21 @@ namespace _tuz_private{
         }
     }
     
-    static void _LCP_create_withR(const tuz_byte* T,TInt n,const TInt* SA,const TInt* R,TInt* LCP){
+    static void _LCP_create_withR(const tuz_byte* T,TInt n,const TInt* SA,const TInt* R,
+                                  TLCPInt* LCP,TLCPInt maxLCPValue){
         if (n>0)
             LCP[n-1]=0;
         for (TInt h=0,i=0; i<n; ++i){
             if (R[i]==0) continue;
             TInt j = SA[R[i]-1];
-            while (((i+h!=n)&&(j+h!=n))&&(T[i+h]==T[j+h]))
+            while (((i+h!=n)&(j+h!=n))&&(T[i+h]==T[j+h]))
                 ++h;
-            LCP[R[i]-1]=h;
+            LCP[R[i]-1]=(TLCPInt)((h<=maxLCPValue)?h:maxLCPValue);
             if (h>0) --h;
         }
     }
 
-void TSuffixString::_init(TInt maxLCPValue){
+void TSuffixString::_init(TLCPInt maxLCPValue){
     size_t sa_size=size();
     checkv(_uint_is_less_2g(sa_size));
     SA.resize(sa_size);
@@ -60,13 +62,7 @@ void TSuffixString::_init(TInt maxLCPValue){
     
     checkv(0==divsufsort(src,(saidx_t*)SA.data(),(saidx_t)sa_size));
     _Rank_create((TInt)SA.size(),SA.data(),R.data());
-    _LCP_create_withR(src,(TInt)SA.size(),SA.data(),R.data(),LCP.data());
-    for (size_t i=0; i<sa_size; ++i) {
-        if (LCP[i]<=maxLCPValue)
-            ;//continue;
-        else
-            LCP[i]=maxLCPValue;
-    }
+    _LCP_create_withR(src,(TInt)SA.size(),SA.data(),R.data(),LCP.data(),maxLCPValue);
 }
 
 }

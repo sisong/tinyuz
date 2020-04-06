@@ -97,7 +97,8 @@ void TTuzCode::outLen(tuz_length_t len){
     half_code_index=(half_count&1)?(code.size()-1):kNullIndex;
 }
 void TTuzCode::outDictPos(tuz_dict_size_t pos){
-    outLen(pos);
+    outLen(pos>>8);
+    code.push_back(pos&255);
 }
 
 tuz_byte TTuzCode::getSavedLenBit(tuz_length_t len)const{
@@ -105,7 +106,7 @@ tuz_byte TTuzCode::getSavedLenBit(tuz_length_t len)const{
 }
     
 tuz_byte TTuzCode::getSavedPosBit(tuz_dict_size_t pos)const{
-    return getSavedLenBit(pos);
+    return 8+_pack_v_half_count(pos>>8)*4;
 }
     
 void TTuzCode::outType(tuz_TCodeType type){

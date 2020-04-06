@@ -27,7 +27,8 @@
 #include "tuz_enc_match.h"
 namespace _tuz_private{
     
-    typedef TSuffixString::TInt TInt;
+    typedef TSuffixString::TInt     TInt;
+    typedef TSuffixString::TLCPInt  TLCPInt;
     
     void TMatch::_match(TInt it_inc,TInt* curBestBitScore,
                         const tuz_byte** curBestMatched,tuz_length_t* curBestMatchLen,
@@ -35,7 +36,7 @@ namespace _tuz_private{
         const TInt it_cur=sstring.R[curString];
         TInt it=it_cur+it_inc;
         TInt it_end;
-        const TInt* LCP;//当前的后缀字符串和下一个后缀字符串的相等长度.
+        const TLCPInt* LCP;//当前的后缀字符串和下一个后缀字符串的相等长度.
         if (it_inc==1){
             it_end=(TInt)sstring.size();
             LCP=sstring.LCP.data()+it_cur;

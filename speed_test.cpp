@@ -131,6 +131,7 @@ static void outResult(const TTestResult& rt){
 
 
 ////
+int zlib_windowBits=0;
 
 int zlib_compress(unsigned char* out_data,unsigned char* out_data_end,
                  const unsigned char* src,const unsigned char* src_end,int zip_parameter){
@@ -145,7 +146,7 @@ int zlib_compress(unsigned char* out_data,unsigned char* out_data_end,
     c_stream.avail_in = (int)(src_end-src);
     c_stream.next_out = (Bytef*)_zipDst;
     c_stream.avail_out = (unsigned int)(out_data_end-out_data);
-    int ret = deflateInit2(&c_stream,zip_parameter,Z_DEFLATED,-15,MAX_MEM_LEVEL,Z_DEFAULT_STRATEGY);
+    int ret = deflateInit2(&c_stream,zip_parameter,Z_DEFLATED,zlib_windowBits,MAX_MEM_LEVEL,Z_DEFAULT_STRATEGY);
     if(ret!=Z_OK)
         throw "deflateInit2 error !";
     ret = deflate(&c_stream,Z_FINISH);
@@ -173,7 +174,7 @@ bool zlib_decompress(unsigned char* out_data,unsigned char* out_data_end,
     strm.avail_in = 0;
     strm.next_in = Z_NULL;
     
-    ret = inflateInit2(&strm,-15);
+    ret = inflateInit2(&strm,zlib_windowBits);
     
     if (ret != Z_OK)
         return false;
@@ -207,10 +208,7 @@ bool zlib_decompress(unsigned char* out_data,unsigned char* out_data_end,
 
 
 
-
-const bool is_decode_step=true;
-const tuz_dict_size_t kCodeCacheSize=1024*4;
-const tuz_dict_size_t kDictSize=1024*1024*4-1;
+tuz_dict_size_t tuz_kDictSize=0;
 
 int _test_tuz_compress(unsigned char* out_data,unsigned char* out_data_end,
                        const unsigned char* src,const unsigned char* src_end,int zip_parameter){
@@ -219,12 +217,14 @@ int _test_tuz_compress(unsigned char* out_data,unsigned char* out_data_end,
     hpatch_TStreamInput in_stream;
     mem_as_hStreamInput(&in_stream,src,src_end);
     tuz_TCompressProps props=tuz_kDefaultCompressProps;
-    props.dictSize=kDictSize;
+    props.dictSize=tuz_kDictSize;
     props.minDictMatchLen=zip_parameter;
     hpatch_StreamPos_t codeSize=tuz_compress(&out_stream,&in_stream,&props);
     return (int)codeSize;
 }
 
+const bool is_decode_step=true;
+const tuz_dict_size_t kCodeCacheSize=1024*4;
 struct TTuzListener{
     const unsigned char* src;
     const unsigned char* src_end;
@@ -297,6 +297,9 @@ int main(int argc, const char * argv[]){
     minEncTestTime=0.0;
     minDecTestTime=0.2;
     
+    zlib_windowBits=-15;
+    tuz_kDictSize=1024*64-1;
+
     //*
     testFile("world95.txt");
     testFile("ohs.doc");
