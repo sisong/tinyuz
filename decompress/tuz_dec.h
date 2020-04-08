@@ -58,13 +58,11 @@ typedef enum tuz_TResult{
         tuz_byte*       dict_buf;
     } _tuz_TDict;
     typedef struct _tuz_TState{
-        tuz_length_t    codeType_len;
         tuz_length_t    dictType_len;
         tuz_dict_size_t dictType_pos;
         tuz_dict_size_t dictType_pos_inc;
         tuz_byte        types;
         tuz_byte        type_count;
-        tuz_byte        half_code;
         tuz_BOOL        is_ctrlType_stream_end;
     } _tuz_TState;
 

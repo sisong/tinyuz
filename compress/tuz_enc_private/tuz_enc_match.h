@@ -35,7 +35,7 @@ namespace _tuz_private{
         :sstring(data,data_end,_props.maxSaveLength),coder(_coder),
         props(_props){ }
         bool match(const tuz_byte** out_matched,tuz_length_t* out_match_len,
-                   const tuz_byte* cur,size_t unmatched_len);
+                   const tuz_byte* cur);
     private:
         TSuffixString               sstring;
         const ICode&                coder;

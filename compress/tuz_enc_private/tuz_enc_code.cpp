@@ -72,9 +72,9 @@ namespace _tuz_private{
 void TTuzCode::outLen(tuz_length_t len){
     tuz_byte c=_pack_v_count(len);
     while (c--) {
-        outType(c>1?1:0);
-        outType((len>>(c*2-1))&1);
-        outType((len>>(c*2-2))&1);
+        outType((len>>(c*2+1))&1);
+        outType((len>>(c*2))&1);
+        outType((c>0)?1:0);
     }
 }
 void TTuzCode::outDictPos(tuz_dict_size_t pos){

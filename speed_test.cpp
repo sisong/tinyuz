@@ -217,6 +217,7 @@ int _test_tuz_compress(unsigned char* out_data,unsigned char* out_data_end,
     mem_as_hStreamInput(&in_stream,src,src_end);
     tuz_TCompressProps props=tuz_kDefaultCompressProps;
     props.dictSize=tuz_kDictSize;
+    //props.maxSaveLength=255;
     props.minDictMatchLen=zip_parameter;
     hpatch_StreamPos_t codeSize=tuz_compress(&out_stream,&in_stream,&props);
     return (int)codeSize;
