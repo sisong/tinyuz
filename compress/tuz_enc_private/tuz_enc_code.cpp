@@ -59,42 +59,23 @@ _debug_log _;
 
 namespace _tuz_private{
     
-    //low to high bitmap: xxx?xxx? xxx?xxx? ...
-    static tuz_inline tuz_byte _pack_v_half_count(tuz_length_t v){
-        tuz_byte half_count=0;
+    //low to high bitmap: xx?xx? xx?xx? ...
+    static tuz_inline tuz_byte _pack_v_count(tuz_length_t v){
+        tuz_byte count=0;
         do {
-            v>>=3;
-            ++half_count;
+            v>>=2;
+            ++count;
         }while(v>0);
-        return half_count;
-    }
-
-    static tuz_byte _pack_v(tuz_byte* half_code,tuz_byte* code,tuz_length_t v){
-        const tuz_byte half_count=_pack_v_half_count(v);
-        tuz_byte i=half_count;
-        for (;i>0;--i) {
-            tuz_byte halfv=(v>>((i-1)*3))&7;
-            halfv|=(i>1)?8:0;
-            if (half_code){
-                (*half_code)|=(halfv<<4);
-                half_code=0;
-            }else{
-                *code=halfv;
-                half_code=code;
-                ++code;
-            }
-        };
-        return half_count;
+        return count;
     }
     
 void TTuzCode::outLen(tuz_length_t len){
-    tuz_byte* half_code=(half_code_index!=kNullIndex)?&code[half_code_index]:0;
-    tuz_byte code_buf[kMaxPackedLenByteSize];
-    tuz_byte half_count=_pack_v(half_code,code_buf,len);
-    if (half_code) --half_count;
-    if (half_count>0)
-        code.insert(code.end(),code_buf,code_buf+(half_count+1)/2);
-    half_code_index=(half_count&1)?(code.size()-1):kNullIndex;
+    tuz_byte c=_pack_v_count(len);
+    while (c--) {
+        outType(c>1?1:0);
+        outType((len>>(c*2-1))&1);
+        outType((len>>(c*2-2))&1);
+    }
 }
 void TTuzCode::outDictPos(tuz_dict_size_t pos){
     outLen(pos>>8);
@@ -102,19 +83,19 @@ void TTuzCode::outDictPos(tuz_dict_size_t pos){
 }
 
 tuz_byte TTuzCode::getSavedLenBit(tuz_length_t len)const{
-    return _pack_v_half_count(len)*4;
+    return _pack_v_count(len)*3;
 }
-    
+
 tuz_byte TTuzCode::getSavedPosBit(tuz_dict_size_t pos)const{
-    return 8+_pack_v_half_count(pos>>8)*4;
+    return 8+_pack_v_count((pos+1)>>8)*3;
 }
-    
-void TTuzCode::outType(tuz_TCodeType type){
+
+void TTuzCode::outType(tuz_byte bitv){
     if (type_count==0){
         types_index=code.size();
         code.push_back(0);
     }
-    code[types_index]|=(type<<type_count);
+    code[types_index]|=(bitv<<type_count);
     ++type_count;
     if (type_count==8)
         type_count=0;
@@ -122,10 +103,10 @@ void TTuzCode::outType(tuz_TCodeType type){
 
 void TTuzCode::outData(const tuz_byte* data,const tuz_byte* data_end){
     tuz_length_t len=(tuz_length_t)(data_end-data);
-    assert(len>0);
-    outType(tuz_codeType_data);
-    outLen(len);
-    code.insert(code.end(),data,data_end);
+    while (len--){
+        outType(tuz_codeType_data);
+        code.push_back(*data++);
+    }
 #if (_TEST_COUNT)
     mdata_count++;
     mdata_len_bit[get_bit(len-1)]++;
@@ -135,8 +116,8 @@ void TTuzCode::outData(const tuz_byte* data,const tuz_byte* data_end){
     
 void TTuzCode::outDict(tuz_length_t len,tuz_dict_size_t dict_pos){
     outType(tuz_codeType_dict);
+    outDictPos(dict_pos+1); //>0
     outLen(len);
-    outDictPos(dict_pos);
 #if (_TEST_COUNT)
     mdict_count++;
     mdict_len_bit[get_bit(len)]++;
@@ -147,8 +128,8 @@ void TTuzCode::outDict(tuz_length_t len,tuz_dict_size_t dict_pos){
 }
 
 void TTuzCode::outCtrl(tuz_TCtrlType ctrl){
-    outType(tuz_codeType_data);
-    outLen(0); //len==0
+    outType(tuz_codeType_dict);
+    outDictPos(0); //dict_pos==0
     code.push_back(ctrl);
 }
 
@@ -157,7 +138,7 @@ void TTuzCode::outCtrl_streamEnd(){
     half_code_index=kNullIndex;
     type_count=0;
 }
-    
+
 void TTuzCode::outCtrl_clipEnd(){
     outCtrl(tuz_ctrlType_clipEnd);
     half_code_index=kNullIndex;

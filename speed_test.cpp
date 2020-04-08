@@ -60,8 +60,7 @@ double testDecodeProc(T_decompress proc_decompress,unsigned char* out_data,unsig
         for (int i=0; i<10; ++i){
             bool ret=proc_decompress(out_data,out_data_end,zip_code,zip_code_end);
             ++testDecompressCount;
-            if (!ret)
-                throw "error result!";
+            if (!ret) throw "error result!";
         }
     }while ((clock_s()-time1)<minDecTestTime);
     double time2=clock_s();

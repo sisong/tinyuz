@@ -46,9 +46,6 @@ namespace _tuz_private{
         std::vector<TInt>           cost;
         std::vector<TInt>           dictPos;
         std::vector<TLCPInt>        saveLen;
-        void _match(TInt it_inc,TInt* curBestBitScore,
-                    const tuz_byte** curBestMatched,tuz_length_t* curBestMatchLen,
-                    const TInt curString,size_t unmatched_len);
         void _cost_match(TInt it_inc,const TInt curString,const size_t curi,TInt* curMinDictMatchLen);
         void _getCost(const tuz_byte* cur0);
     };

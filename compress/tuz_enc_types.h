@@ -35,7 +35,7 @@ extern "C" {
 
     typedef struct tuz_TCompressProps{
         //memory requires for decompress: kCodeCacheSize + dictSize
-        tuz_dict_size_t dictSize;        // >=1 & <=8m-1;    default 64k-1;  220,255,1k,4k,64k-1,1m,...
+        tuz_dict_size_t dictSize;        // >=1 & <=16m-1;   default 64k-1;  220,255,1k,4k,64k-1,1m,...
         tuz_length_t    maxSaveLength;   // >=255 & <64k;    default 64k-1;  1023,16k-1 ...
         tuz_byte        minDictMatchLen; // >=3;             default 4;      5,6,7,8,...
         int             threadNum;       // >=1;             default 1;
@@ -43,7 +43,7 @@ extern "C" {
     
     const size_t    tuz_kMinOfMaxSaveLength = 255;
     const size_t    tuz_kMaxOfMaxSaveLength = 1024*64-1;
-    const size_t    tuz_kMaxOfDictSize = 1024*1024*8-1;
+    const size_t    tuz_kMaxOfDictSize = 1024*1024*16-1;
 
 #ifdef __cplusplus
 }

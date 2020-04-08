@@ -31,11 +31,12 @@ using namespace _tuz_private;
 
 const tuz_TCompressProps tuz_kDefaultCompressProps={tuz_kMaxOfMaxSaveLength,tuz_kMaxOfMaxSaveLength,4,1};
 
+static const size_t   kMaxPackedPosByteSize =sizeof(hpatch_StreamPos_t)*3/2+1;
+
 hpatch_StreamPos_t tuz_maxCompressedSize(hpatch_StreamPos_t data_size){
-    const hpatch_StreamPos_t _u_cout=(data_size+tuz_kMinOfMaxSaveLength-1)/tuz_kMinOfMaxSaveLength;
-    const hpatch_StreamPos_t u_size=(_u_cout+7)/8 + (_u_cout*3+1)/2;
-    hpatch_StreamPos_t c_count=(data_size+kMinBestClipSize-1)/kMinBestClipSize+1;
-    return data_size+ 1+kMaxPackedLenByteSize + (1+2)*c_count + u_size +1+2;
+    const hpatch_StreamPos_t u_size=data_size/8+1;
+    hpatch_StreamPos_t c_count=data_size/kMinBestClipSize+1;
+    return data_size + u_size + 1+kMaxPackedPosByteSize + 4*c_count + 4;
 }
 
 hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatch_TStreamInput* data,

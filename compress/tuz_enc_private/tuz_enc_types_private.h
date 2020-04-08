@@ -37,7 +37,6 @@
 
 namespace _tuz_private{
 
-    static const size_t   kMaxPackedLenByteSize =(sizeof(hpatch_StreamPos_t)*8+5)/(3+3);
     static const size_t   kMinBestClipSize = 1024*128;
     static const size_t   kMaxBestClipSize = tuz_kMaxOfDictSize *2;
 

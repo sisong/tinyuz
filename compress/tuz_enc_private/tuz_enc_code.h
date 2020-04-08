@@ -48,7 +48,7 @@ namespace _tuz_private{
         size_t    half_code_index;
         size_t    types_index;
         tuz_byte  type_count;
-        void outType(tuz_TCodeType type);
+        void outType(tuz_byte bitv);
         void outCtrl(tuz_TCtrlType ctrl);
     };
     
