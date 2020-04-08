@@ -141,10 +141,12 @@ static tuz_inline tuz_byte _cache_read_1bit(tuz_TStream* self){
         self->_state.type_count=8;
         self->_state.types=_cache_read_1byte(self);
     }
-    tuz_byte result=self->_state.types&1;
-    self->_state.types>>=1;
-    --self->_state.type_count;
-    return result;
+    {
+        tuz_byte result=self->_state.types&1;
+        self->_state.types>>=1;
+        --self->_state.type_count;
+        return result;
+    }
 }
 
 static tuz_inline void _cache_push_1bit(tuz_TStream* self,tuz_byte bitv){
