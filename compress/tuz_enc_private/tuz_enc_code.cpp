@@ -103,15 +103,23 @@ void TTuzCode::outType(tuz_byte bitv){
 
 void TTuzCode::outData(const tuz_byte* data,const tuz_byte* data_end){
     tuz_length_t len=(tuz_length_t)(data_end-data);
-    while (len--){
-        outType(tuz_codeType_data);
-        code.push_back(*data++);
-    }
 #if (_TEST_COUNT)
     mdata_count++;
     mdata_len_bit[get_bit(len-1)]++;
     if (len-1<kMCount) mdata_len[len-1]++;
 #endif
+    if (len>=kMinLiteralLen){
+        outType(tuz_codeType_dict);
+        outDictPos(0); //dict_pos==0
+        outType(1); //! 1
+        outLen(len-kMinLiteralLen);
+        code.insert(code.end(),data,data_end);
+    }else{
+        while (len--){
+            outType(tuz_codeType_data);
+            code.push_back(*data++);
+        }
+    }
 }
     
 void TTuzCode::outDict(tuz_length_t len,tuz_dict_size_t dict_pos){
@@ -130,6 +138,7 @@ void TTuzCode::outDict(tuz_length_t len,tuz_dict_size_t dict_pos){
 void TTuzCode::outCtrl(tuz_TCtrlType ctrl){
     outType(tuz_codeType_dict);
     outDictPos(0); //dict_pos==0
+    outType(0); //! 0
     code.push_back(ctrl);
 }
 

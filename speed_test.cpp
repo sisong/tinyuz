@@ -298,7 +298,7 @@ int main(int argc, const char * argv[]){
     minDecTestTime=0.2;
     
     zlib_windowBits=-15;
-    tuz_kDictSize=1024*64-1;
+    tuz_kDictSize=1024*1024*16-1;
 
     //*
     testFile("world95.txt");
