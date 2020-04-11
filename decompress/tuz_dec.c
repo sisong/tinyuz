@@ -27,10 +27,6 @@
 #include "tuz_dec.h"
 #include "tuz_types_private.h"
 
-#ifndef  _IS_NEED_MIN_CODE_SIZE
-#   define _IS_NEED_MIN_CODE_SIZE  0  //default used fast code
-#endif
-
 #ifndef _IS_RUN_MEM_SAFE_CHECK
 #   define _IS_RUN_MEM_SAFE_CHECK  1
 #endif
@@ -126,7 +122,7 @@ static tuz_BOOL _update_cache(tuz_TStream* self){
     return len?tuz_TRUE:tuz_FALSE;
 }
 
-static tuz_inline tuz_byte _cache_read_1byte(tuz_TStream* self){
+static tuz_try_inline tuz_byte _cache_read_1byte(tuz_TStream* self){
     do {
         if (self->_code_cache.cache_begin<self->_code_cache.cache_end){
             return self->_code_cache.cache_buf[self->_code_cache.cache_begin++];
@@ -136,7 +132,7 @@ static tuz_inline tuz_byte _cache_read_1byte(tuz_TStream* self){
     }while(1);
 }
 
-static tuz_inline tuz_byte _cache_read_1bit(tuz_TStream* self){
+static tuz_try_inline tuz_byte _cache_read_1bit(tuz_TStream* self){
     if (self->_state.type_count==0){
         self->_state.type_count=8;
         self->_state.types=_cache_read_1byte(self);
@@ -156,7 +152,7 @@ static tuz_inline void _cache_push_1bit(tuz_TStream* self,tuz_byte bitv){
 }
 
 //low to high bitmap: xx?xx?xx?xx? ...
-static tuz_inline tuz_length_t _cache_unpack_len(tuz_TStream* self){
+static tuz_try_inline tuz_length_t _cache_unpack_len(tuz_TStream* self){
     tuz_length_t    v=0;
     do {
         v=(v<<2)+(_cache_read_1bit(self)<<1)+_cache_read_1bit(self);
@@ -260,9 +256,6 @@ tuz_TResult tuz_TStream_decompress_begin(tuz_TStream* self,tuz_byte* dict_buf,tu
     self->_dict.dict_size=dictSize;
     return tuz_OK;
 }
-
-
-#define _check_return(v)  { if (!(v)) return tuz_CODE_ERROR; }
 
 tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,tuz_dict_size_t* data_size){
     tuz_byte*  cur_out_data=out_data;
