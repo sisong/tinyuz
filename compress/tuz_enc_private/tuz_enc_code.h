@@ -30,8 +30,8 @@
 namespace _tuz_private{
     
     struct TTuzCode:public ICode{
-        explicit TTuzCode(std::vector<tuz_byte>& out_code)
-        :code(out_code),half_code_index(kNullIndex),type_count(0){ minSavedLenBit=4; }
+        explicit TTuzCode(std::vector<tuz_byte>& out_code,tuz_byte _isLite)
+        :code(out_code),isLite(_isLite),half_code_index(kNullIndex),type_count(0){ minSavedLenBit=4; }
         
         void outLen(tuz_length_t len);
         void outDictPos(tuz_dict_size_t len);
@@ -45,6 +45,7 @@ namespace _tuz_private{
     private:
         static const size_t kNullIndex=~(size_t)0;
         std::vector<tuz_byte>& code;
+        tuz_byte  isLite;
         size_t    half_code_index;
         size_t    types_index;
         tuz_byte  type_count;

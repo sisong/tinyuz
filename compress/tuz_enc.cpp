@@ -29,7 +29,7 @@
 using namespace _tuz_private;
 
 
-const tuz_TCompressProps tuz_kDefaultCompressProps={tuz_kMaxOfMaxSaveLength,tuz_kMaxOfMaxSaveLength,4,1};
+const tuz_TCompressProps tuz_kDefaultCompressProps={tuz_kMaxOfMaxSaveLength,tuz_kMaxOfMaxSaveLength,1,4,tuz_FALSE};
 
 static const size_t   kMaxPackedPosByteSize =sizeof(hpatch_StreamPos_t)*3/2+1;
 
@@ -59,24 +59,29 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     
     hpatch_StreamPos_t cur_out_pos=0;
     std::vector<tuz_byte> code;
-    {//head
-        TTuzCode coder(code);
+    if (!selfProps.isLite){//head
+        TTuzCode coder(code,selfProps.isLite);
         coder.outLen(selfProps.minDictMatchLen);
         coder.outDictPos((tuz_length_t)selfProps.dictSize);
     }
     {
-        hpatch_StreamPos_t clipSize=selfProps.dictSize*16;
-        if (clipSize<kMinBestClipSize) clipSize=kMinBestClipSize;
-        if (clipSize>kMaxBestClipSize) clipSize=kMaxBestClipSize;
-        hpatch_StreamPos_t clipCount=(data->streamSize+clipSize)/clipSize;
-        clipSize=(data->streamSize+clipCount-1)/clipCount;
+        hpatch_StreamPos_t clipSize;
+        if (selfProps.isLite){
+            clipSize=data->streamSize;
+        }else{
+            clipSize=selfProps.dictSize*16;
+            if (clipSize<kMinBestClipSize) clipSize=kMinBestClipSize;
+            if (clipSize>kMaxBestClipSize) clipSize=kMaxBestClipSize;
+            hpatch_StreamPos_t clipCount=(data->streamSize+clipSize)/clipSize;
+            clipSize=(data->streamSize+clipCount-1)/clipCount;
+        }
         
         for (hpatch_StreamPos_t clipBegin=0;true;clipBegin+=clipSize) {
             hpatch_StreamPos_t clipEnd=clipBegin+clipSize;
             bool isToStreamEnd=(clipEnd>=data->streamSize);
             if (isToStreamEnd) clipEnd=data->streamSize;
 
-            TTuzCode coder(code);
+            TTuzCode coder(code,selfProps.isLite);
             if (clipBegin<clipEnd)
                 compress_clip(coder,data,clipBegin,clipEnd,selfProps);
             if (!isToStreamEnd)

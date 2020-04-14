@@ -107,8 +107,7 @@ static tuz_BOOL _update_cache(tuz_TStream* self){
     //assert(self->_code_cache.cache_begin==self->_code_cache.cache_end);
     //    [                    cache  buf                        ]
     tuz_dict_size_t len=self->_code_cache.cache_begin;
-    tuz_byte* buf=self->_code_cache.cache_buf;
-    if (!self->read_code(self->inputStream,buf,&len)){
+    if (!self->read_code(self->inputStream,self->_code_cache.cache_buf,&len)){
         self->_code_cache.input_state=kInputState_error;
         return tuz_FALSE;
     }
@@ -123,13 +122,10 @@ static tuz_BOOL _update_cache(tuz_TStream* self){
 }
 
 static tuz_try_inline tuz_byte _cache_read_1byte(tuz_TStream* self){
-    do {
-        if (self->_code_cache.cache_begin<self->_code_cache.cache_end){
-            return self->_code_cache.cache_buf[self->_code_cache.cache_begin++];
-        }else{
-            if(!_update_cache(self)) return 0;
-        }
-    }while(1);
+    if (self->_code_cache.cache_begin==self->_code_cache.cache_end){
+        if(!_update_cache(self)) return 0;
+    }
+    return self->_code_cache.cache_buf[self->_code_cache.cache_begin++];
 }
 
 static tuz_try_inline tuz_byte _cache_read_1bit(tuz_TStream* self){
@@ -207,10 +203,10 @@ static tuz_dict_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* cur_out_data,
     max_len=(max_len<dsize)?max_len:dsize;
     len=(self->_state.dictType_len<max_len)?(tuz_dict_size_t)self->_state.dictType_len:max_len;
     pos=self->_dict.dict_size-self->_dict.dict_cur;
-    if (self->_state.dictType_pos>=pos)
-        pos=self->_state.dictType_pos-pos;
-    else
+    if (self->_state.dictType_pos<pos)
         pos=self->_dict.dict_cur+self->_state.dictType_pos;
+    else
+        pos=self->_state.dictType_pos-pos;
     if (len<=(self->_dict.dict_size-pos)){
         _memcpy(cur_out_data,self->_dict.dict_buf+pos,len);
     }else{
