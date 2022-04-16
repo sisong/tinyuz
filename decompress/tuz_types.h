@@ -26,13 +26,20 @@
 */
 #ifndef _tuz_types_h
 #define _tuz_types_h
+#ifdef NDEBUG
+# ifndef assert
+#   define  assert(expression) ((void)0)
+# endif
+#else
+#   include <assert.h> //assert
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
     
 #define TINYUZ_VERSION_MAJOR    0
-#define TINYUZ_VERSION_MINOR    3
+#define TINYUZ_VERSION_MINOR    4
 #define TINYUZ_VERSION_RELEASE  0
     
 #define _TINYUZ_VERSION                 TINYUZ_VERSION_MAJOR.TINYUZ_VERSION_MINOR.TINYUZ_VERSION_RELEASE
@@ -40,21 +47,20 @@ extern "C" {
 #define _TINYUZ_EXPAND_AND_QUOTE(str)   _TINYUZ_QUOTE(str)
 #define TINYUZ_VERSION_STRING           _TINYUZ_EXPAND_AND_QUOTE(_TINYUZ_VERSION)
 
-    typedef  unsigned char      tuz_byte;
-    typedef  unsigned int       tuz_uint;
 
 #ifndef tuz_length_t
-    //if tuz_length_t==tuz_byte, must set CompressProps.maxSaveLength & dictSize <= 255
-    typedef  tuz_uint           tuz_length_t;
+    //tuz_length_t must can saved CompressProps.maxSaveLength & dictSize value
+    //  if tuz_length_t==uint8_t, must CompressProps.maxSaveLength & dictSize <= 255 when compress;
+    //  if tuz_length_t==int16_t, must CompressProps.maxSaveLength & dictSize <= (2<<15)-1 ; ...
+    typedef  unsigned int       tuz_length_t;
 #endif
     typedef  tuz_length_t       tuz_dict_size_t;
+#ifndef tuz_byte
+    typedef  unsigned char      tuz_byte;
+#endif
     typedef  tuz_byte           tuz_BOOL;
 #define      tuz_FALSE      0
 #define      tuz_TRUE       1
-
-#ifndef  _IS_NEED_MIN_CODE_SIZE
-#   define _IS_NEED_MIN_CODE_SIZE  0  //default used fast code
-#endif
     
 #ifndef tuz_inline
 #ifdef _MSC_VER
@@ -64,11 +70,13 @@ extern "C" {
 #endif
 #endif
     
-#if (_IS_NEED_MIN_CODE_SIZE)
+#if 1
 #   define tuz_try_inline
 #else
 #   define tuz_try_inline tuz_inline
 #endif
+
+#  define tuz_kMinDictMatchLen  3
 
 #ifdef __cplusplus
 }

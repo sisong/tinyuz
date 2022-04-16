@@ -46,7 +46,7 @@ namespace _tuz_private{
             LCP=sstring.LCP.data()+it_cur-1;
         }
         
-        const TInt kDeltaLen=16;
+        const TInt kDeltaLen=0;
         TInt minDictMatchLen=*curMinDictMatchLen;
         TInt curMinLcp=(TInt)tuz_ui2G_sub_1;
         const size_t props_dictSize=props.dictSize;
@@ -61,9 +61,9 @@ namespace _tuz_private{
             
             TInt curSaveDictCost=cost[curi-1]+1+coder.getSavedPosBit((tuz_dict_size_t)dict_pos);
             TInt mlenBegin=minDictMatchLen-kDeltaLen;
-            for (TInt mLen=(mlenBegin>=props.minDictMatchLen)?mlenBegin:props.minDictMatchLen;mLen<=curMinLcp;++mLen) {
+            for (TInt mLen=(mlenBegin>=tuz_kMinDictMatchLen)?mlenBegin:tuz_kMinDictMatchLen;mLen<=curMinLcp;++mLen) {
                 size_t ni=curi+mLen-1;
-                TInt dictCost=curSaveDictCost+coder.getSavedLenBit(mLen-props.minDictMatchLen);
+                TInt dictCost=curSaveDictCost+coder.getSavedLenBit(mLen-tuz_kMinDictMatchLen);
                 if (dictCost<cost[ni]){
                     cost[ni]=dictCost;
                     saveLen[ni]=mLen;
@@ -91,7 +91,7 @@ void TMatch::_getCost(const tuz_byte* cur0){
             dictPos[i]=-1;
         }
         const TInt curString=(TInt)(cur0+i-sstring.src);
-        TInt minDictMatchLen=props.minDictMatchLen;
+        TInt minDictMatchLen=tuz_kMinDictMatchLen;
         _cost_match( 1,curString,i,&minDictMatchLen);
         _cost_match(-1,curString,i,&minDictMatchLen);
     }

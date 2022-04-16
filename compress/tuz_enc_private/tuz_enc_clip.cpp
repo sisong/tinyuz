@@ -70,14 +70,14 @@ void compress_clip(TTuzCode& coder,const hpatch_TStreamInput* data,hpatch_Stream
             if (matcher.match(&matched,&match_len,cur)){
                 assert(matched<cur);
                 assert(cur+match_len<=end);
-                assert(match_len>=props.minDictMatchLen);
+                assert(match_len>=tuz_kMinDictMatchLen);
                 assert(match_len<=props.maxSaveLength);
                 size_t unmatched_len=(cur-back);
                 if (unmatched_len>0)
                     _outData(back,unmatched_len,coder,props);
                 size_t dict_pos=(cur-matched)-1;
                 assert(dict_pos<props.dictSize);
-                coder.outDict(match_len-props.minDictMatchLen,(tuz_length_t)dict_pos);
+                coder.outDict(match_len-tuz_kMinDictMatchLen,(tuz_length_t)dict_pos);
                 cur+=match_len;
                 back=cur;
             }else{

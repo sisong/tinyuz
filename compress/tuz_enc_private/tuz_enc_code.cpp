@@ -108,11 +108,11 @@ void TTuzCode::outData(const tuz_byte* data,const tuz_byte* data_end){
     mdata_len_bit[get_bit(len-1)]++;
     if (len-1<kMCount) mdata_len[len-1]++;
 #endif
-    if ((len>=kMinLiteralLen)&&(!this->isLite)){
+    if ((len>=tuz_kMinLiteralLen)&&(!this->isLite)){
         outType(tuz_codeType_dict);
         outDictPos(0); //dict_pos==0
         outType(1); //! 1
-        outLen(len-kMinLiteralLen);
+        outLen(len-tuz_kMinLiteralLen);
         code.insert(code.end(),data,data_end);
     }else{
         while (len--){

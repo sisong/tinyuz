@@ -216,7 +216,7 @@ bool zlib_decompress(unsigned char* out_data,unsigned char* out_data_end,
 tuz_dict_size_t tuz_kDictSize=0;
 
 int _test_tuz_compress(unsigned char* out_data,unsigned char* out_data_end,
-                       const unsigned char* src,const unsigned char* src_end,int zip_parameter){
+                       const unsigned char* src,const unsigned char* src_end,int ){
     hpatch_TStreamOutput out_stream;
     mem_as_hStreamOutput(&out_stream,out_data,out_data_end);
     hpatch_TStreamInput in_stream;
@@ -224,7 +224,6 @@ int _test_tuz_compress(unsigned char* out_data,unsigned char* out_data_end,
     tuz_TCompressProps props=tuz_kDefaultCompressProps;
     props.dictSize=tuz_kDictSize;
     //props.maxSaveLength=255;
-    props.minDictMatchLen=zip_parameter;
     hpatch_StreamPos_t codeSize=tuz_compress(&out_stream,&in_stream,&props);
     return (int)codeSize;
 }
@@ -255,12 +254,11 @@ tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
     tuz_dict_size_t dictSize;
     tuz_byte* _dict_buf=0;
     tuz_TStream tuz;
-    tuz_TResult result=tuz_TStream_open(&tuz,&listener,listener.read_code,_mem_buf,kCodeCacheSize,&dictSize);
-    if (tuz_OK!=result) return result;
+    tuz_TResult result=tuz_OK;
+    tuz_TStream_open(&tuz,&listener,listener.read_code,_mem_buf,kCodeCacheSize,&dictSize);
     _dict_buf=(tuz_byte*)malloc(dictSize);
     assert(_dict_buf!=0);
-    result=tuz_TStream_decompress_begin(&tuz,_dict_buf,dictSize);
-    if (tuz_OK!=result) return result;
+    tuz_TStream_decompress_begin(&tuz,_dict_buf,dictSize);
     if (is_decode_step){
         const size_t buf_size=*uncompress_size;
         size_t data_size=0;
@@ -292,7 +290,7 @@ bool _test_tuz_decompress_stream(unsigned char* out_data,unsigned char* out_data
 static void testFile(const char* srcFileName){
     //*
     outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"      zlib",9));
-    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tuz_stream",4));
+    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tuz_stream",tuz_kMinDictMatchLen));
     //std::cout << "\n";
 }
 
@@ -304,7 +302,7 @@ int main(int argc, const char * argv[]){
     minDecTestTime=0.2;
     
     zlib_windowBits=-10;
-    tuz_kDictSize=1024*1-1;
+    tuz_kDictSize=1024*1;
 
     //*
     testFile("world95.txt");
