@@ -28,7 +28,7 @@
 #define _tuz_enc_types_private_h
 #include "../tuz_enc_types.h"
 #include "../../decompress/tuz_types_private.h"
-#include "libHDiffPatch/HDiff/private_diff/mem_buf.h"
+#include "../../../HDiffPatch/libHDiffPatch/HDiff/private_diff/mem_buf.h"
 #include <vector>
 #include <stdexcept>
 

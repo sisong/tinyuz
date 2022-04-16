@@ -25,7 +25,7 @@
  OTHER DEALINGS IN THE SOFTWARE.
 */
 #include "tuz_sstring.h"
-#include "libHDiffPatch/HDiff/private_diff/libdivsufsort/divsufsort.h"
+#include "../../../HDiffPatch/libHDiffPatch/HDiff/private_diff/libdivsufsort/divsufsort.h"
 
 namespace _tuz_private{
     

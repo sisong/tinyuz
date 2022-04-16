@@ -5,11 +5,16 @@
 #include <iostream>
 #include <string.h>
 #include <math.h>
+#include <algorithm>
 #include <vector>
-#include "_clock_for_demo.h" //in HDiffPatch
+#include "../HDiffPatch/_clock_for_demo.h" //in HDiffPatch
 #include "decompress/tuz_dec.h"
 #include "compress/tuz_enc.h"
 #include "zlib.h"
+
+#ifdef min
+#   undef min
+#endif
 
 std::string TEST_FILE_DIR;
 
@@ -71,7 +76,7 @@ double testDecodeProc(T_decompress proc_decompress,unsigned char* out_data,unsig
 
 double testEncodeProc(T_compress proc_compress,std::vector<unsigned char>& compressedCode,const unsigned char* src,const unsigned char* src_end,int zip_parameter){
     int testCompressCount=0;
-    compressedCode.resize((src_end-src)*1.2+1024);
+    compressedCode.resize((size_t)((src_end-src)*1.2)+1024);
     int dstCodeSize=0;
     double time1=clock_s();
     do{
@@ -86,7 +91,8 @@ double testEncodeProc(T_compress proc_compress,std::vector<unsigned char>& compr
 
 TTestResult testProc(const char* srcFileName,T_compress proc_compress,const char* proc_compress_Name,
                  T_decompress proc_decompress,const char* proc_decompress_Name,int zip_parameter){
-    std::vector<unsigned char> oldData; readFile(oldData,(TEST_FILE_DIR+srcFileName).c_str());
+    std::string testFilePath=TEST_FILE_DIR; testFilePath.append(srcFileName);
+    std::vector<unsigned char> oldData; readFile(oldData,testFilePath.c_str());
     const unsigned char* src=&oldData[0];
     const unsigned char* src_end=src+oldData.size();
     
@@ -118,9 +124,9 @@ TTestResult testProc(const char* srcFileName,T_compress proc_compress,const char
 
 
 static void outResult(const TTestResult& rt){
-    std::cout<<"\""<<rt.srcFileName<<"\"\t";
+    std::cout<<"\""<<rt.srcFileName.c_str()<< "\"\t";
     std::cout<<rt.srcSize/1024.0/1024<<"M\t";
-    std::cout<<rt.procName<<"_"<<rt.zip_parameter<<"\t";
+    std::cout<<rt.procName.c_str()<< "_" << rt.zip_parameter << "\t";
     std::cout<<rt.zipSize*100.0/rt.srcSize<<"% ("<<rt.zipSize<<") \t";
     //std::cout<<rt.compressTime_s<<"S\t";
     std::cout<<rt.srcSize/rt.compressTime_s/1024/1024<<"M/S\t";
@@ -297,8 +303,8 @@ int main(int argc, const char * argv[]){
     minEncTestTime=0.0;
     minDecTestTime=0.2;
     
-    zlib_windowBits=-15;
-    tuz_kDictSize=1024*1024*16-1;
+    zlib_windowBits=-10;
+    tuz_kDictSize=1024*1-1;
 
     //*
     testFile("world95.txt");

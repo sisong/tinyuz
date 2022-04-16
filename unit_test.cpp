@@ -5,13 +5,13 @@
 #include <string.h>
 #include <math.h>
 #include <vector>
-#include "_clock_for_demo.h" //in HDiffPatch
+#include "../HDiffPatch/_clock_for_demo.h" //in HDiffPatch
 #include "decompress/tuz_dec.h"
 #include "compress/tuz_enc.h"
 
 const int   kRandTestCount=1000;
 const bool  is_attack_decompress=false;
-const bool  is_log_tag=false;
+const bool  is_log_tag=true;
 const bool  is_all_rand=false;
 const bool  is_decode_step=true;
 int     error_count=0;
@@ -39,14 +39,15 @@ struct TTuzListener{
         return tuz_TRUE;
     }
     
-    tuz_byte _mem_buf[kCodeCacheSize+kDictSize];
+    tuz_byte _mem_buf[kCodeCacheSize];
+    //tuz_byte _mem_buf[kCodeCacheSize+kDictSize];
     tuz_byte* alloc_mem(tuz_dict_size_t mem_size){
-        //return malloc(mem_size);
-        if (mem_size>kDictSize) return 0;
-        return (&_mem_buf[0])+kCodeCacheSize;
+        return (tuz_byte*)malloc(mem_size);
+        //if (mem_size>kDictSize) return 0;
+        //return (&_mem_buf[0])+kCodeCacheSize;
     }
     void free_mem(tuz_byte* pmem){
-        //free(pmem);
+        free(pmem);
     }
 };
 
@@ -126,7 +127,7 @@ long attack_decompress(const tuz_byte* _code,const tuz_byte* _code_end,tuz_dict_
 }
 
 static int test(const unsigned char* src,const unsigned char* src_end,const char* tag){
-    std::vector<unsigned char> compressedCode(tuz_maxCompressedSize(src_end-src));
+    std::vector<unsigned char> compressedCode((size_t)tuz_maxCompressedSize(src_end-src));
     hpatch_TStreamOutput out_stream;
     mem_as_hStreamOutput(&out_stream,compressedCode.data(),compressedCode.data()+compressedCode.size());
     hpatch_TStreamInput in_stream;
@@ -135,7 +136,7 @@ static int test(const unsigned char* src,const unsigned char* src_end,const char
     props.dictSize=kDictSize;
     props.maxSaveLength=kMaxSaveLength;
     hpatch_StreamPos_t codeSize=tuz_compress(&out_stream,&in_stream,&props);
-    compressedCode.resize(codeSize);
+    compressedCode.resize((size_t)codeSize);
     
     if (is_attack_decompress){
         error_count+=attack_decompress(compressedCode.data(),compressedCode.data()+compressedCode.size(),
