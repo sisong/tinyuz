@@ -308,26 +308,25 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
                         self->_state.dictType_pos_inc=outed_size+saved_dict_pos-self->_dict.dict_size;
                     }
                     goto copyDict_process;
-                }else if (_cache_read_1bit(self)){ //literalType
-                    tuz_length_t llen=_cache_unpack_len(self);
-                    self->_state.literalType_len=llen+tuz_kMinLiteralLen;
-                    goto copyLiteral_process;
-                }else{//ctrl type
-                    tuz_byte ctrlType=_cache_read_1byte(self);
-                    if (tuz_ctrlType_streamEnd==ctrlType){ //stream end
-#ifdef __RUN_MEM_SAFE_CHECK
-                        if (self->_state.is_ctrlType_stream_end) return tuz_CTRLTYPE_STREAM_END_ERROR;
-#endif
-                        self->_state.type_count=0;
-                        self->_state.is_ctrlType_stream_end=tuz_TRUE;
-                        if (self->_code_cache.cache_begin==self->_code_cache.cache_end)
-                            _update_cache(self);
-                        break;
-                    }else if (tuz_ctrlType_clipEnd==ctrlType){ //clip end
-                        self->_state.type_count=0;
-                        goto type_process;
-                    }else{
-                        return tuz_CTRLTYPE_UNKNOW_ERROR;
+                }else {  
+                    tuz_length_t saved_len=_cache_unpack_len(self);
+                    if (saved_len){ //literalType
+                        self->_state.literalType_len=saved_len+(tuz_kMinLiteralLen-1);
+                        goto copyLiteral_process;
+                    }else{ // ctrlType
+                        const tuz_byte ctrlType=_cache_read_1byte(self);
+                        if (tuz_ctrlType_streamEnd==ctrlType){ //stream end
+                            self->_state.is_ctrlType_stream_end=tuz_TRUE;
+                            //self->_state.type_count=0;
+                            //if (self->_code_cache.cache_begin==self->_code_cache.cache_end)
+                            //    _update_cache(self);
+                            break;
+                        }else if (tuz_ctrlType_clipEnd==ctrlType){ //clip end
+                            self->_state.type_count=0;
+                            goto type_process;
+                        }else{
+                            return tuz_CTRLTYPE_UNKNOW_ERROR;
+                        }
                     }
                 }
             }else{
@@ -351,13 +350,8 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
             return tuz_READ_CODE_ERROR;
 
         if (self->_state.is_ctrlType_stream_end){
-            if ((self->_code_cache.input_state==kInputState_end)
-                &&(self->_code_cache.cache_begin==self->_code_cache.cache_end)){
-                (*data_size)-=dsize;
-                return tuz_STREAM_END;
-            }else{
-                return tuz_CTRLTYPE_STREAM_END_ERROR;
-            }
+            (*data_size)-=dsize;
+            return tuz_STREAM_END;
         }else{
             return (dsize==0)?
             #ifdef __RUN_MEM_SAFE_CHECK

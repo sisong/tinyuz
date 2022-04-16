@@ -29,7 +29,7 @@
 using namespace _tuz_private;
 
 
-const tuz_TCompressProps tuz_kDefaultCompressProps={tuz_kMaxOfMaxSaveLength,tuz_kMaxOfMaxSaveLength,tuz_FALSE};
+const tuz_TCompressProps tuz_kDefaultCompressProps={tuz_kMaxOfMaxSaveLength,tuz_kMaxOfMaxSaveLength};
 
 static const size_t   kMaxPackedPosByteSize =sizeof(hpatch_StreamPos_t)*3/2+1;
 
@@ -58,15 +58,13 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     
     hpatch_StreamPos_t cur_out_pos=0;
     std::vector<tuz_byte> code;
-    if (!selfProps.isLite){//head
-        TTuzCode coder(code,selfProps.isLite);
+    {//head
+        TTuzCode coder(code);
         coder.outDictPos((tuz_length_t)(selfProps.dictSize-1));
     }
     {
         hpatch_StreamPos_t clipSize;
-        if (selfProps.isLite){
-            clipSize=data->streamSize;
-        }else{
+        {
             clipSize=selfProps.dictSize*16;
             if (clipSize<kMinBestClipSize) clipSize=kMinBestClipSize;
             if (clipSize>kMaxBestClipSize) clipSize=kMaxBestClipSize;
@@ -79,14 +77,14 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
             bool isToStreamEnd=(clipEnd>=data->streamSize);
             if (isToStreamEnd) clipEnd=data->streamSize;
 
-            TTuzCode coder(code,selfProps.isLite);
+            TTuzCode coder(code);
             if (clipBegin<clipEnd)
                 compress_clip(coder,data,clipBegin,clipEnd,selfProps);
             if (!isToStreamEnd)
                 coder.outCtrl_clipEnd();
             else
                 coder.outCtrl_streamEnd();
-            
+                
             checkv(out_code->write(out_code,cur_out_pos,code.data(),code.data()+code.size()));
             cur_out_pos+=code.size();
             code.clear();

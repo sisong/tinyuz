@@ -37,8 +37,6 @@ extern "C" {
         //memory requires for decompress: kCodeCacheSize + dictSize
         size_t      dictSize;        // >=1 & <=16m-1;   default 64k-1;  220,255,1k,4k,64k-1,1m,...
         size_t      maxSaveLength;   // >=255 & <64k;    default 64k-1;  1023,16k-1 ...
-        tuz_BOOL    isLite; // tuz_FALSE
-      //int         threadNum;       // >=1;             default 1;
     } tuz_TCompressProps;
     
     const size_t    tuz_kMinOfMaxSaveLength = 255;

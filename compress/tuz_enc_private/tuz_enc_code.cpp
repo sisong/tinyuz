@@ -108,11 +108,10 @@ void TTuzCode::outData(const tuz_byte* data,const tuz_byte* data_end){
     mdata_len_bit[get_bit(len-1)]++;
     if (len-1<kMCount) mdata_len[len-1]++;
 #endif
-    if ((len>=tuz_kMinLiteralLen)&&(!this->isLite)){
+    if (len>=tuz_kMinLiteralLen){
         outType(tuz_codeType_dict);
         outDictPos(0); //dict_pos==0
-        outType(1); //! 1
-        outLen(len-tuz_kMinLiteralLen);
+        outLen(len-(tuz_kMinLiteralLen-1));
         code.insert(code.end(),data,data_end);
     }else{
         while (len--){
@@ -135,27 +134,19 @@ void TTuzCode::outDict(tuz_length_t len,tuz_dict_size_t dict_pos){
 #endif
 }
 
-void TTuzCode::outCtrl(tuz_TCtrlType ctrl){
-    if (!this->isLite){
-        outType(tuz_codeType_dict);
-        outDictPos(0); //dict_pos==0
-        outType(0); //! 0
-        code.push_back(ctrl);
-    }else{
-        assert(ctrl==tuz_ctrlType_streamEnd);
-        outType(tuz_codeType_dict);
-        outDictPos(0); //dict_pos==0
-    }
-}
 
 void TTuzCode::outCtrl_streamEnd(){
     outCtrl(tuz_ctrlType_streamEnd);
-    half_code_index=kNullIndex;
-    type_count=0;
 }
-
 void TTuzCode::outCtrl_clipEnd(){
     outCtrl(tuz_ctrlType_clipEnd);
+}
+
+void TTuzCode::outCtrl(tuz_TCtrlType ctrl){
+    outType(tuz_codeType_dict);
+    outDictPos(0); //dict_pos==0
+    outLen(0);
+    code.push_back(ctrl);
     half_code_index=kNullIndex;
     type_count=0;
 }
