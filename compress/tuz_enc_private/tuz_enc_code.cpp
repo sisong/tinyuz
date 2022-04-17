@@ -60,20 +60,23 @@ _debug_log _;
 namespace _tuz_private{
     
     //low to high bitmap: xx?xx? xx?xx? ...
-    static tuz_inline tuz_byte _pack_v_count(tuz_length_t v){
-        tuz_byte count=0;
+    static tuz_inline size_t _pack_v_count(tuz_length_t v){
+        size_t count=0;
         do {
             v>>=2;
             ++count;
         }while(v>0);
         return count;
     }
+    static tuz_inline size_t _getSavedLenBit(tuz_length_t len){
+        return _pack_v_count(len)*3;
+    }
     
 void TTuzCode::outLen(tuz_length_t len){
-    tuz_byte c=_pack_v_count(len);
+    size_t c=_pack_v_count(len);
     while (c--) {
-        outType((len>>(c*2+1))&1);
         outType((len>>(c*2))&1);
+        outType((len>>(c*2+1))&1);
         outType((c>0)?1:0);
     }
 }
@@ -82,12 +85,20 @@ void TTuzCode::outDictPos(tuz_dict_size_t pos){
     code.push_back(pos&255);
 }
 
-tuz_byte TTuzCode::getSavedLenBit(tuz_length_t len)const{
-    return _pack_v_count(len)*3;
+
+size_t TTuzCode::getSavedDataBit(tuz_length_t data_len)const{
+    if (data_len<tuz_kMinLiteralLen)
+        return data_len*(size_t)(1+8);
+    else
+        return data_len*(size_t)8+1+8+3+_getSavedLenBit(data_len-(tuz_kMinLiteralLen-1));
+}
+size_t TTuzCode::getSavedDictLenBit(tuz_length_t match_len)const{
+    return _getSavedLenBit(match_len-tuz_kMinDictMatchLen);
 }
 
-tuz_byte TTuzCode::getSavedPosBit(tuz_dict_size_t pos)const{
-    return 8+_pack_v_count((pos+1)>>8)*3;
+size_t TTuzCode::getSavedDictPosBit(tuz_dict_size_t pos)const{
+    // break bit + type bit + pos bit
+    return 1+1+8+_getSavedLenBit((pos+1)>>8);
 }
 
 void TTuzCode::outType(tuz_byte bitv){
@@ -121,7 +132,8 @@ void TTuzCode::outData(const tuz_byte* data,const tuz_byte* data_end){
     }
 }
     
-void TTuzCode::outDict(tuz_length_t len,tuz_dict_size_t dict_pos){
+void TTuzCode::outDict(tuz_length_t match_len,tuz_dict_size_t dict_pos){
+    tuz_length_t len=match_len-tuz_kMinDictMatchLen;
     outType(tuz_codeType_dict);
     outDictPos(dict_pos+1); //>0
     outLen(len);

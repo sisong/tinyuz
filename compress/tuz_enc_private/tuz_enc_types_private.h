@@ -45,9 +45,9 @@ namespace _tuz_private{
     #define _uint_is_less_2g(v) ((v)<=tuz_ui2G_sub_1)  // < 2G ?
     
     struct ICode{
-        tuz_byte  minSavedLenBit;
-        virtual tuz_byte getSavedLenBit(tuz_length_t len)const=0;
-        virtual tuz_byte getSavedPosBit(tuz_dict_size_t pos)const=0;
+        virtual size_t getSavedDataBit(tuz_length_t data_len)const=0;
+        virtual size_t getSavedDictLenBit(tuz_length_t match_len)const=0;
+        virtual size_t getSavedDictPosBit(tuz_dict_size_t pos)const=0;
     };
 
 }

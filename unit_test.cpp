@@ -19,9 +19,9 @@ double  sum_src_size=0;
 double  sum_cmz_size=0;
 
 
-const tuz_dict_size_t kCodeCacheSize=1024;
-const tuz_dict_size_t kDictSize=1024*1024;
-const tuz_dict_size_t kMaxSaveLength=1024*16;
+const tuz_dict_size_t kCodeCacheSize=1024*4;
+const tuz_dict_size_t kDictSize=1024*64-1;
+const tuz_dict_size_t kMaxSaveLength=1024*64-1;
 
 struct TTuzListener{
     const unsigned char* src;

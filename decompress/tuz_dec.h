@@ -38,8 +38,7 @@ typedef enum tuz_TResult{
     tuz_CTRLTYPE_UNKNOW_ERROR=5,
     tuz_CTRLTYPE_STREAM_END_ERROR,
     
-    tuz_OPEN_ERROR=10,
-    tuz_READ_CODE_ERROR,
+    tuz_READ_CODE_ERROR=10,
     tuz_DICT_POS_ERROR,
     tuz_OUT_SIZE_OR_CODE_ERROR,
     tuz_CODE_ERROR, //unknow code ,or decode len(tuz_length_t) overflow
@@ -84,7 +83,7 @@ typedef struct tuz_TStream{
 
 //open tuz_TStream
 //  kCodeCacheSize >=1; 64,250,1k,4k,32k,...  only affect decompress speed
-//  read saved dictSize from inputStream to out_dictSize;
+//  read saved dictSize from inputStream to out_dictSize, out_dictSize can null;
 void tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
                       tuz_byte* codeCache,tuz_dict_size_t kCodeCacheSize,tuz_dict_size_t* out_dictSize);
 
@@ -93,7 +92,6 @@ void tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_T
 static tuz_inline void tuz_TStream_decompress_begin(tuz_TStream* self,tuz_byte* dict_buf,tuz_dict_size_t dictSize){
     assert((self->_dict.dict_buf==0)&&(dict_buf!=0)&&(dictSize>0)&&(dictSize>=self->_dict.dict_size));
     self->_dict.dict_buf=dict_buf;
-    self->_dict.dict_size=dictSize;
 }
 
 //decompress partial to out_data

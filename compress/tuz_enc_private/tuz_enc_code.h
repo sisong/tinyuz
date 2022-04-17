@@ -31,17 +31,18 @@ namespace _tuz_private{
     
     struct TTuzCode:public ICode{
         explicit TTuzCode(std::vector<tuz_byte>& out_code)
-        :code(out_code),half_code_index(kNullIndex),type_count(0){ minSavedLenBit=4; }
+        :code(out_code),half_code_index(kNullIndex),type_count(0){  }
         
         void outLen(tuz_length_t len);
         void outDictPos(tuz_dict_size_t len);
         void outData(const tuz_byte* data,const tuz_byte* data_end);
-        void outDict(tuz_length_t len,tuz_dict_size_t dict_pos);
+        void outDict(tuz_length_t match_len,tuz_dict_size_t dict_pos);
         void outCtrl_streamEnd();
         void outCtrl_clipEnd();
         
-        virtual tuz_byte getSavedLenBit(tuz_length_t len)const;
-        virtual tuz_byte getSavedPosBit(tuz_dict_size_t pos)const;
+        virtual size_t getSavedDataBit(tuz_length_t data_len)const;
+        virtual size_t getSavedDictLenBit(tuz_length_t match_len)const;
+        virtual size_t getSavedDictPosBit(tuz_dict_size_t pos)const;
     private:
         static const size_t kNullIndex=~(size_t)0;
         std::vector<tuz_byte>& code;

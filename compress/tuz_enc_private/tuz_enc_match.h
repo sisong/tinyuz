@@ -35,7 +35,7 @@ namespace _tuz_private{
         :sstring(data,data_end,_props.maxSaveLength),coder(_coder),
         props(_props){ }
         bool match(const tuz_byte** out_matched,tuz_length_t* out_match_len,
-                   const tuz_byte* cur);
+                   const tuz_byte* cur,size_t unmatched_len);
     private:
         TSuffixString               sstring;
         const ICode&                coder;
@@ -47,7 +47,7 @@ namespace _tuz_private{
         std::vector<TInt>           dictPos;
         std::vector<TLCPInt>        saveLen;
         void _cost_match(TInt it_inc,const TInt curString,const size_t curi,TInt* curMinDictMatchLen);
-        void _getCost(const tuz_byte* cur0);
+        void _getCost(const tuz_byte* cur0,size_t unmatched_len);
     };
     
 }

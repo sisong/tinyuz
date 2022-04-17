@@ -63,10 +63,19 @@ extern "C" {
 #define      tuz_TRUE       1
     
 #ifndef tuz_inline
-#ifdef _MSC_VER
-#   define tuz_inline _inline
+#if (defined(_MSC_VER))
+#   define tuz_inline __inline
 #else
 #   define tuz_inline inline
+#endif
+#endif
+#ifndef tuz_force_inline
+#if (defined(_MSC_VER))
+#   define tuz_force_inline __forceinline 
+#elif defined(__GNUC__) || defined(__clang__) || defined(__ICCARM__) || defined(__CC_ARM)
+#   define tuz_force_inline inline __attribute__((always_inline)) 
+#else
+#   define tuz_force_inline tuz_inline
 #endif
 #endif
     
@@ -76,7 +85,7 @@ extern "C" {
 #   define tuz_try_inline tuz_inline
 #endif
 
-#  define tuz_kMinDictMatchLen  3
+#  define tuz_kMinDictMatchLen  2
 
 #ifdef __cplusplus
 }
