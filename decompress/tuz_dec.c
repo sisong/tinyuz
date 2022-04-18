@@ -121,7 +121,7 @@ static tuz_BOOL _update_cache(tuz_TStream* self){
     return len?tuz_TRUE:tuz_FALSE;
 }
 
-static tuz_try_inline tuz_byte _cache_read_1byte(tuz_TStream* self){
+static tuz_try_inline tuz_fast_xint _cache_read_1byte(tuz_TStream* self){
     if (self->_code_cache.cache_begin!=self->_code_cache.cache_end){
 __cache_read_1byte:
         return self->_code_cache.cache_buf[self->_code_cache.cache_begin++];
@@ -132,41 +132,45 @@ __cache_read_1byte:
         return 0;
 }
 
+#define _cache_read_typeBits _cache_read_1byte
+
 static tuz_force_inline void _cache_read_bytes(tuz_TStream* self,tuz_byte* dst,tuz_length_t readLen){
     while (readLen--)
         *dst++=_cache_read_1byte(self);
 }
 
-static tuz_force_inline tuz_byte _cache_read_1bit(tuz_TStream* self){
-    if (self->_state.type_count==0){
-        self->_state.type_count=8;
-        self->_state.types=_cache_read_1byte(self);
-    }
-    {
-        tuz_byte result=self->_state.types&1;
-        self->_state.types>>=1;
+static tuz_force_inline tuz_fast_xint _cache_read_1bit(tuz_TStream* self){
+    tuz_fast_xint result;
+    if (self->_state.type_count){
         --self->_state.type_count;
-        return result;
+        result=self->_state.types;
+__cache_read_1bit:
+        self->_state.types=result>>1;
+        return result&1;
+    }else{
+        self->_state.type_count=tuz_kMaxTypeBitCount-1;
+        result=_cache_read_typeBits(self);
+        goto __cache_read_1bit;
     }
 }
 
-static tuz_force_inline tuz_byte _cache_read_low3bit(tuz_TStream* self){
-    tuz_byte count=self->_state.type_count;
-    tuz_byte result=self->_state.types;
+static tuz_force_inline tuz_fast_xint _cache_read_low3bit(tuz_TStream* self){
+    tuz_fast_xint count=self->_state.type_count;
+    tuz_fast_xint result=self->_state.types;
     if (count>=3){
         self->_state.type_count=count-3;
         self->_state.types=(result>>3);
+        return result;
     }else{
-        tuz_byte v=_cache_read_1byte(self);
-        self->_state.type_count=count+(8-3);
+        tuz_fast_xint v=_cache_read_typeBits(self);
+        self->_state.type_count=count+(tuz_kMaxTypeBitCount-3);
         self->_state.types=v>>(3-count);
-        result|=(v<<count);
+        return result|(v<<count);
     }
-    return result;
 }
 
-static tuz_force_inline void _cache_push_1bit(tuz_TStream* self,tuz_byte bitv){
-    //assert(self->_state.type_count<8);
+static tuz_force_inline void _cache_push_1bit(tuz_TStream* self,tuz_fast_xint bitv){
+    //assert(self->_state.type_count<tuz_kMaxTypeBitCount);
     self->_state.types=(self->_state.types<<1)+bitv;
     ++self->_state.type_count;
 }
@@ -174,7 +178,7 @@ static tuz_force_inline void _cache_push_1bit(tuz_TStream* self,tuz_byte bitv){
 //low to high bitmap: xx?xx?xx?xx? ...
 static tuz_try_inline tuz_length_t _cache_unpack_len(tuz_TStream* self){
     tuz_length_t    v=0;
-    tuz_byte        low3bit;
+    tuz_fast_xint   low3bit;
     do {
         low3bit=_cache_read_low3bit(self);
         v=(v<<2)+(low3bit&0x3);
@@ -338,7 +342,7 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
                         self->_state.literalType_len=saved_len+(tuz_kMinLiteralLen-1);
                         goto copyLiteral_process;
                     }else{ // ctrlType
-                        const tuz_byte ctrlType=_cache_read_1byte(self);
+                        const tuz_fast_xint ctrlType=_cache_read_1byte(self);
                         if (tuz_ctrlType_streamEnd==ctrlType){ //stream end
                             self->_state.is_ctrlType_stream_end=tuz_TRUE;
                             break;

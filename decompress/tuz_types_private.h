@@ -41,7 +41,9 @@ extern "C" {
         tuz_ctrlType_clipEnd=2,
     } tuz_TCtrlType;
     
-    #define tuz_kMinLiteralLen  16
+    #define tuz_kMinLiteralLen      16
+    #define tuz_kMinDictMatchLen    2
+    #define tuz_kMaxTypeBitCount    8
 
 #ifdef __cplusplus
 }

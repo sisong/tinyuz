@@ -48,20 +48,27 @@ extern "C" {
 #define TINYUZ_VERSION_STRING           _TINYUZ_EXPAND_AND_QUOTE(_TINYUZ_VERSION)
 
 
+#ifndef tuz_byte
+    typedef  unsigned char      tuz_byte;
+#endif
 #ifndef tuz_length_t
     //tuz_length_t must can saved CompressProps.maxSaveLength & dictSize value
     //  if tuz_length_t==uint8_t, must CompressProps.maxSaveLength & dictSize <= 255 when compress;
     //  if tuz_length_t==int16_t, must CompressProps.maxSaveLength & dictSize <= (2<<15)-1 ; ...
     typedef  unsigned int       tuz_length_t;
 #endif
+#ifndef tuz_dict_size_t
     typedef  tuz_length_t       tuz_dict_size_t;
-#ifndef tuz_byte
-    typedef  unsigned char      tuz_byte;
 #endif
-    typedef  tuz_byte           tuz_BOOL;
+#ifndef tuz_fast_xint
+    typedef  unsigned int       tuz_fast_xint; //>= 8bit uint
+#endif
+#ifndef tuz_BOOL
+    typedef  tuz_fast_xint      tuz_BOOL;
+#endif
 #define      tuz_FALSE      0
 #define      tuz_TRUE       1
-    
+
 #ifndef tuz_inline
 #if (defined(_MSC_VER))
 #   define tuz_inline __inline
@@ -70,10 +77,12 @@ extern "C" {
 #endif
 #endif
 #ifndef tuz_force_inline
-#if (defined(_MSC_VER))
-#   define tuz_force_inline __forceinline 
-#elif defined(__GNUC__) || defined(__clang__) || defined(__ICCARM__) || defined(__CC_ARM)
-#   define tuz_force_inline inline __attribute__((always_inline)) 
+#if defined(_MSC_VER)
+#   define tuz_force_inline __forceinline
+#elif defined(__GNUC__) || defined(__clang__) || defined(__CC_ARM)
+#   define tuz_force_inline __attribute__((always_inline)) inline
+#elif defined(__ICCARM__)
+#   define tuz_force_inline _Pragma("inline=forced")
 #else
 #   define tuz_force_inline tuz_inline
 #endif
@@ -84,8 +93,6 @@ extern "C" {
 #else
 #   define tuz_try_inline tuz_inline
 #endif
-
-#  define tuz_kMinDictMatchLen  2
 
 #ifdef __cplusplus
 }

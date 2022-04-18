@@ -60,7 +60,7 @@ _debug_log _;
 namespace _tuz_private{
     
     //low to high bitmap: xx?xx? xx?xx? ...
-    static tuz_inline size_t _pack_v_count(tuz_length_t v){
+    static tuz_inline size_t _pack_v_count(size_t v){
         size_t count=0;
         do {
             v>>=2;
@@ -68,7 +68,7 @@ namespace _tuz_private{
         }while(v>0);
         return count;
     }
-    static tuz_inline size_t _getSavedLenBit(tuz_length_t len){
+    static tuz_inline size_t _getSavedLenBit(size_t len){
         return _pack_v_count(len)*3;
     }
     
@@ -101,15 +101,16 @@ size_t TTuzCode::getSavedDictPosBit(tuz_dict_size_t pos)const{
     return 1+1+8+_getSavedLenBit((pos+1)>>8);
 }
 
-void TTuzCode::outType(tuz_byte bitv){
+void TTuzCode::outType(size_t bit1v){
     if (type_count==0){
         types_index=code.size();
         code.push_back(0);
     }
-    code[types_index]|=(bitv<<type_count);
+    tuz_byte* types=&code[types_index];
+    (*types)|=(bit1v<<type_count);
     ++type_count;
-    if (type_count==8)
-        type_count=0;
+    if (type_count==tuz_kMaxTypeBitCount)
+        type_count = 0;
 }
 
 void TTuzCode::outData(const tuz_byte* data,const tuz_byte* data_end){
@@ -159,7 +160,10 @@ void TTuzCode::outCtrl(tuz_TCtrlType ctrl){
     outDictPos(0); //dict_pos==0
     outLen(0);
     code.push_back(ctrl);
-    half_code_index=kNullIndex;
+    outCtrl_typesEnd();
+}
+
+void TTuzCode::outCtrl_typesEnd(){
     type_count=0;
 }
 

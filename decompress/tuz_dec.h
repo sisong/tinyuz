@@ -48,7 +48,7 @@ typedef enum tuz_TResult{
         tuz_dict_size_t cache_begin;
         tuz_dict_size_t cache_end;
         tuz_byte*       cache_buf;
-        tuz_byte        input_state;
+        tuz_fast_xint   input_state;
     } _tuz_TInputCache;
     typedef struct _tuz_TDict{
         tuz_dict_size_t dict_cur;
@@ -60,8 +60,8 @@ typedef enum tuz_TResult{
         tuz_dict_size_t dictType_pos_inc;
         tuz_length_t    dictType_len;
         tuz_length_t    literalType_len;
-        tuz_byte        types;
-        tuz_byte        type_count;
+        tuz_fast_xint   types;
+        tuz_fast_xint   type_count;
         tuz_BOOL        is_ctrlType_stream_end;
     } _tuz_TState;
 
