@@ -43,21 +43,20 @@ void writeFile(const std::vector<unsigned char>& data,const char* fileName){
 }
 
 
-typedef int (*T_compress)(unsigned char* out_data,unsigned char* out_data_end,const unsigned char* src,const unsigned char* src_end,int zip_parameter);
+typedef int (*T_compress)(unsigned char* out_data,unsigned char* out_data_end,const unsigned char* src,const unsigned char* src_end);
 typedef bool (*T_decompress)(unsigned char* out_data,unsigned char* out_data_end,const unsigned char* zip_code,const unsigned char* zip_code_end);
 
 struct TTestResult {
     std::string     procName;
     std::string     srcFileName;
-    int             zip_parameter;
     double          compressTime_s;
     double          decompressTime_s;
     int             srcSize;
     int             zipSize;
 };
 
-double minEncTestTime=1.0;
-double minDecTestTime=1.0;
+double minEncTestTime=0.5;
+double minDecTestTime=0.5;
 double testDecodeProc(T_decompress proc_decompress,unsigned char* out_data,unsigned char* out_data_end,const unsigned char* zip_code,const unsigned char* zip_code_end){
     int testDecompressCount=0;
     double time1=clock_s();
@@ -74,13 +73,13 @@ double testDecodeProc(T_decompress proc_decompress,unsigned char* out_data,unsig
 }
 
 
-double testEncodeProc(T_compress proc_compress,std::vector<unsigned char>& compressedCode,const unsigned char* src,const unsigned char* src_end,int zip_parameter){
+double testEncodeProc(T_compress proc_compress,std::vector<unsigned char>& compressedCode,const unsigned char* src,const unsigned char* src_end){
     int testCompressCount=0;
     compressedCode.resize((size_t)((src_end-src)*1.2)+1024);
     int dstCodeSize=0;
     double time1=clock_s();
     do{
-        dstCodeSize=proc_compress(&compressedCode[0],&compressedCode[0]+compressedCode.size(),src,src_end,zip_parameter);
+        dstCodeSize=proc_compress(&compressedCode[0],&compressedCode[0]+compressedCode.size(),src,src_end);
         ++testCompressCount;
     }while ((clock_s()-time1)<minEncTestTime);
     double time2=clock_s();
@@ -90,14 +89,14 @@ double testEncodeProc(T_compress proc_compress,std::vector<unsigned char>& compr
 }
 
 TTestResult testProc(const char* srcFileName,T_compress proc_compress,const char* proc_compress_Name,
-                 T_decompress proc_decompress,const char* proc_decompress_Name,int zip_parameter){
+                 T_decompress proc_decompress,const char* proc_decompress_Name){
     std::string testFilePath=TEST_FILE_DIR; testFilePath.append(srcFileName);
     std::vector<unsigned char> oldData; readFile(oldData,testFilePath.c_str());
     const unsigned char* src=&oldData[0];
     const unsigned char* src_end=src+oldData.size();
     
     std::vector<unsigned char> compressedCode;
-    double compressTime_s=testEncodeProc(proc_compress,compressedCode,src,src_end,zip_parameter);
+    double compressTime_s=testEncodeProc(proc_compress,compressedCode,src,src_end);
     const unsigned char* unsrc=&compressedCode[0];
     
     std::vector<unsigned char> uncompressedCode(oldData.size(),0);
@@ -118,7 +117,6 @@ TTestResult testProc(const char* srcFileName,T_compress proc_compress,const char
     result.decompressTime_s=decompressTime_s;
     result.srcSize=(int)(src_end-src);
     result.zipSize=(int)compressedCode.size();
-    result.zip_parameter=zip_parameter;
     return result;
 }
 
@@ -126,7 +124,7 @@ TTestResult testProc(const char* srcFileName,T_compress proc_compress,const char
 static void outResult(const TTestResult& rt){
     std::cout<<"\""<<rt.srcFileName.c_str()<< "\"\t";
     std::cout<<rt.srcSize/1024.0/1024<<"M\t";
-    std::cout<<rt.procName.c_str()<< "_" << rt.zip_parameter << "\t";
+    std::cout<<rt.procName.c_str()<< "\t";
     std::cout<<rt.zipSize*100.0/rt.srcSize<<"% ("<<rt.zipSize<<") \t";
     //std::cout<<rt.compressTime_s<<"S\t";
     std::cout<<rt.srcSize/rt.compressTime_s/1024/1024<<"M/S\t";
@@ -139,7 +137,7 @@ static void outResult(const TTestResult& rt){
 int zlib_windowBits=0;
 
 int zlib_compress(unsigned char* out_data,unsigned char* out_data_end,
-                 const unsigned char* src,const unsigned char* src_end,int zip_parameter){
+                 const unsigned char* src,const unsigned char* src_end){
     const unsigned char* _zipSrc=&src[0];
     unsigned char* _zipDst=&out_data[0];
  
@@ -151,7 +149,7 @@ int zlib_compress(unsigned char* out_data,unsigned char* out_data_end,
     c_stream.avail_in = (int)(src_end-src);
     c_stream.next_out = (Bytef*)_zipDst;
     c_stream.avail_out = (unsigned int)(out_data_end-out_data);
-    int ret = deflateInit2(&c_stream,zip_parameter,Z_DEFLATED,zlib_windowBits,MAX_MEM_LEVEL,Z_DEFAULT_STRATEGY);
+    int ret = deflateInit2(&c_stream,9,Z_DEFLATED,zlib_windowBits,MAX_MEM_LEVEL,Z_DEFAULT_STRATEGY);
     if(ret!=Z_OK)
         throw "deflateInit2 error !";
     ret = deflate(&c_stream,Z_FINISH);
@@ -217,7 +215,7 @@ bool zlib_decompress(unsigned char* out_data,unsigned char* out_data_end,
 tuz_dict_size_t tuz_kDictSize=0;
 
 int _test_tuz_compress(unsigned char* out_data,unsigned char* out_data_end,
-                       const unsigned char* src,const unsigned char* src_end,int ){
+                       const unsigned char* src,const unsigned char* src_end){
     hpatch_TStreamOutput out_stream;
     mem_as_hStreamOutput(&out_stream,out_data,out_data_end);
     hpatch_TStreamInput in_stream;
@@ -288,22 +286,30 @@ bool _test_tuz_decompress_stream(unsigned char* out_data,unsigned char* out_data
 }
 
 static void testFile(const char* srcFileName){
-    outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"      zlib",9));
-    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tuz_stream",2));
+    outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"  zlib"));
+    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tinyuz"));
     //std::cout << "\n";
 }
 
 int main(int argc, const char * argv[]){
-    std::cout << "start> \n";
-    assert(argc==2);
-    TEST_FILE_DIR=argv[1];
-    minEncTestTime=0.2;
-    minDecTestTime=0.4;
-    
-    zlib_windowBits=-10;
+    const int testDictBit=10;
+    zlib_windowBits=-testDictBit;
     tuz_kDictSize=(1<<10);
+    if (argc!=2){
+        std::cout << "speed_test testFile\n";
+        return -1;
+    }
+    std::cout << "  ( dictSize: " << tuz_kDictSize
+              << "   codeCacheSize: " << kCodeCacheSize << " )\n";
 
-    //*
+    testFile(argv[1]);
+
+    /* //for test
+    std::cout << "test start> \n";
+    minEncTestTime=0.2;
+    minDecTestTime=0.3;
+    //testFile("V0.bin"); testFile("V1.bin"); testFile("V2.bin"); testFile("V3.bin");
+
     testFile("world95.txt");
     testFile("ohs.doc");
     testFile("FP.LOG");
@@ -314,9 +320,9 @@ int main(int argc, const char * argv[]){
     testFile("FlashMX.pdf");
     testFile("rafale.bmp");
     testFile("A10.jpg");
-    //*/
 
     std::cout << "done!\n";
+    //*/
     return 0;
 }
 

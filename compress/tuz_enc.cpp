@@ -29,7 +29,7 @@
 using namespace _tuz_private;
 
 
-const tuz_TCompressProps tuz_kDefaultCompressProps={tuz_kMaxOfMaxSaveLength,tuz_kMaxOfMaxSaveLength};
+const tuz_TCompressProps tuz_kDefaultCompressProps={tuz_kMaxOfMaxSaveLength,tuz_kMaxOfMaxSaveLength,1};
 
 static const size_t   kMaxPackedPosByteSize =sizeof(hpatch_StreamPos_t)*3/2+1;
 
@@ -44,7 +44,7 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     assert(out_code&&(out_code->write));
     assert(data&&(data->read));
     if (props){
-        checkv((props->dictSize>=1)&(props->dictSize<=kMaxOfDictSize));
+        checkv((props->dictSize>=1)&(props->dictSize<=tuz_kMaxOfDictSize));
         checkv(props->dictSize==(tuz_dict_size_t)props->dictSize);
         checkv((props->maxSaveLength>=tuz_kMinOfMaxSaveLength)&(props->maxSaveLength<=tuz_kMaxOfMaxSaveLength));
     }
