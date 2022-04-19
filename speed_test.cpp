@@ -308,7 +308,7 @@ int main(int argc, const char * argv[]){
     std::cout << "test start> \n";
     minEncTestTime=0.2;
     minDecTestTime=0.3;
-    //testFile("V0.bin"); testFile("V1.bin"); testFile("V2.bin"); testFile("V3.bin");
+    testFile("V0.bin"); testFile("V1.bin"); testFile("V2.bin"); testFile("V3.bin");
 
     testFile("world95.txt");
     testFile("ohs.doc");

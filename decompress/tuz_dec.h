@@ -41,14 +41,16 @@ typedef enum tuz_TResult{
     tuz_READ_CODE_ERROR=10,
     tuz_DICT_POS_ERROR,
     tuz_OUT_SIZE_OR_CODE_ERROR,
-    tuz_CODE_ERROR, //unknow code ,or decode len(tuz_length_t) overflow
+    tuz_CODE_ERROR, //unknow code, or decode len(tuz_length_t) overflow
 } tuz_TResult;
     
     typedef struct _tuz_TInputCache{
         tuz_dict_size_t cache_begin;
         tuz_dict_size_t cache_end;
         tuz_byte*       cache_buf;
-        tuz_fast_xint   input_state;
+        _TUZ_SELECT_DEF1(tuz_TInputStreamHandle  inputStream;)
+        tuz_TInputStream_read   read_code;
+        tuz_fast_uint8  input_state;
     } _tuz_TInputCache;
     typedef struct _tuz_TDict{
         tuz_dict_size_t dict_cur;
@@ -60,21 +62,12 @@ typedef enum tuz_TResult{
         tuz_dict_size_t dictType_pos_inc;
         tuz_length_t    dictType_len;
         tuz_length_t    literalType_len;
-        tuz_fast_xint   types;
-        tuz_fast_xint   type_count;
+        tuz_fast_uint8  types;
+        tuz_fast_uint8  type_count;
         tuz_BOOL        is_ctrlType_stream_end;
     } _tuz_TState;
 
-//data_size: input out_data buf's size,output readed data size,
-//     if output size < input size means input stream end;
-//if read error return tuz_FALSE;
-typedef void*    tuz_TInputStreamHandle;
-typedef tuz_BOOL (*tuz_TInputStream_read)(tuz_TInputStreamHandle inputStream,tuz_byte* out_data,tuz_dict_size_t* data_size);
-
 typedef struct tuz_TStream{
-    tuz_TInputStreamHandle  inputStream;
-    tuz_TInputStream_read   read_code;
-    
     _tuz_TInputCache    _code_cache;
     _tuz_TDict          _dict;
     _tuz_TState         _state;
@@ -84,7 +77,7 @@ typedef struct tuz_TStream{
 //open tuz_TStream
 //  kCodeCacheSize >=1; 64,250,1k,4k,32k,...  only affect decompress speed
 //  read saved dictSize from inputStream to out_dictSize, out_dictSize can null;
-void tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
+void tuz_TStream_open(tuz_TStream* self,_TUZ_SELECT_DEF2(tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code),
                       tuz_byte* codeCache,tuz_dict_size_t kCodeCacheSize,tuz_dict_size_t* out_dictSize);
 
 //set dict buf

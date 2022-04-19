@@ -60,11 +60,11 @@ extern "C" {
 #ifndef tuz_dict_size_t
     typedef  tuz_length_t       tuz_dict_size_t;
 #endif
-#ifndef tuz_fast_xint
-    typedef  unsigned int       tuz_fast_xint; //>= 8bit uint
+#ifndef tuz_fast_uint8
+    typedef  unsigned int       tuz_fast_uint8; //>= 8bit uint
 #endif
 #ifndef tuz_BOOL
-    typedef  tuz_fast_xint      tuz_BOOL;
+    typedef  tuz_fast_uint8     tuz_BOOL;
 #endif
 #define      tuz_FALSE      0
 #define      tuz_TRUE       1
@@ -93,6 +93,25 @@ extern "C" {
 #else
 #   define tuz_try_inline tuz_inline
 #endif
+
+#ifndef _IS_NEED_StreamHandle
+#   define _IS_NEED_StreamHandle    1
+#endif
+#if (_IS_NEED_StreamHandle)
+#   define _TUZ_SELECT_DEF1(_select_code)            _select_code
+#   define _TUZ_SELECT_DEF2(_select_code,_must_code) _select_code,_must_code
+#   ifndef tuz_TInputStreamHandle
+    typedef void* tuz_TInputStreamHandle;
+#   endif
+#else
+#   define _TUZ_SELECT_DEF1(_select_code)
+#   define _TUZ_SELECT_DEF2(_select_code,_must_code) _must_code
+#endif
+
+//data_size: input out_data buf's size,output readed data size,
+//     if output size < input size means input stream end;
+//if read error return tuz_FALSE;
+typedef tuz_BOOL (*tuz_TInputStream_read)(_TUZ_SELECT_DEF2(tuz_TInputStreamHandle inputStream,tuz_byte* out_data),tuz_dict_size_t* data_size);
 
 #ifdef __cplusplus
 }

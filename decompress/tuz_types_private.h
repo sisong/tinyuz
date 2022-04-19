@@ -45,6 +45,15 @@ extern "C" {
     #define tuz_kMinDictMatchLen    2
     #define tuz_kMaxTypeBitCount    8
 
+    enum _tuz_TInputState{
+        tuz_kInputState_default=0,
+        tuz_kInputState_error,
+        //tuz_kInputState_end,
+    };
+
+    struct _tuz_TInputCache;
+    tuz_fast_uint8 _tuz_cache_read_1byte(struct _tuz_TInputCache* self);
+
 #ifdef __cplusplus
 }
 #endif
