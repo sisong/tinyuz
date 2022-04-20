@@ -58,7 +58,7 @@ namespace _tuz_private{
             const size_t dict_pos=(curString-matchedString)-1;
             if (dict_pos>=props_dictSize) continue; //same as ((TInt)dict_pos<0)|(dict_pos>=props.dictSize)
             
-            const TInt curSaveDictCost=cost[curi-1]+(TInt)coder.getSavedDictPosBit((tuz_dict_size_t)dict_pos);
+            const TInt curSaveDictCost=cost[curi-1]+(TInt)coder.getSavedDictPosBit((tuz_size_t)dict_pos);
             for (TInt mLen=minDictMatchLen;mLen<=curMinLcp;++mLen){
                 size_t ni=curi+mLen-1;
                 const TInt dictCost=curSaveDictCost+(TInt)coder.getSavedDictLenBit(mLen);

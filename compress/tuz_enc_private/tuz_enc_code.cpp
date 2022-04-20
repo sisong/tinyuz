@@ -80,7 +80,7 @@ void TTuzCode::outLen(tuz_length_t len){
         outType((c>0)?1:0);
     }
 }
-void TTuzCode::outDictPos(tuz_dict_size_t pos){
+void TTuzCode::outDictPos(tuz_size_t pos){
     outLen(pos>>8);
     code.push_back(pos&255);
 }
@@ -96,7 +96,7 @@ size_t TTuzCode::getSavedDictLenBit(tuz_length_t match_len)const{
     return _getSavedLenBit(match_len-tuz_kMinDictMatchLen);
 }
 
-size_t TTuzCode::getSavedDictPosBit(tuz_dict_size_t pos)const{
+size_t TTuzCode::getSavedDictPosBit(tuz_size_t pos)const{
     // break bit + type bit + pos bit
     return 1+1+8+_getSavedLenBit((pos+1)>>8);
 }
@@ -133,7 +133,7 @@ void TTuzCode::outData(const tuz_byte* data,const tuz_byte* data_end){
     }
 }
     
-void TTuzCode::outDict(tuz_length_t match_len,tuz_dict_size_t dict_pos){
+void TTuzCode::outDict(tuz_length_t match_len,tuz_size_t dict_pos){
     tuz_length_t len=match_len-tuz_kMinDictMatchLen;
     outType(tuz_codeType_dict);
     outDictPos(dict_pos+1); //>0

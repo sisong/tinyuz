@@ -162,7 +162,7 @@ int zlib_compress(unsigned char* out_data,unsigned char* out_data_end,
     return zipLen;
 }
 
-const tuz_dict_size_t kCodeCacheSize=1024*1/4;
+const tuz_size_t kCodeCacheSize=1024*1/4;
 
 bool zlib_decompress(unsigned char* out_data,unsigned char* out_data_end,
                     const unsigned char* zip_code,const unsigned char* zip_code_end){
@@ -212,7 +212,7 @@ bool zlib_decompress(unsigned char* out_data,unsigned char* out_data_end,
 
 
 
-tuz_dict_size_t tuz_kDictSize=0;
+tuz_size_t tuz_kDictSize=0;
 
 int _test_tuz_compress(unsigned char* out_data,unsigned char* out_data_end,
                        const unsigned char* src,const unsigned char* src_end){
@@ -230,12 +230,12 @@ int _test_tuz_compress(unsigned char* out_data,unsigned char* out_data_end,
 struct TTuzListener{
     const unsigned char* src;
     const unsigned char* src_end;
-    static tuz_BOOL read_code(void* listener,tuz_byte* out_code,tuz_dict_size_t* code_size){
+    static tuz_BOOL read_code(void* listener,tuz_byte* out_code,tuz_size_t* code_size){
         TTuzListener* self=(TTuzListener*)listener;
-        tuz_dict_size_t r_size=*code_size;
+        tuz_size_t r_size=*code_size;
         size_t s_size=self->src_end-self->src;
         if (r_size>s_size){
-            r_size=(tuz_dict_size_t)s_size;
+            r_size=(tuz_size_t)s_size;
             *code_size=r_size;
         }
         memcpy(out_code,self->src,r_size);
@@ -249,7 +249,7 @@ tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
                                   tuz_byte* out_uncompress,size_t* uncompress_size){
     tuz_byte _mem_buf[kCodeCacheSize];
     TTuzListener  listener={code,code_end};
-    tuz_dict_size_t dictSize;
+    tuz_size_t dictSize;
     tuz_byte* _dict_buf=0;
     tuz_TStream tuz;
     tuz_TResult result=tuz_OK;
@@ -261,16 +261,16 @@ tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
         const size_t buf_size=*uncompress_size;
         size_t data_size=0;
         while (result==tuz_OK) {
-            tuz_dict_size_t step_size=kCodeCacheSize; //for test
+            tuz_size_t step_size=kCodeCacheSize; //for test
             if (data_size+step_size>buf_size)
-                step_size=(tuz_dict_size_t)(buf_size-data_size);
+                step_size=(tuz_size_t)(buf_size-data_size);
             result=tuz_TStream_decompress_partial(&tuz,out_uncompress,&step_size);
             data_size+=step_size;
             out_uncompress+=step_size;
         }
         *uncompress_size=data_size;
     }else{
-        tuz_dict_size_t usize=(tuz_dict_size_t)(*uncompress_size);
+        tuz_size_t usize=(tuz_size_t)(*uncompress_size);
         assert(usize==*uncompress_size);
         result=tuz_TStream_decompress_partial(&tuz,out_uncompress,&usize);
         *uncompress_size=usize;
@@ -285,9 +285,16 @@ bool _test_tuz_decompress_stream(unsigned char* out_data,unsigned char* out_data
     return (ret==tuz_STREAM_END)&&(uncompress_size==(out_data_end-out_data));
 }
 
+bool _test_tuz_decompress_mem(unsigned char* out_data,unsigned char* out_data_end,const unsigned char* zip_code,const unsigned char* zip_code_end){
+    tuz_size_t uncompress_size=out_data_end-out_data;
+    tuz_TResult ret=tuz_decompress_mem(zip_code,zip_code_end-zip_code,out_data,&uncompress_size);
+    return (ret==tuz_STREAM_END)&&(uncompress_size==(out_data_end-out_data));
+}
+
 static void testFile(const char* srcFileName){
     outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"  zlib"));
-    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tinyuz"));
+    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tinyuz_stream"));
+    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_mem   ,"   tinyuz_mem"));
     //std::cout << "\n";
 }
 

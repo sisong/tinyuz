@@ -19,19 +19,19 @@ double  sum_src_size=0;
 double  sum_cmz_size=0;
 
 
-const tuz_dict_size_t kCodeCacheSize=1024*4;
-const tuz_dict_size_t kDictSize=1024*64-1;
-const tuz_dict_size_t kMaxSaveLength=1024*64-1;
+const tuz_size_t kCodeCacheSize=1024*4;
+const tuz_size_t kDictSize=1024*64-1;
+const tuz_size_t kMaxSaveLength=1024*64-1;
 
 struct TTuzListener{
     const unsigned char* src;
     const unsigned char* src_end;
-    static tuz_BOOL read_code(void* listener,tuz_byte* out_code,tuz_dict_size_t* code_size){
+    static tuz_BOOL read_code(void* listener,tuz_byte* out_code,tuz_size_t* code_size){
         TTuzListener* self=(TTuzListener*)listener;
-        tuz_dict_size_t r_size=*code_size;
+        tuz_size_t r_size=*code_size;
         size_t s_size=self->src_end-self->src;
         if (r_size>s_size){
-            r_size=(tuz_dict_size_t)s_size;
+            r_size=(tuz_size_t)s_size;
             *code_size=r_size;
         }
         memcpy(out_code,self->src,r_size);
@@ -41,7 +41,7 @@ struct TTuzListener{
     
     tuz_byte _mem_buf[kCodeCacheSize];
     //tuz_byte _mem_buf[kCodeCacheSize+kDictSize];
-    tuz_byte* alloc_mem(tuz_dict_size_t mem_size){
+    tuz_byte* alloc_mem(tuz_size_t mem_size){
         return (tuz_byte*)malloc(mem_size);
         //if (mem_size>kDictSize) return 0;
         //return (&_mem_buf[0])+kCodeCacheSize;
@@ -54,7 +54,7 @@ struct TTuzListener{
 tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
                                   tuz_byte* out_uncompress,size_t* uncompress_size){
     TTuzListener  listener={code,code_end};
-    tuz_dict_size_t dictSize;
+    tuz_size_t dictSize;
     tuz_byte* _dict_buf=0;
     tuz_TStream tuz;
     tuz_TResult result=tuz_OK;
@@ -67,16 +67,16 @@ tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
         const size_t buf_size=*uncompress_size;
         size_t data_size=0;
         while (result==tuz_OK) {
-            tuz_dict_size_t step_size=kCodeCacheSize; //for test
+            tuz_size_t step_size=kCodeCacheSize; //for test
             if (data_size+step_size>buf_size)
-                step_size=(tuz_dict_size_t)(buf_size-data_size);
+                step_size=(tuz_size_t)(buf_size-data_size);
             result=tuz_TStream_decompress_partial(&tuz,out_uncompress,&step_size);
             data_size+=step_size;
             out_uncompress+=step_size;
         }
         *uncompress_size=data_size;
     }else{
-        tuz_dict_size_t usize=*uncompress_size;
+        tuz_size_t usize=*uncompress_size;
         assert(usize==*uncompress_size);
         result=tuz_TStream_decompress_partial(&tuz,out_uncompress,&usize);
         *uncompress_size=usize;
@@ -86,7 +86,7 @@ tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
 }
 
 int _attack_seed=111111111;
-long attack_decompress(const tuz_byte* _code,const tuz_byte* _code_end,tuz_dict_size_t uncompress_size,
+long attack_decompress(const tuz_byte* _code,const tuz_byte* _code_end,tuz_size_t uncompress_size,
                        const char* error_tag){
     char tag[250]="\0";
     srand(_attack_seed);
@@ -99,27 +99,36 @@ long attack_decompress(const tuz_byte* _code,const tuz_byte* _code_end,tuz_dict_
     tuz_byte* code=_test_code.data();
     tuz_byte* code_end=code+codeSize;
     tuz_byte* out_uncompress=_test_data.data();
-    try {
-        for (long i=0; i<kLoopCount; ++i) {
-                sprintf(tag, "attackPacth exceptionCount=%ld testAttackSeed=%d i=%ld",exceptionCount,_attack_seed,i);
-                memcpy(code,_code,codeSize);
-                const long randCount=(long)(1+rand()*(1.0/RAND_MAX)*rand()*(1.0/RAND_MAX)*codeSize/3);
-                for (long r=0; r<randCount; ++r){
-                    code[rand()%codeSize]=rand();
-                }
-                size_t uncompress_size=_test_data.size();
-                if (rand()%4==0){
-                    uncompress_size=(size_t)(uncompress_size*rand()*(1.0/(RAND_MAX+1)));
-                    assert(uncompress_size<_test_data.size());
-                }
-                tuz_decompress_stream(code,code_end,out_uncompress,&uncompress_size);
-            }
-            return exceptionCount;
+    for (long i=0; i<kLoopCount; ++i) {
+        sprintf(tag, "attackPacth exceptionCount=%ld testAttackSeed=%d i=%ld",exceptionCount,_attack_seed,i);
+        memcpy(code,_code,codeSize);
+        const long randCount=(long)(1+rand()*(1.0/RAND_MAX)*rand()*(1.0/RAND_MAX)*codeSize/3);
+        for (long r=0; r<randCount; ++r){
+            code[rand()%codeSize]=rand();
+        }
+        size_t uncompress_size=_test_data.size();
+        if (rand()%4==0){
+            uncompress_size=(size_t)(uncompress_size*rand()*(1.0/(RAND_MAX+1)));
+            assert(uncompress_size<_test_data.size());
+        }
+
+        try {
+            tuz_decompress_stream(code,code_end,out_uncompress,&uncompress_size);
         } catch (...) {
-            printf("exception!!! tag:%s\n", tag);
-        return exceptionCount+1;
+            printf("exception!!! stream tag:%s\n", tag);
+            return exceptionCount+1;
+        }
+        
+        tuz_size_t _uncompress_size=_test_data.size();
+        try {
+            tuz_decompress_mem(code,code_end-code,out_uncompress,&_uncompress_size);
+        } catch (...) {
+            printf("exception!!! mem tag:%s\n", tag);
+            return exceptionCount+1;
         }
     }
+    return exceptionCount;
+}
 
 static int test(const unsigned char* src,const unsigned char* src_end,const char* tag){
     std::vector<unsigned char> compressedCode((size_t)tuz_maxCompressedSize(src_end-src));
@@ -143,6 +152,23 @@ static int test(const unsigned char* src,const unsigned char* src_end,const char
             size_t uncompress_size=decompressedData.size();
             tuz_TResult tret=tuz_decompress_stream(compressedCode.data(),compressedCode.data()+compressedCode.size(),
                                                    decompressedData.data(),&uncompress_size);
+            ret=(tret==tuz_STREAM_END)&&(uncompress_size==decompressedData.size());
+        }
+        if (!ret){
+            ++error_count;
+            std::cout << "\nerror_count=="<<error_count<<" result error, tag==\""<<tag<<"\"\n";
+        }else if (decompressedData!=std::vector<unsigned char>(src,src_end)){
+            ++error_count;
+            std::cout << "\nerror_count=="<<error_count<<" data error, tag==\""<<tag<<"\"\n";
+        }else if(is_log_tag){
+            std::cout << "error_count=="<<error_count<<", test ok  cmpSize/srcSize:"<<compressedCode.size()<<"/"<<src_end-src<<", tag==\""<<tag<<"\"\n";
+        }
+
+        memset(decompressedData.data(),0,src_end-src);
+        {
+            tuz_size_t uncompress_size=decompressedData.size();
+            tuz_TResult tret=tuz_decompress_mem(compressedCode.data(),compressedCode.size(),
+                                                decompressedData.data(),&uncompress_size);
             ret=(tret==tuz_STREAM_END)&&(uncompress_size==decompressedData.size());
         }
         if (!ret){

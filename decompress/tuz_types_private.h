@@ -32,11 +32,12 @@ extern "C" {
 #endif
 
     typedef enum tuz_TCodeType{
-        tuz_codeType_data=0,
-        tuz_codeType_dict=1,
+        tuz_codeType_dict=0,
+        tuz_codeType_data=1,
     } tuz_TCodeType;
     
     typedef enum tuz_TCtrlType{
+        //0 for error type
         tuz_ctrlType_streamEnd=1,
         tuz_ctrlType_clipEnd=2,
     } tuz_TCtrlType;

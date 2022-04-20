@@ -57,9 +57,10 @@ extern "C" {
     //  if tuz_length_t==int16_t, must CompressProps.maxSaveLength & dictSize <= (2<<15)-1 ; ...
     typedef  unsigned int       tuz_length_t;
 #endif
-#ifndef tuz_dict_size_t
-    typedef  tuz_length_t       tuz_dict_size_t;
+#ifndef tuz_size_t
+    typedef  tuz_length_t       tuz_size_t; //memory size type
 #endif
+
 #ifndef tuz_fast_uint8
     typedef  unsigned int       tuz_fast_uint8; //>= 8bit uint
 #endif
@@ -94,24 +95,12 @@ extern "C" {
 #   define tuz_try_inline tuz_inline
 #endif
 
-#ifndef _IS_NEED_StreamHandle
-#   define _IS_NEED_StreamHandle    1
-#endif
-#if (_IS_NEED_StreamHandle)
-#   define _TUZ_SELECT_DEF1(_select_code)            _select_code
-#   define _TUZ_SELECT_DEF2(_select_code,_must_code) _select_code,_must_code
-#   ifndef tuz_TInputStreamHandle
-    typedef void* tuz_TInputStreamHandle;
-#   endif
-#else
-#   define _TUZ_SELECT_DEF1(_select_code)
-#   define _TUZ_SELECT_DEF2(_select_code,_must_code) _must_code
+#ifndef tuz_TInputStreamHandle
+    typedef void*                   tuz_TInputStreamHandle;
 #endif
 
-//data_size: input out_data buf's size,output readed data size,
-//     if output size < input size means input stream end;
-//if read error return tuz_FALSE;
-typedef tuz_BOOL (*tuz_TInputStream_read)(_TUZ_SELECT_DEF2(tuz_TInputStreamHandle inputStream,tuz_byte* out_data),tuz_dict_size_t* data_size);
+//read (*data_size) data to out_data from sequence stream; if input stream end,set *data_size readed size; if read error return tuz_FALSE;
+typedef tuz_BOOL (*tuz_TInputStream_read)(tuz_TInputStreamHandle inputStream,tuz_byte* out_data,tuz_size_t* data_size);
 
 #ifdef __cplusplus
 }

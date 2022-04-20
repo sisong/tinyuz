@@ -45,7 +45,7 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     assert(data&&(data->read));
     if (props){
         checkv((props->dictSize>=1)&(props->dictSize<=tuz_kMaxOfDictSize));
-        checkv(props->dictSize==(tuz_dict_size_t)props->dictSize);
+        checkv(props->dictSize==(tuz_size_t)props->dictSize);
         checkv((props->maxSaveLength>=tuz_kMinOfMaxSaveLength)&(props->maxSaveLength<=tuz_kMaxOfMaxSaveLength));
     }
     

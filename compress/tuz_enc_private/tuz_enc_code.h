@@ -34,16 +34,16 @@ namespace _tuz_private{
         :code(out_code),type_count(0){  }
         
         void outLen(tuz_length_t len);
-        void outDictPos(tuz_dict_size_t len);
+        void outDictPos(tuz_size_t len);
         void outData(const tuz_byte* data,const tuz_byte* data_end);
-        void outDict(tuz_length_t match_len,tuz_dict_size_t dict_pos);
+        void outDict(tuz_length_t match_len,tuz_size_t dict_pos);
         void outCtrl_typesEnd();
         void outCtrl_streamEnd();
         void outCtrl_clipEnd();
         
         virtual size_t getSavedDataBit(tuz_length_t data_len)const;
         virtual size_t getSavedDictLenBit(tuz_length_t match_len)const;
-        virtual size_t getSavedDictPosBit(tuz_dict_size_t pos)const;
+        virtual size_t getSavedDictPosBit(tuz_size_t pos)const;
     private:
         std::vector<tuz_byte>& code;
         size_t    types_index;

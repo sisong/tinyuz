@@ -35,36 +35,39 @@ typedef enum tuz_TResult{
     tuz_OK=0,
     tuz_STREAM_END,
     
-    tuz_CTRLTYPE_UNKNOW_ERROR=5,
+    tuz_CTRLTYPE_UNKNOW_ERROR=10,
     tuz_CTRLTYPE_STREAM_END_ERROR,
     
-    tuz_READ_CODE_ERROR=10,
+    tuz_READ_CODE_ERROR=20,
     tuz_DICT_POS_ERROR,
     tuz_OUT_SIZE_OR_CODE_ERROR,
     tuz_CODE_ERROR, //unknow code, or decode len(tuz_length_t) overflow
+
 } tuz_TResult;
-    
+
+//-----------------------------------------------------------------------------------------------------------------
+// decompress by tuz_TStream: compiled by Mbed Studio is 738 bytes
+
     typedef struct _tuz_TInputCache{
-        tuz_dict_size_t cache_begin;
-        tuz_dict_size_t cache_end;
+        tuz_size_t      cache_begin;
+        tuz_size_t      cache_end;
         tuz_byte*       cache_buf;
-        _TUZ_SELECT_DEF1(tuz_TInputStreamHandle  inputStream;)
+        tuz_TInputStreamHandle  inputStream;
         tuz_TInputStream_read   read_code;
-        tuz_fast_uint8  input_state;
+        tuz_fast_uint8          input_state;
     } _tuz_TInputCache;
     typedef struct _tuz_TDict{
-        tuz_dict_size_t dict_cur;
-        tuz_dict_size_t dict_size;
+        tuz_size_t      dict_cur;
+        tuz_size_t      dict_size;
         tuz_byte*       dict_buf;
     } _tuz_TDict;
     typedef struct _tuz_TState{
-        tuz_dict_size_t dictType_pos;
-        tuz_dict_size_t dictType_pos_inc;
+        tuz_size_t      dictType_pos;
+        tuz_size_t      dictType_pos_inc;
         tuz_length_t    dictType_len;
         tuz_length_t    literalType_len;
         tuz_fast_uint8  types;
         tuz_fast_uint8  type_count;
-        tuz_BOOL        is_ctrlType_stream_end;
     } _tuz_TState;
 
 typedef struct tuz_TStream{
@@ -73,16 +76,18 @@ typedef struct tuz_TStream{
     _tuz_TState         _state;
 } tuz_TStream;
 
-
 //open tuz_TStream
-//  kCodeCacheSize >=1; 64,250,1k,4k,32k,...  only affect decompress speed
+//  kCodeCacheSize >=1; 64,250,1k,4k,32k,...  only affect decompress speed;
 //  read saved dictSize from inputStream to out_dictSize, out_dictSize can null;
-void tuz_TStream_open(tuz_TStream* self,_TUZ_SELECT_DEF2(tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code),
-                      tuz_byte* codeCache,tuz_dict_size_t kCodeCacheSize,tuz_dict_size_t* out_dictSize);
+//  codeCache lifetime need holding by caller;
+//  not need clear tuz_TStream before open;
+void tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
+                      tuz_byte* codeCache,tuz_size_t kCodeCacheSize,tuz_size_t* out_dictSize);
 
 //set dict buf
-//  dict_buf lifetime need holding by caller
-static tuz_inline void tuz_TStream_decompress_begin(tuz_TStream* self,tuz_byte* dict_buf,tuz_dict_size_t dictSize){
+//  dict_buf lifetime need holding by caller;
+static tuz_force_inline 
+void tuz_TStream_decompress_begin(tuz_TStream* self,tuz_byte* dict_buf,tuz_size_t dictSize){
     assert((self->_dict.dict_buf==0)&&(dict_buf!=0)&&(dictSize>0)&&(dictSize>=self->_dict.dict_size));
     self->_dict.dict_buf=dict_buf;
 }
@@ -90,9 +95,16 @@ static tuz_inline void tuz_TStream_decompress_begin(tuz_TStream* self,tuz_byte* 
 //decompress partial to out_data
 //  data_size: input out_data buf's size,output decompressed data size;
 //  if success return tuz_OK or tuz_STREAM_END, tuz_STREAM_END means decompress finish;
-tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,tuz_dict_size_t* data_size);
+tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,tuz_size_t* data_size);
 
-//not need clear tuz_TStream;
+
+//-----------------------------------------------------------------------------------------------------------------
+
+//decompress all to out_data
+//  compiled by Mbed Studio is 464 bytes; faster than decompress by tuz_TStream; 
+//  if success return tuz_STREAM_END;
+tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_byte* out_data,tuz_size_t* data_size);
+
 
 #ifdef __cplusplus
 }
