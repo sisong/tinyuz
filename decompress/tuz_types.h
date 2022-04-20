@@ -39,7 +39,7 @@ extern "C" {
 #endif
     
 #define TINYUZ_VERSION_MAJOR    0
-#define TINYUZ_VERSION_MINOR    4
+#define TINYUZ_VERSION_MINOR    5
 #define TINYUZ_VERSION_RELEASE  0
     
 #define _TINYUZ_VERSION                 TINYUZ_VERSION_MAJOR.TINYUZ_VERSION_MINOR.TINYUZ_VERSION_RELEASE
@@ -93,6 +93,10 @@ extern "C" {
 #   define tuz_try_inline
 #else
 #   define tuz_try_inline tuz_inline
+#endif
+
+#ifndef _IS_RUN_MEM_SAFE_CHECK
+#   define _IS_RUN_MEM_SAFE_CHECK  1
 #endif
 
 #ifndef tuz_TInputStreamHandle

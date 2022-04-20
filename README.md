@@ -1,5 +1,5 @@
 # [tinyuz](https://github.com/sisong/tinyuz)
-[![release](https://img.shields.io/badge/release-v0.4.0-blue.svg)](https://github.com/sisong/tinyuz/releases) 
+[![release](https://img.shields.io/badge/release-v0.5.0-blue.svg)](https://github.com/sisong/tinyuz/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/tinyuz/blob/master/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/tinyuz/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/tinyuz?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/tinyuz/issues)   
@@ -27,6 +27,10 @@ void tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_T
                       tuz_byte* codeCache,tuz_size_t kCodeCacheSize,tuz_size_t* out_dictSize);
 void tuz_TStream_decompress_begin(tuz_TStream* self,tuz_byte* dict_buf,tuz_size_t dictSize);
 tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,tuz_size_t* data_size);
+```
+can also decompress at once in memory:
+```
+tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_byte* out_data,tuz_size_t* data_size);
 ```
 
 ---

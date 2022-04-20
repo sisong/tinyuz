@@ -27,10 +27,6 @@
 #include "tuz_dec.h"
 #include "tuz_types_private.h"
 
-#ifndef _IS_RUN_MEM_SAFE_CHECK
-#   define _IS_RUN_MEM_SAFE_CHECK  1
-#endif
-
 #if (_IS_RUN_MEM_SAFE_CHECK)
 #   define __RUN_MEM_SAFE_CHECK
 #endif
