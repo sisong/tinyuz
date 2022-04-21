@@ -1,7 +1,9 @@
-//
-//  unit_test.cpp
-//  for FRZ
-//
+//speed_test.cpp
+// for tinyuz
+ /*
+ The MIT License (MIT)
+ Copyright (c) 2012-2022 HouSisong All Rights Reserved.
+ */
 #include <iostream>
 #include <string.h>
 #include <math.h>
