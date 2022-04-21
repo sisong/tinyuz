@@ -9,7 +9,7 @@
 #include "decompress/tuz_dec.h"
 #include "compress/tuz_enc.h"
 
-const int   kRandTestCount=1000;
+const int   kRandTestCount=2000;
 const bool  is_attack_decompress=false;
 const bool  is_log_tag=true;
 const bool  is_all_rand=false;
@@ -85,7 +85,7 @@ tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
     return result;
 }
 
-int _attack_seed=111111111;
+int _attack_seed=11111111;
 long attack_decompress(const tuz_byte* _code,const tuz_byte* _code_end,tuz_size_t uncompress_size,
                        const char* error_tag){
     char tag[250]="\0";
@@ -97,7 +97,6 @@ long attack_decompress(const tuz_byte* _code,const tuz_byte* _code_end,tuz_size_
     std::vector<tuz_byte> _test_code(codeSize);
     std::vector<tuz_byte> _test_data(uncompress_size*2+1);
     tuz_byte* code=_test_code.data();
-    tuz_byte* code_end=code+codeSize;
     tuz_byte* out_uncompress=_test_data.data();
     for (long i=0; i<kLoopCount; ++i) {
         sprintf(tag, "attackPacth exceptionCount=%ld testAttackSeed=%d i=%ld",exceptionCount,_attack_seed,i);
@@ -106,8 +105,14 @@ long attack_decompress(const tuz_byte* _code,const tuz_byte* _code_end,tuz_size_
         for (long r=0; r<randCount; ++r){
             code[rand()%codeSize]=rand();
         }
+        tuz_byte* code_end=code+codeSize;
+        if ((rand()%8)==0){
+            size_t lcodeSize=(size_t)(codeSize*rand()*(1.0/(RAND_MAX+1)));
+            assert(lcodeSize<codeSize);
+            code_end=code+lcodeSize;
+        }
         size_t uncompress_size=_test_data.size();
-        if (rand()%4==0){
+        if ((rand()%8)==0){
             uncompress_size=(size_t)(uncompress_size*rand()*(1.0/(RAND_MAX+1)));
             assert(uncompress_size<_test_data.size());
         }

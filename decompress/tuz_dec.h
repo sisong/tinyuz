@@ -46,29 +46,7 @@ typedef enum tuz_TResult{
 } tuz_TResult;
 
 //-----------------------------------------------------------------------------------------------------------------
-// decompress by tuz_TStream: compiled by Mbed Studio is 738 bytes
-
-    typedef struct _tuz_TInputCache{
-        tuz_size_t      cache_begin;
-        tuz_size_t      cache_end;
-        tuz_byte*       cache_buf;
-        tuz_TInputStreamHandle  inputStream;
-        tuz_TInputStream_read   read_code;
-        tuz_fast_uint8          input_state;
-    } _tuz_TInputCache;
-    typedef struct _tuz_TDict{
-        tuz_size_t      dict_cur;
-        tuz_size_t      dict_size;
-        tuz_byte*       dict_buf;
-    } _tuz_TDict;
-    typedef struct _tuz_TState{
-        tuz_size_t      dictType_pos;
-        tuz_size_t      dictType_pos_inc;
-        tuz_length_t    dictType_len;
-        tuz_length_t    literalType_len;
-        tuz_fast_uint8  types;
-        tuz_fast_uint8  type_count;
-    } _tuz_TState;
+// decompress by tuz_TStream: compiled by Mbed Studio is 750 bytes
 
 typedef struct tuz_TStream{
     _tuz_TInputCache    _code_cache;

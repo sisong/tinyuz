@@ -26,7 +26,7 @@
 */
 #ifndef _tuz_types_private_h
 #define _tuz_types_private_h
-
+#include "tuz_types.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -46,14 +46,11 @@ extern "C" {
     #define tuz_kMinDictMatchLen    2
     #define tuz_kMaxTypeBitCount    8
 
-    enum _tuz_TInputState{
-        tuz_kInputState_default=0,
-        tuz_kInputState_error,
-        //tuz_kInputState_end,
-    };
-
-    struct _tuz_TInputCache;
     tuz_fast_uint8 _tuz_cache_read_1byte(struct _tuz_TInputCache* self);
+    tuz_BOOL _tuz_cache_update(struct _tuz_TInputCache* self);
+
+    static tuz_force_inline tuz_BOOL _tuz_cache_success_finish(const _tuz_TInputCache* self){
+        return (self->cache_end!=0); }
 
 #ifdef __cplusplus
 }

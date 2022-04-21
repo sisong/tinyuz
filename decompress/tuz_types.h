@@ -100,11 +100,32 @@ extern "C" {
 #endif
 
 #ifndef tuz_TInputStreamHandle
-    typedef void*                   tuz_TInputStreamHandle;
+    typedef void*   tuz_TInputStreamHandle;
 #endif
 
 //read (*data_size) data to out_data from sequence stream; if input stream end,set *data_size readed size; if read error return tuz_FALSE;
 typedef tuz_BOOL (*tuz_TInputStream_read)(tuz_TInputStreamHandle inputStream,tuz_byte* out_data,tuz_size_t* data_size);
+
+typedef struct _tuz_TInputCache{
+    tuz_size_t      cache_begin;
+    tuz_size_t      cache_end;
+    tuz_byte*       cache_buf;
+    tuz_TInputStreamHandle  inputStream;
+    tuz_TInputStream_read   read_code;
+} _tuz_TInputCache;
+typedef struct _tuz_TDict{
+    tuz_size_t      dict_cur;
+    tuz_size_t      dict_size;
+    tuz_byte*       dict_buf;
+} _tuz_TDict;
+typedef struct _tuz_TState{
+    tuz_size_t      dictType_pos;
+    tuz_size_t      dictType_pos_inc;
+    tuz_length_t    dictType_len;
+    tuz_length_t    literalType_len;
+    tuz_fast_uint8  types;
+    tuz_fast_uint8  type_count;
+} _tuz_TState;
 
 #ifdef __cplusplus
 }
