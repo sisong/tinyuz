@@ -6,7 +6,7 @@
 
  english | [中文版](README_cn.md)   
    
-**tinyuz** is a lossless compression algorithm, which is characterized by a very small decompress code(disk or Flash occupancy, compiled from source code); The code compiled by Mbed Studio is 750 bytes. And the decompress memory(RAM occupancy) can also be very small, RAM size = dictionary size(1Byte--16MB) specified when compress + input cache size(>=1Byte) when decompress. Tip: The smaller the dictionary, the lower the compression ratio; while the smaller input cache only affects the decompress speed.   
+**tinyuz** is a lossless compression algorithm, which is characterized by a very small decompress code(disk or Flash occupancy, compiled from source code); The code compiled by Mbed Studio is 784 bytes. And the decompress memory(RAM occupancy) can also be very small, RAM size = dictionary size(1Byte--16MB) specified when compress + input cache size(>=1Byte) when decompress. Tip: The smaller the dictionary, the lower the compression ratio; while the smaller input cache only affects the decompress speed.   
 Large data are supported, and both compress and decompress are streaming.   
 The compress and decompress speed is related to the characteristics of the input data; On modern CPUs, compress speed is slower by about 0.2MB/S--3MB/S, and decompress speed is faster by about 160MB/S--250MB/S.   
 (developmenting & evaluating ...)
@@ -23,9 +23,9 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
 ```
 decompress:
 ```
-void tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
-                      tuz_byte* codeCache,tuz_size_t kCodeCacheSize,tuz_size_t* out_dictSize);
-void tuz_TStream_decompress_begin(tuz_TStream* self,tuz_byte* dict_buf,tuz_size_t dictSize);
+tuz_size_t tuz_TStream_read_dict_size(tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code);
+tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
+                             tuz_byte* cache,tuz_size_t cache_size,tuz_size_t dict_size);
 tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,tuz_size_t* data_size);
 ```
 can also decompress at once in memory:

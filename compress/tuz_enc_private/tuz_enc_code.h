@@ -13,7 +13,8 @@ namespace _tuz_private{
         :code(out_code),type_count(0){  }
         
         void outLen(tuz_length_t len);
-        void outDictPos(tuz_size_t len);
+        void outDictPos(tuz_size_t pos);
+        void outDictSize(tuz_size_t dict_size);
         void outData(const tuz_byte* data,const tuz_byte* data_end);
         void outDict(tuz_length_t match_len,tuz_size_t dict_pos);
         void outCtrl_typesEnd();

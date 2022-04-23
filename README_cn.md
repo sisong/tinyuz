@@ -6,9 +6,9 @@
 
  中文版 | [english](README.md)   
 
-**tinyuz** 是一个无损压缩算法，特色是编译后的解压缩代码(磁盘或Flash占用)非常的小，用 Mbed Studio 编译后为 750 字节；并且解压时内存(RAM占用)也可以非常的小，大小为 压缩时指定的字典大小(1Byte--16MB) + 解压缩输入缓存区大小(>=1Byte)；提示：字典越小压缩率越低，而输入缓存区较小时只影响解压缩速度。   
+**tinyuz** 是一个无损压缩算法，特色是编译后的解压缩代码(磁盘或Flash占用)非常的小，用 Mbed Studio 编译后为 784 字节；并且解压时内存(RAM 占用)也可以非常的小，大小为 压缩时指定的字典大小(1Byte--16MB) + 解压缩输入缓存区大小(>=1Byte)；提示：字典越小压缩率越低，而输入缓存区较小时只影响解压缩速度。   
 支持处理巨大的数据，压缩和解压缩时都是流式处理。   
-压缩和解压缩速度和数据特性有关；在现代CPU上，压缩时比较慢约0.2MB/S--3MB/S，解压缩较快约160MB/S--250MB/S。   
+压缩和解压缩速度和数据特性有关；在现代 CPU 上，压缩时比较慢约 0.2MB/S--3MB/S，解压缩较快约 160MB/S--250MB/S。   
 (开发评估中...)
 
 ## 自己编译
@@ -23,9 +23,9 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
 ```
 解压缩:
 ```
-void tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
-                      tuz_byte* codeCache,tuz_size_t kCodeCacheSize,tuz_size_t* out_dictSize);
-void tuz_TStream_decompress_begin(tuz_TStream* self,tuz_byte* dict_buf,tuz_size_t dictSize);
+tuz_size_t tuz_TStream_read_dict_size(tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code);
+tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
+                             tuz_byte* cache,tuz_size_t cache_size,tuz_size_t dict_size);
 tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,tuz_size_t* data_size);
 ```
 也可以在内存中一次全部解压缩:

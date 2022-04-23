@@ -10,10 +10,6 @@
 #   define __RUN_MEM_SAFE_CHECK
 #endif
 
-static tuz_force_inline void _memset(tuz_byte* dst,tuz_byte v,tuz_size_t len){
-    while(len--) *dst++=v;
-}
-
 static tuz_try_inline void memmove_order(tuz_byte* dst,const tuz_byte* src,tuz_size_t len){
     while (len--) *dst++=*src++;
 }
@@ -211,25 +207,57 @@ static tuz_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* cur_out_data,tuz_s
     return len;
 }
 
-void tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
-                      tuz_byte* codeCache,tuz_size_t kCodeCacheSize,tuz_size_t* out_dictSize){
-    assert((read_code!=0)&&(codeCache!=0)&&(kCodeCacheSize>0));
-    _memset((tuz_byte*)self,0,sizeof(*self));
-    {//init
-        self->_code_cache.inputStream=inputStream;
-        self->_code_cache.read_code=read_code;
-        self->_code_cache.cache_begin=kCodeCacheSize;
-        self->_code_cache.cache_end=kCodeCacheSize;
-        self->_code_cache.cache_buf=codeCache;
+
+#if (tuz_isNeedSaveDictSize)
+tuz_size_t tuz_TStream_read_dict_size(tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code){
+    tuz_size_t v=tuz_kDictSizeSavedCount;
+    tuz_byte   saved[tuz_kDictSizeSavedCount];
+    assert(read_code!=0);
+    if ((read_code(inputStream,saved,&v))&&(v==tuz_kDictSizeSavedCount)){
+        #if (tuz_kDictSizeSavedCount==1)
+            v=saved[0];
+            assert(v>0);
+        #elif (tuz_kDictSizeSavedCount==2)
+            v=saved[0]|(((tuz_size_t)saved[1])<<8);
+            assert((v>0)&(((v>>8)&0xFF)==saved[1]));
+        #elif (tuz_kDictSizeSavedCount==3)
+            v=saved[0]|(((tuz_size_t)saved[1])<<8)|(((tuz_size_t)saved[2])<<16);
+            assert((v>0)&(((v>>8)&0xFF)==saved[1])&((v>>16)==saved[2]));
+        #elif (tuz_kDictSizeSavedCount==4)
+            v=saved[0]|(((tuz_size_t)saved[1])<<8)|(((tuz_size_t)saved[2])<<16)|(((tuz_size_t)saved[3])<<24);
+            assert((v>0)&(((v>>8)&0xFF)==saved[1])&((v>>16)==saved[2])&((v>>24)==saved[3]));
+        #else
+        #   error unsupport tuz_kDictSizeSavedCount
+        #endif
+        return v;
+    }else{ //error 
+        return 0;
     }
-    {//dict_size
-        const tuz_size_t saved_size=_cache_unpack_dict_pos(self);
-        self->_dict.dict_size=saved_size+1;
-        self->_state.type_count=0;
-        assert(self->_state.types==0);
-        if (out_dictSize)
-            *out_dictSize=self->_dict.dict_size; //out
-    }
+}
+#endif
+
+tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
+                             tuz_byte* cache,tuz_size_t cache_size,tuz_size_t dict_size){
+    assert((read_code!=0)&&(cache!=0));
+    if (dict_size==0) return tuz_READ_DICT_SIZE_ERROR;
+    if (cache_size<dict_size) return tuz_CACHE_SIZE_ERROR;
+    cache_size-=dict_size;
+    self->_code_cache.cache_begin=cache_size;
+    self->_code_cache.cache_end=cache_size;
+    self->_code_cache.cache_buf=cache+dict_size;
+    self->_code_cache.inputStream=inputStream;
+    self->_code_cache.read_code=read_code;
+    self->_dict.dict_cur=0;
+    self->_dict.dict_size=dict_size;
+    self->_dict.dict_buf=cache;
+    
+    self->_state.dictType_pos=0;
+    self->_state.dictType_pos_inc=0;
+    self->_state.dictType_len=0;
+    self->_state.literalType_len=0;
+    self->_state.types=0;
+    self->_state.type_count=0;
+    return tuz_OK;
 }
 
 tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,tuz_size_t* data_size){
@@ -424,13 +452,15 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_
     tuz_size_t dsize=*data_size;
     tuz_fast_uint8  types=0;
     tuz_fast_uint8  type_count=0;
+#if (tuz_isNeedSaveDictSize)
     {//dict_size
-        tuz_size_t _dict_size;
-        _mem_unpack_dict_pos(_dict_size);
-        //_dict_size+=1;
-        type_count=0;
-        assert(types==0);
+        in_code+=tuz_kDictSizeSavedCount; //skip tuz_kDictSizeSavedCount size
+        if (__SafeTest(in_code<=in_code_end)){
+        }else{
+            return tuz_READ_CODE_ERROR;
+        }
     }
+#endif
     while(1){
         tuz_fast_uint8 codeType;
         _mem_read_codeType(codeType);

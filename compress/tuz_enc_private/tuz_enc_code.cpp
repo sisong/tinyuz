@@ -61,7 +61,16 @@ void TTuzCode::outLen(tuz_length_t len){
 }
 void TTuzCode::outDictPos(tuz_size_t pos){
     outLen(pos>>8);
-    code.push_back(pos&255);
+    code.push_back(pos&0xFF);
+}
+void TTuzCode::outDictSize(tuz_size_t dict_size){
+    assert(dict_size<=tuz_kMaxOfDictSize);
+#if (tuz_isNeedSaveDictSize)
+    for (size_t i=0;i<tuz_kDictSizeSavedCount;++i){
+        code.push_back(dict_size&0xFF);
+        dict_size>>=8;
+    }
+#endif
 }
 
 

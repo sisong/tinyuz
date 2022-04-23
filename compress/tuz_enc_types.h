@@ -21,8 +21,7 @@ extern "C" {
     
     static const size_t tuz_kMinOfMaxSaveLength = 127;
     static const size_t tuz_kMaxOfMaxSaveLength = 1024*64-1;
-    static const size_t tuz_kMaxOfDictSize      = 1024*1024*16-1;
-
+ 
 #ifdef __cplusplus
 }
 #endif

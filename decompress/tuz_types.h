@@ -82,6 +82,27 @@ extern "C" {
     typedef void*   tuz_TInputStreamHandle;
 #endif
 
+#ifndef tuz_isNeedSaveDictSize
+#   define tuz_isNeedSaveDictSize 1
+#endif
+
+#ifndef tuz_kMaxOfDictSize
+#   define tuz_kMaxOfDictSize  ((1<<24)-1)
+#endif
+#if ((tuz_kMaxOfDictSize>>31)>=1)
+#   error tuz_kMaxOfDictSize error
+#elif ((tuz_kMaxOfDictSize>>24)>=1)
+#   define tuz_kDictSizeSavedCount 4
+#elif ((tuz_kMaxOfDictSize>>16)>=1)
+#   define tuz_kDictSizeSavedCount 3
+#elif ((tuz_kMaxOfDictSize>>8)>=1)
+#   define tuz_kDictSizeSavedCount 2
+#elif (tuz_kMaxOfDictSize>=1)
+#   define tuz_kDictSizeSavedCount 1
+#else
+#   error tuz_kMaxOfDictSize error
+#endif
+
 //read (*data_size) data to out_data from sequence stream; if input stream end,set *data_size readed size; if read error return tuz_FALSE;
 typedef tuz_BOOL (*tuz_TInputStream_read)(tuz_TInputStreamHandle inputStream,tuz_byte* out_data,tuz_size_t* data_size);
 

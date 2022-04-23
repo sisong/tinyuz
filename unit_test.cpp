@@ -42,31 +42,22 @@ struct TTuzListener{
         self->src+=r_size;
         return tuz_TRUE;
     }
-    
-    tuz_byte _mem_buf[kCodeCacheSize];
-    //tuz_byte _mem_buf[kCodeCacheSize+kDictSize];
-    tuz_byte* alloc_mem(tuz_size_t mem_size){
-        return (tuz_byte*)malloc(mem_size);
-        //if (mem_size>kDictSize) return 0;
-        //return (&_mem_buf[0])+kCodeCacheSize;
-    }
-    void free_mem(tuz_byte* pmem){
-        free(pmem);
-    }
 };
 
 tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
                                   tuz_byte* out_uncompress,size_t* uncompress_size){
     TTuzListener  listener={code,code_end};
-    tuz_size_t dictSize;
     tuz_byte* _dict_buf=0;
     tuz_TStream tuz;
     tuz_TResult result=tuz_OK;
-    tuz_TStream_open(&tuz,&listener,listener.read_code,listener._mem_buf,kCodeCacheSize,&dictSize);
-    if (!is_attack_decompress) assert(dictSize<=kDictSize);
-    _dict_buf=listener.alloc_mem(dictSize);
-    if (!is_attack_decompress) assert(_dict_buf!=0);
-    tuz_TStream_decompress_begin(&tuz,_dict_buf,dictSize);
+#if (tuz_isNeedSaveDictSize)
+    tuz_size_t dictSize=tuz_TStream_read_dict_size(&listener,listener.read_code);
+#else
+    tuz_size_t dictSize=kDictSize;//unknow dictSize
+#endif
+    _dict_buf=(tuz_byte*)malloc(dictSize+kCodeCacheSize);
+    assert(_dict_buf!=0);
+    result=tuz_TStream_open(&tuz,&listener,listener.read_code,_dict_buf,dictSize+kCodeCacheSize,dictSize);
     if (is_decode_step){
         const size_t buf_size=*uncompress_size;
         size_t data_size=0;
@@ -79,13 +70,13 @@ tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
             out_uncompress+=step_size;
         }
         *uncompress_size=data_size;
-    }else{
+    }else if (result==tuz_OK){
         tuz_size_t usize=*uncompress_size;
         assert(usize==*uncompress_size);
         result=tuz_TStream_decompress_partial(&tuz,out_uncompress,&usize);
         *uncompress_size=usize;
     }
-    listener.free_mem(_dict_buf);
+    free(_dict_buf);
     return result;
 }
 
