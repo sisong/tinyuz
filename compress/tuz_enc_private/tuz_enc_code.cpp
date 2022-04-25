@@ -37,25 +37,27 @@ _debug_log _;
 #endif
 
 namespace _tuz_private{
-    
+    #define _kPackBit    1
     //low to high bitmap: xx?xx? xx?xx? ...
     static tuz_inline size_t _pack_v_count(size_t v){
         size_t count=0;
         do {
-            v>>=2;
+            v>>=_kPackBit;
             ++count;
         }while(v>0);
         return count;
     }
     static tuz_inline size_t _getSavedLenBit(size_t len){
-        return _pack_v_count(len)*3;
+        return _pack_v_count(len)*(_kPackBit+1);
     }
     
 void TTuzCode::outLen(tuz_length_t len){
     size_t c=_pack_v_count(len);
     while (c--) {
-        outType((len>>(c*2))&1);
-        outType((len>>(c*2+1))&1);
+        //outType((len>>(c*2))&1);
+        //outType((len>>(c*2+1))&1);
+        for (size_t i=0;i<_kPackBit;++i)
+            outType((len>>(c*_kPackBit+i))&1);
         outType((c>0)?1:0);
     }
 }
@@ -78,15 +80,15 @@ size_t TTuzCode::getSavedDataBit(tuz_length_t data_len)const{
     if (data_len<tuz_kMinLiteralLen)
         return data_len*(size_t)(1+8);
     else
-        return data_len*(size_t)8+1+8+3+_getSavedLenBit(data_len-(tuz_kMinLiteralLen-1));
+        return data_len*(size_t)8+1+8+(_kPackBit+1)+_getSavedLenBit(data_len-(tuz_kMinLiteralLen-1));
 }
 size_t TTuzCode::getSavedDictLenBit(tuz_length_t match_len)const{
     return _getSavedLenBit(match_len-tuz_kMinDictMatchLen);
 }
 
 size_t TTuzCode::getSavedDictPosBit(tuz_size_t pos)const{
-    // break bit + type bit + pos bit
-    return 1+1+8+_getSavedLenBit((pos+1)>>8);
+    //type bit + pos bit
+    return 1+8+_getSavedLenBit((pos+1)>>8);
 }
 
 void TTuzCode::outType(size_t bit1v){

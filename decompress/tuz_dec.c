@@ -114,6 +114,13 @@ __cache_read_1bit:
     }
 }
 
+static tuz_force_inline void _cache_push_1bit(tuz_TStream* self,tuz_fast_uint8 bitv){
+    //assert(self->_state.type_count<tuz_kMaxTypeBitCount);
+    self->_state.types=(self->_state.types<<1)+bitv;
+    ++self->_state.type_count;
+}
+
+/*
 static tuz_force_inline tuz_fast_uint8 _cache_read_low3bit(tuz_TStream* self){
     tuz_fast_uint8 count=self->_state.type_count;
     tuz_fast_uint8 result=self->_state.types;
@@ -129,22 +136,45 @@ static tuz_force_inline tuz_fast_uint8 _cache_read_low3bit(tuz_TStream* self){
     }
 }
 
-static tuz_force_inline void _cache_push_1bit(tuz_TStream* self,tuz_fast_uint8 bitv){
-    //assert(self->_state.type_count<tuz_kMaxTypeBitCount);
-    self->_state.types=(self->_state.types<<1)+bitv;
-    ++self->_state.type_count;
+//low to high bitmap: xx?xx?xx?xx? ...
+static tuz_try_inline tuz_length_t _cache_unpack_len(tuz_TStream* self){
+    tuz_length_t    v=0;
+    tuz_fast_uint8  lowbit;
+    do {
+        lowbit=_cache_read_low3bit(self);
+        v=(v<<(3-1))+(lowbit&0x3);
+    }while(lowbit&0x4);
+    return v;
+}
+//*/
+
+//*
+static tuz_force_inline tuz_fast_uint8 _cache_read_lowbit(tuz_TStream* self){
+    tuz_fast_uint8 count=self->_state.type_count;
+    tuz_fast_uint8 result=self->_state.types;
+    if (count>=2){
+        self->_state.type_count=count-2;
+        self->_state.types=(result>>2);
+        return result;
+    }else{
+        tuz_fast_uint8 v=_cache_read_typeBits(&self->_code_cache);
+        self->_state.type_count=count+(tuz_kMaxTypeBitCount-2);
+        self->_state.types=v>>(2-count);
+        return result|(v<<count);
+    }
 }
 
 //low to high bitmap: xx?xx?xx?xx? ...
 static tuz_try_inline tuz_length_t _cache_unpack_len(tuz_TStream* self){
     tuz_length_t    v=0;
-    tuz_fast_uint8   low3bit;
+    tuz_fast_uint8  lowbit;
     do {
-        low3bit=_cache_read_low3bit(self);
-        v=(v<<2)+(low3bit&0x3);
-    }while(low3bit&0x4);
+        lowbit=_cache_read_lowbit(self);
+        v=(v<<(2-1))+(lowbit&0x1);
+    }while(lowbit&0x2);
     return v;
 }
+//*/
 
 static tuz_force_inline tuz_size_t _cache_unpack_dict_pos(tuz_TStream* self){
     tuz_size_t result=_cache_unpack_len(self);
