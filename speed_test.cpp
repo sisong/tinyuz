@@ -296,14 +296,14 @@ bool _test_tuz_decompress_mem(unsigned char* out_data,unsigned char* out_data_en
 }
 
 static void testFile(const char* srcFileName){
-    outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"  zlib"));
+    outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"       zlib_9"));
     outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tinyuz_stream"));
     outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_mem   ,"   tinyuz_mem"));
     //std::cout << "\n";
 }
 
 int main(int argc, const char * argv[]){
-    const int testDictBit=10;
+    const int testDictBit=12;
     zlib_windowBits=-testDictBit;
     _tuz_kDictSize=(1<<testDictBit);
     if (argc!=2){
@@ -319,8 +319,10 @@ int main(int argc, const char * argv[]){
     std::cout << "test start> \n";
     minEncTestTime=0.2;
     minDecTestTime=0.3;
+
     testFile("V0.bin"); testFile("V1.bin"); testFile("V2.bin"); testFile("V3.bin");
 
+    //*
     testFile("world95.txt");
     testFile("ohs.doc");
     testFile("FP.LOG");
@@ -331,9 +333,11 @@ int main(int argc, const char * argv[]){
     testFile("FlashMX.pdf");
     testFile("rafale.bmp");
     testFile("A10.jpg");
+    testFile("enwik8");
+    testFile("silesia.tar");
+    //*/
 
     std::cout << "done!\n";
-    //*/
     return 0;
 }
 

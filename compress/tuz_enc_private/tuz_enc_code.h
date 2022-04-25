@@ -24,6 +24,7 @@ namespace _tuz_private{
         virtual size_t getSavedDataBit(tuz_length_t data_len)const;
         virtual size_t getSavedDictLenBit(tuz_length_t match_len)const;
         virtual size_t getSavedDictPosBit(tuz_size_t pos)const;
+        virtual size_t getLiteralCostBit()const;
     private:
         std::vector<tuz_byte>& code;
         size_t    types_index;
@@ -32,5 +33,5 @@ namespace _tuz_private{
         void outCtrl(tuz_TCtrlType ctrl);
     };
     
-}
+}//end namespace
 #endif //_tuz_enc_code_h

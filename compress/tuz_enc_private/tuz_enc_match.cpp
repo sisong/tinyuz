@@ -59,6 +59,7 @@ void TMatch::_getCost(const tuz_byte* cur0){
     cost.resize(costSize,kNullCostValue);
     dictPos.resize(costSize,-1);
     saveLen.resize(costSize,1);
+    const TInt _kLiteralCost0=(TInt)coder.getLiteralCostBit();
     const TInt _kCost0=(TInt)coder.getSavedDataBit(1);
     cost[0]=_kCost0;
     size_t unmatched_len=1;
@@ -89,7 +90,7 @@ void TMatch::_getCost(const tuz_byte* cur0){
             if (costUnmatchStill_len>unmatched_len){
                 TInt costUzStill=((i>=costUnmatchStill_len)?cost[i-costUnmatchStill_len]:0)
                                     +(TInt)coder.getSavedDataBit((tuz_length_t)costUnmatchStill_len);
-                if ((costUzStill>cost[i]+2*tuz_kMinLiteralLen)){
+                if ((costUzStill>cost[i]+_kLiteralCost0)){
                     costUnmatchStill_len=_kNullValue;
                 }else{
                     if (costUzStill<=cost[i]){

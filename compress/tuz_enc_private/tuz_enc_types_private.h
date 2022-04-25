@@ -26,6 +26,7 @@ namespace _tuz_private{
         virtual size_t getSavedDataBit(tuz_length_t data_len)const=0;
         virtual size_t getSavedDictLenBit(tuz_length_t match_len)const=0;
         virtual size_t getSavedDictPosBit(tuz_size_t pos)const=0;
+        virtual size_t getLiteralCostBit()const=0;
     };
 
 }
