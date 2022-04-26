@@ -78,6 +78,10 @@ extern "C" {
 #   define _IS_RUN_MEM_SAFE_CHECK  1
 #endif
 
+#ifndef _IS_USED_C_MEMCPY  // use memcpy in <string.h>?
+#   define _IS_USED_C_MEMCPY  1
+#endif
+
 #ifndef tuz_TInputStreamHandle
     typedef void*   tuz_TInputStreamHandle;
 #endif

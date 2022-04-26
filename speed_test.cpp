@@ -320,7 +320,8 @@ int main(int argc, const char * argv[]){
     minEncTestTime=0.2;
     minDecTestTime=0.3;
 
-    testFile("V0.bin"); testFile("V1.bin"); testFile("V2.bin"); testFile("V3.bin");
+    testFile("V0.pat"); testFile("V1.pat"); testFile("V2.pat"); testFile("V3.pat");
+    testFile("V0.bin"); testFile("V1.bin"); testFile("V2.bin"); testFile("V3.bin"); testFile("V4.bin");
 
     //*
     testFile("world95.txt");

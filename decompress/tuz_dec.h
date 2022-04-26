@@ -27,7 +27,7 @@ typedef enum tuz_TResult{
 } tuz_TResult;
 
 //-----------------------------------------------------------------------------------------------------------------
-// decompress by tuz_TStream: compiled by Mbed Studio is 842 bytes
+// decompress by tuz_TStream: compiled by Mbed Studio is 824 bytes
 
 typedef struct tuz_TStream{
     _tuz_TInputCache    _code_cache;
@@ -57,7 +57,7 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
 //-----------------------------------------------------------------------------------------------------------------
 
 //decompress all to out_data
-//  compiled by Mbed Studio is 408 bytes; faster than decompress by tuz_TStream; 
+//  compiled by Mbed Studio is 388 bytes; faster than decompress by tuz_TStream; 
 //  if success return tuz_STREAM_END;
 tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_byte* out_data,tuz_size_t* data_size);
 

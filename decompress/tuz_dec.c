@@ -5,68 +5,24 @@
 */
 #include "tuz_dec.h"
 #include "tuz_types_private.h"
+#if _IS_USED_C_MEMCPY
+#   include <string.h> // memcpy
+#endif
 
 #if (_IS_RUN_MEM_SAFE_CHECK)
 #   define __RUN_MEM_SAFE_CHECK
 #endif
 
-static tuz_try_inline void memmove_order(tuz_byte* dst,const tuz_byte* src,tuz_size_t len){
-    while (len--) *dst++=*src++;
-}
-
-#if 1
+#define  _memmove_order    memmove_order
+#if (!(_IS_USED_C_MEMCPY))
 #   define  _memcpy        memmove_order
-#   define  _memmove       memmove_order
-#   define  _memmove_order memmove_order
 #else
-
-#define  _memcpy    memcpy_tiny8
-#define  _memmove(dst,_src,len){  \
-    const tuz_byte* src=_src;   \
-    if (src-dst>=8) \
-        memcpy_tiny8(dst,src,len); \
-    else    \
-        memmove_order(dst,src,len); }
-#define  _memmove_order(dst,_src,len){  \
-    const tuz_byte* src=_src;   \
-    if (dst-src>=8) \
-        memcpy_tiny8(dst,src,len); \
-    else    \
-        memmove_order(dst,src,len); }
-
-struct _t_data8{ tuz_byte _[8]; };
-struct _t_data4{ tuz_byte _[4]; };
-struct _t_data2{ tuz_byte _[2]; };
-#define _COPY_t(dst,src,T)  { *(T*)(dst)=*(const T*)(src); }
-#define _COPY_8(dst,src)    _COPY_t(dst,src,struct _t_data8)
-#define _COPY_4(dst,src)    _COPY_t(dst,src,struct _t_data4)
-#define _COPY_2(dst,src)    _COPY_t(dst,src,struct _t_data2)
-
-static void memcpy_tiny8(tuz_byte* dst,const tuz_byte* src,tuz_size_t len){
-case_process:
-    switch (len) {
-        /*case 16: case 15: case 14: case 13:{ len-=8;
-            _COPY_8(dst,src); _COPY_8(dst+len,src+len); } return;
-        case 12: case 11: case 10: case 9:{ len-=4;
-            _COPY_8(dst,src); _COPY_4(dst+len,src+len); } return;*/
-        case 8: _COPY_8(dst,src); return;
-        case 7: case 6: case 5:{ len-=4;
-            _COPY_4(dst,src); _COPY_4(dst+len,src+len); } return;
-        case 4: _COPY_4(dst,src); return;
-        case 3: *dst++=*src++;
-        case 2: _COPY_2(dst,src); return;
-        case 1: *dst=*src;
-        case 0: return;
-        default: {
-            do {
-                _COPY_8(dst,src);
-                dst+=8; src+=8; len-=8;
-            }while (len>=8);
-            goto case_process;
-        }
-    }
-}
+#   define  _memcpy        memcpy
+    tuz_force_inline
 #endif
+    static void memmove_order(tuz_byte* dst,const tuz_byte* src,tuz_size_t len){
+        while (len--) *dst++=*src++;
+    }
 
 tuz_BOOL _tuz_cache_update(struct _tuz_TInputCache* self){
     //    [                    cache  buf                        ]
@@ -331,11 +287,11 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
                         goto copyLiteral_process;
                     }else{ // ctrlType
                         const tuz_fast_uint8 ctrlType=_cache_read_1byte(&self->_code_cache);
+                        self->_state.type_count=0;
                         if (tuz_ctrlType_clipEnd==ctrlType){ //clip end
-                            self->_state.type_count=0;
                             goto type_process;
                         }else if (tuz_ctrlType_streamEnd==ctrlType){ //stream end
-                            (*data_size)-=dsize;
+                            *data_size=cur_out_data-out_data;
                             return tuz_STREAM_END;
                         }else{
                             return _tuz_cache_success_finish(&self->_code_cache)?
@@ -435,7 +391,7 @@ static tuz_length_t _mem_unpack_len(_mem_TStream* self){
 tuz_TResult tuz_decompress_mem(const tuz_byte* _in_code,tuz_size_t code_size,tuz_byte* out_data,tuz_size_t* data_size){
     _mem_TStream self={_in_code,_in_code+code_size,0,0};
     tuz_byte*  cur_out_data=out_data;
-    tuz_size_t dsize=*data_size;
+    tuz_byte*  out_data_end=out_data+(*data_size);
 #if (tuz_isNeedSaveDictSize)
     {//dict_size
         self.in_code+=tuz_kDictSizeSavedCount; //skip tuz_kDictSizeSavedCount size
@@ -461,30 +417,34 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* _in_code,tuz_size_t code_size,tuz
                 }
 #ifdef __RUN_MEM_SAFE_CHECK
                 if (saved_dict_pos>(tuz_size_t)(cur_out_data-out_data)) return tuz_DICT_POS_ERROR;
-                if (dictType_len>dsize) return tuz_OUT_SIZE_OR_CODE_ERROR;
+                if (dictType_len>(out_data_end-cur_out_data)) return tuz_OUT_SIZE_OR_CODE_ERROR;
 #endif
-                _memmove_order(cur_out_data,cur_out_data-saved_dict_pos,dictType_len);
-                cur_out_data+=dictType_len;
-                dsize-=dictType_len;
+                {
+                    const tuz_byte* src=cur_out_data-saved_dict_pos;
+                    while (dictType_len--)
+                        *cur_out_data++=*src++;
+                }
             }else {  
                 tuz_length_t literalType_len=_mem_unpack_len(&self);
                 if (literalType_len){ //literalType
                     literalType_len+=(tuz_kMinLiteralLen-1);
 #ifdef __RUN_MEM_SAFE_CHECK
                     if (literalType_len>(tuz_size_t)(self.in_code_end-self.in_code)) return tuz_READ_CODE_ERROR;
-                    if (literalType_len>dsize) return tuz_OUT_SIZE_OR_CODE_ERROR;
+                    if (literalType_len>(out_data_end-cur_out_data)) return tuz_OUT_SIZE_OR_CODE_ERROR;
 #endif
-                    _memcpy(cur_out_data,self.in_code,literalType_len);
-                    cur_out_data+=literalType_len;
-                    self.in_code+=literalType_len;
-                    dsize-=literalType_len;
+                    {
+                        const tuz_byte* src=self.in_code;
+                        while (literalType_len--)
+                            *cur_out_data++=*src++;
+                        self.in_code=src;
+                    }
                 }else{ // ctrlType
                     tuz_fast_uint8 ctrlType;
                     _mem_read_1byte(ctrlType);
+                    self.type_count=0;
                     if (tuz_ctrlType_clipEnd==ctrlType){ //clip end
-                        self.type_count=0;
                     }else if (tuz_ctrlType_streamEnd==ctrlType){ //stream end
-                        (*data_size)-=dsize;
+                        *data_size=(tuz_size_t)(cur_out_data-out_data);
                         return tuz_STREAM_END;
                     }else{
                         return tuz_CTRLTYPE_UNKNOW_ERROR;
@@ -492,11 +452,8 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* _in_code,tuz_size_t code_size,tuz
                 }
             }
         }else{
-            if (__SafeTest(dsize)){
-                tuz_fast_uint8 data;
-                _mem_read_1byte(data);
-                *cur_out_data++=data;
-                --dsize;
+            if (__SafeTest(cur_out_data<out_data_end)){
+                _mem_read_1byte(*cur_out_data++); 
             }else{
                 return tuz_OUT_SIZE_OR_CODE_ERROR;
             }
