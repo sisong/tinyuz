@@ -10,9 +10,8 @@ namespace _tuz_private{
     
     struct TTuzCode{
         explicit TTuzCode(std::vector<tuz_byte>& out_code)
-        :code(out_code),type_count(0){  }
+        :code(out_code),type_count(0),_dictPos_back(1),_isHaveData_back(false){  }
         
-        void outLen(size_t len);
         void outDictPos(size_t pos);
         void outDictSize(size_t dict_size);
         void outData(const tuz_byte* data,const tuz_byte* data_end);
@@ -29,8 +28,11 @@ namespace _tuz_private{
         std::vector<tuz_byte>& code;
         size_t    types_index;
         size_t    type_count;
+        size_t    _dictPos_back;
+        bool      _isHaveData_back;
         void outType(size_t bit1v);
         void outCtrl(tuz_TCtrlType ctrl);
+        void outLen(size_t len,int packBit);
     };
     
 }//end namespace

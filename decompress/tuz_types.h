@@ -18,7 +18,7 @@ extern "C" {
 #endif
     
 #define TINYUZ_VERSION_MAJOR    0
-#define TINYUZ_VERSION_MINOR    6
+#define TINYUZ_VERSION_MINOR    7
 #define TINYUZ_VERSION_RELEASE  0
     
 #define _TINYUZ_VERSION                 TINYUZ_VERSION_MAJOR.TINYUZ_VERSION_MINOR.TINYUZ_VERSION_RELEASE
@@ -125,10 +125,12 @@ typedef struct _tuz_TDict{
 typedef struct _tuz_TState{
     tuz_size_t      dictType_pos;
     tuz_size_t      dictType_pos_inc;
+    tuz_size_t      dict_pos_back;
     tuz_length_t    dictType_len;
     tuz_length_t    literalType_len;
     tuz_fast_uint8  types;
     tuz_fast_uint8  type_count;
+    tuz_BOOL        isHaveData_back;
 } _tuz_TState;
 
 #ifdef __cplusplus

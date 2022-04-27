@@ -202,10 +202,12 @@ tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStrea
     
     self->_state.dictType_pos=0;
     self->_state.dictType_pos_inc=0;
+    self->_state.dict_pos_back=1;
     self->_state.dictType_len=0;
     self->_state.literalType_len=0;
     self->_state.types=0;
     self->_state.type_count=0;
+    self->_state.isHaveData_back=tuz_FALSE;
     return tuz_OK;
 }
 
@@ -261,9 +263,17 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
     type_process:
         {
             if (_cache_read_1bit(self)==tuz_codeType_dict){
-                tuz_size_t saved_dict_pos=_cache_unpack_dict_pos(self);
+                tuz_size_t saved_dict_pos;
+                if ((self->_state.isHaveData_back)&&(_cache_read_1bit(self))){
+                    saved_dict_pos=self->_state.dict_pos_back;
+                }else{
+                    saved_dict_pos=_cache_unpack_dict_pos(self);
+                }
+
                 if (saved_dict_pos){
                     const tuz_size_t outed_size=(tuz_size_t)(cur_out_data-out_data);
+                    self->_state.dict_pos_back=saved_dict_pos;
+                    self->_state.isHaveData_back=tuz_FALSE;
                     if (_cache_read_1bit(self)==0)
                         self->_state.dictType_len=_cache_read_1bit(self)+tuz_kMinDictMatchLen;
                     else
@@ -284,9 +294,12 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
                     tuz_length_t saved_len=_cache_unpack_len(self);
                     if (saved_len){ //literalType
                         self->_state.literalType_len=saved_len+(tuz_kMinLiteralLen-1);
+                        self->_state.isHaveData_back=tuz_TRUE;
                         goto copyLiteral_process;
                     }else{ // ctrlType
                         const tuz_fast_uint8 ctrlType=_cache_read_1byte(&self->_code_cache);
+                        self->_state.dict_pos_back=1;
+                        self->_state.isHaveData_back=tuz_FALSE;
                         self->_state.type_count=0;
                         if (tuz_ctrlType_clipEnd==ctrlType){ //clip end
                             goto type_process;
@@ -300,7 +313,8 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
                     }
                 }
             }else{
-                if (dsize){
+                if (dsize){                
+                    self->_state.isHaveData_back=tuz_TRUE;
                     *cur_out_data++=_cache_read_1byte(&self->_code_cache);
                     --dsize;
                     goto type_process;
@@ -392,6 +406,8 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* _in_code,tuz_size_t code_size,tuz
     _mem_TStream self={_in_code,_in_code+code_size,0,0};
     tuz_byte*  cur_out_data=out_data;
     tuz_byte*  out_data_end=out_data+(*data_size);
+    tuz_size_t dict_pos_back=1;
+    tuz_BOOL   isHaveData_back=tuz_FALSE;
 #if (tuz_isNeedSaveDictSize)
     {//dict_size
         self.in_code+=tuz_kDictSizeSavedCount; //skip tuz_kDictSizeSavedCount size
@@ -404,10 +420,16 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* _in_code,tuz_size_t code_size,tuz
     while(1){
         if ((_mem_read_lowbits(&self,1)&1)==tuz_codeType_dict){
             tuz_size_t saved_dict_pos; 
-            _mem_unpack_dict_pos(saved_dict_pos);
+            if ((isHaveData_back)&&(_mem_read_lowbits(&self,1)&1)){
+                saved_dict_pos=dict_pos_back;
+            }else{
+                _mem_unpack_dict_pos(saved_dict_pos);
+            }
             if (saved_dict_pos){
                 tuz_size_t dictType_len;
                 tuz_fast_uint8 low2bit=_mem_read_lowbits(&self,2)&0x3;
+                dict_pos_back=saved_dict_pos;
+                isHaveData_back=tuz_FALSE;
                 if ((low2bit&0x1)==0){
                     dictType_len=(low2bit>>1)+tuz_kMinDictMatchLen;
                 }else{
@@ -428,6 +450,7 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* _in_code,tuz_size_t code_size,tuz
                 tuz_length_t literalType_len=_mem_unpack_len(&self);
                 if (literalType_len){ //literalType
                     literalType_len+=(tuz_kMinLiteralLen-1);
+                    isHaveData_back=tuz_TRUE;
 #ifdef __RUN_MEM_SAFE_CHECK
                     if (literalType_len>(tuz_size_t)(self.in_code_end-self.in_code)) return tuz_READ_CODE_ERROR;
                     if (literalType_len>(tuz_size_t)(out_data_end-cur_out_data)) return tuz_OUT_SIZE_OR_CODE_ERROR;
@@ -441,6 +464,8 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* _in_code,tuz_size_t code_size,tuz
                 }else{ // ctrlType
                     tuz_fast_uint8 ctrlType;
                     _mem_read_1byte(ctrlType);
+                    dict_pos_back=1;
+                    isHaveData_back=tuz_FALSE;
                     self.type_count=0;
                     if (tuz_ctrlType_clipEnd==ctrlType){ //clip end
                     }else if (tuz_ctrlType_streamEnd==ctrlType){ //stream end
@@ -453,6 +478,7 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* _in_code,tuz_size_t code_size,tuz
             }
         }else{
             if (__SafeTest(cur_out_data<out_data_end)){
+                isHaveData_back=tuz_TRUE;
                 _mem_read_1byte(*cur_out_data++); 
             }else{
                 return tuz_OUT_SIZE_OR_CODE_ERROR;

@@ -41,7 +41,7 @@ namespace _tuz_private{
             if (dict_pos>=props_dictSize) continue; //same as ((TInt)dict_pos<0)|(dict_pos>=props.dictSize)
             
             const size_t curSaveDictCost=cost[curi-1]+coder.getSavedDictPosBit(dict_pos,
-                                                dictPos[curi-1],false);
+                                                                dictPos[curi-1],(saveLen[curi-1]==0));
             for (TInt mLen=minDictMatchLen;mLen<=curMinLcp;++mLen){
                 size_t ni=curi+mLen-1;
                 const size_t dictCost=curSaveDictCost+coder.getSavedDictLenBit(mLen);
@@ -66,6 +66,7 @@ void TMatch::_getCost(const tuz_byte* cur0){
     const size_t _kLiteralCost0=coder.getLiteralCostBit();
     const size_t _kCost0=coder.getSavedDataBit(1);
     cost[0]=(TUInt)_kCost0;
+    dictPos[0]=0;
     size_t unmatched_len=1;
     size_t costUnmatchStill_len=_kNullValue;
     size_t costUnmatchStill_dict_i=_kNullValue;
@@ -82,6 +83,7 @@ void TMatch::_getCost(const tuz_byte* cur0){
         if (curSaveDataCost<=cost[i]){
             cost[i]=(TUInt)curSaveDataCost;
             saveLen[i]=0;
+            dictPos[i]=dictPos[i-1];
             if (costUnmatchStill_len==_kNullValue){
                 costUnmatchStill_len=unmatched_len-1;
                 costUnmatchStill_dict_i=_kNullValue;
@@ -99,10 +101,14 @@ void TMatch::_getCost(const tuz_byte* cur0){
                     if (costUzStill<=cost[i]){
                         cost[i]=(TUInt)costUzStill;
                         saveLen[i]=0;
+                        dictPos[i]=0;
+                        if ((costUnmatchStill_dict_i>0)&&(costUnmatchStill_dict_i!=_kNullValue))
+                            dictPos[i]=dictPos[costUnmatchStill_dict_i-1];
                         cost[i-1]=(TUInt)(costUzStill-umstillLenCost+coder.getSavedDataBit(costUnmatchStill_len-1));
                         saveLen[i-1]=0;
                         for (size_t j=costUnmatchStill_dict_i;j<i-1;++j){
                             saveLen[j]=0;
+                            dictPos[j]=(costUnmatchStill_dict_i>0)?dictPos[costUnmatchStill_dict_i-1]:0;
                         }
                         costUnmatchStill_dict_i=_kNullValue;
                         unmatched_len=costUnmatchStill_len;
