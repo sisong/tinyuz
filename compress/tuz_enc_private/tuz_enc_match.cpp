@@ -4,14 +4,17 @@
  Copyright (c) 2012-2022 HouSisong All Rights Reserved.
 */
 #include "tuz_enc_match.h"
+#include "tuz_enc_code.h"
 namespace _tuz_private{
     
-    typedef TSuffixString::TInt     TInt;
-    typedef TSuffixString::TLCPInt  TLCPInt;
-    const TInt kNullCostValue=tuz_ui2G_sub_1;
+    typedef TMatch::TInt     TInt;
+    typedef TMatch::TUInt    TUInt;
+    typedef TMatch::TLCPInt  TLCPInt;
+    const TUInt kNullCostValue=~(TUInt)0;
+    const TInt  kTInt_Max=(TInt)((~(uint32_t)0)>>1);
     
     void TMatch::_cost_match(TInt it_inc,const TInt curString,const size_t curi,
-                             TInt* curMinDictMatchLen,std::vector<TInt>& cost){
+                             TInt* curMinDictMatchLen,std::vector<TUInt>& cost){
         const TInt it_cur=sstring.R[curString];
         TInt it=it_cur+it_inc;
         TInt it_end;
@@ -26,7 +29,7 @@ namespace _tuz_private{
         }
         
         TInt minDictMatchLen=*curMinDictMatchLen;
-        TInt curMinLcp=(TInt)tuz_ui2G_sub_1;
+        TInt curMinLcp=kTInt_Max;
         const size_t props_dictSize=props.dictSize;
         const TInt* SA=sstring.SA.data();
         for (;(it!=it_end);it+=it_inc,LCP+=it_inc){
@@ -37,12 +40,13 @@ namespace _tuz_private{
             const size_t dict_pos=(curString-matchedString)-1;
             if (dict_pos>=props_dictSize) continue; //same as ((TInt)dict_pos<0)|(dict_pos>=props.dictSize)
             
-            const TInt curSaveDictCost=cost[curi-1]+(TInt)coder.getSavedDictPosBit((tuz_size_t)dict_pos);
+            const size_t curSaveDictCost=cost[curi-1]+coder.getSavedDictPosBit(dict_pos,
+                                                dictPos[curi-1],false);
             for (TInt mLen=minDictMatchLen;mLen<=curMinLcp;++mLen){
                 size_t ni=curi+mLen-1;
-                const TInt dictCost=curSaveDictCost+(TInt)coder.getSavedDictLenBit(mLen);
+                const size_t dictCost=curSaveDictCost+coder.getSavedDictLenBit(mLen);
                 if (dictCost<cost[ni]){
-                    cost[ni]=dictCost;
+                    cost[ni]=(TUInt)dictCost;
                     saveLen[ni]=mLen;
                     dictPos[ni]=(TInt)dict_pos;
                 }
@@ -54,31 +58,30 @@ namespace _tuz_private{
     
 void TMatch::_getCost(const tuz_byte* cur0){
     const size_t _kNullValue=~0;
-    std::vector<TInt> cost;
+    std::vector<TUInt> cost;
     size_t costSize=(sstring.src_end-cur0);
     cost.resize(costSize,kNullCostValue);
-    dictPos.resize(costSize,-1);
-    saveLen.resize(costSize,1);
-    const TInt _kLiteralCost0=(TInt)coder.getLiteralCostBit();
-    const TInt _kCost0=(TInt)coder.getSavedDataBit(1);
-    cost[0]=_kCost0;
+    dictPos.resize(costSize);
+    saveLen.resize(costSize,0);
+    const size_t _kLiteralCost0=coder.getLiteralCostBit();
+    const size_t _kCost0=coder.getSavedDataBit(1);
+    cost[0]=(TUInt)_kCost0;
     size_t unmatched_len=1;
     size_t costUnmatchStill_len=_kNullValue;
     size_t costUnmatchStill_dict_i=_kNullValue;
     for (size_t i=1;i<costSize;++i){
-        TInt curSaveDataCost;
-        if (dictPos[i-1]>=0){
+        size_t curSaveDataCost;
+        if (saveLen[i-1]>0){
             curSaveDataCost=cost[i-1]+_kCost0;
             unmatched_len=1;
         }else{
             ++unmatched_len;
             curSaveDataCost=((i>=unmatched_len)?cost[i-unmatched_len]:0)
-                            + (TInt)coder.getSavedDataBit((tuz_length_t)unmatched_len);
+                            + coder.getSavedDataBit(unmatched_len);
         }
         if (curSaveDataCost<=cost[i]){
-            cost[i]=curSaveDataCost;
-            saveLen[i]=1;
-            dictPos[i]=-1;
+            cost[i]=(TUInt)curSaveDataCost;
+            saveLen[i]=0;
             if (costUnmatchStill_len==_kNullValue){
                 costUnmatchStill_len=unmatched_len-1;
                 costUnmatchStill_dict_i=_kNullValue;
@@ -88,22 +91,18 @@ void TMatch::_getCost(const tuz_byte* cur0){
         if (costUnmatchStill_len!=_kNullValue){
             ++costUnmatchStill_len;
             if (costUnmatchStill_len>unmatched_len){
-                TInt costUzStill=((i>=costUnmatchStill_len)?cost[i-costUnmatchStill_len]:0)
-                                    +(TInt)coder.getSavedDataBit((tuz_length_t)costUnmatchStill_len);
+                const size_t umstillLenCost=coder.getSavedDataBit(costUnmatchStill_len);
+                size_t costUzStill=umstillLenCost+((i>=costUnmatchStill_len)?cost[i-costUnmatchStill_len]:0);
                 if ((costUzStill>cost[i]+_kLiteralCost0)){
                     costUnmatchStill_len=_kNullValue;
                 }else{
                     if (costUzStill<=cost[i]){
-                        cost[i]=costUzStill;
-                        saveLen[i]=1;
-                        dictPos[i]=-1;
-                        cost[i-1]=costUzStill-(TInt)coder.getSavedDataBit((tuz_length_t)costUnmatchStill_len)
-                                    +(TInt)coder.getSavedDataBit((tuz_length_t)(costUnmatchStill_len-1));
-                        saveLen[i-1]=1;
-                        dictPos[i-1]=-1;
+                        cost[i]=(TUInt)costUzStill;
+                        saveLen[i]=0;
+                        cost[i-1]=(TUInt)(costUzStill-umstillLenCost+coder.getSavedDataBit(costUnmatchStill_len-1));
+                        saveLen[i-1]=0;
                         for (size_t j=costUnmatchStill_dict_i;j<i-1;++j){
-                            saveLen[j]=1;
-                            dictPos[j]=-1;
+                            saveLen[j]=0;
                         }
                         costUnmatchStill_dict_i=_kNullValue;
                         unmatched_len=costUnmatchStill_len;
@@ -114,33 +113,32 @@ void TMatch::_getCost(const tuz_byte* cur0){
 
         const TInt curString=(TInt)(cur0+i-sstring.src);
         TInt minDictMatchLen=tuz_kMinDictMatchLen;
-        _cost_match( 1,curString,i,&minDictMatchLen,cost);
         _cost_match(-1,curString,i,&minDictMatchLen,cost);
-        if ((costUnmatchStill_dict_i==_kNullValue)&&(dictPos[i]>=0))
+        _cost_match( 1,curString,i,&minDictMatchLen,cost);
+        if ((costUnmatchStill_dict_i==_kNullValue)&&(saveLen[i]>0))
             costUnmatchStill_dict_i=i;
     }
-    size_t wi=costSize;
-    while (wi>0) {
-        size_t i=wi-1;
-        if (dictPos[i]>=0){
-            TInt mlen=saveLen[i];
+    size_t i_inc=costSize;
+    while (i_inc>0) {
+        size_t i=i_inc-1;
+        TLCPInt mlen=saveLen[i];
+        if (mlen>0){
             dictPos[i-mlen+1]=dictPos[i];
             saveLen[i-mlen+1]=mlen;
-            wi-=mlen;
+            i_inc-=mlen;
         }else{
-            saveLen[i]=1;
-            --wi;
+            --i_inc;
         }
     }
 }
 
-bool TMatch::match(const tuz_byte** out_matched,tuz_length_t* out_match_len,
+bool TMatch::match(const tuz_byte** out_matched,size_t* out_match_len,
                    const tuz_byte* cur){
-    if (dictPos.empty())
+    if (saveLen.empty())
         _getCost(cur);
     
-    size_t costi=dictPos.size()-(sstring.src_end-cur);
-    if (dictPos[costi]>=0){
+    size_t costi=saveLen.size()-(sstring.src_end-cur);
+    if (saveLen[costi]>0){
         *out_matched=cur-dictPos[costi]-1;
         *out_match_len=saveLen[costi];
         return true;

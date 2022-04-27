@@ -33,7 +33,7 @@ namespace _tuz_private{
 
 void TSuffixString::_init(TLCPInt maxLCPValue){
     size_t sa_size=size();
-    checkv(_uint_is_less_2g(sa_size));
+    checkv((sa_size==(size_t)(TInt)sa_size)&&(0<=(TInt)sa_size));
     SA.resize(sa_size);
     R.resize(sa_size);
     LCP.resize(sa_size);

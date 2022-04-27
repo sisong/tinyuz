@@ -7,25 +7,27 @@
 #define _tuz_enc_match_h
 #include "tuz_sstring.h"
 namespace _tuz_private{
-    
+    struct TTuzCode;
+
     struct TMatch{
         explicit TMatch(const tuz_byte* data,const tuz_byte* data_end,
-                        const ICode& _coder,const tuz_TCompressProps& _props)
+                        const TTuzCode& _coder,const tuz_TCompressProps& _props)
         :sstring(data,data_end,(TLCPInt)_props.maxSaveLength), coder(_coder),
         props(_props){ }
-        bool match(const tuz_byte** out_matched,tuz_length_t* out_match_len,
+        bool match(const tuz_byte** out_matched,size_t* out_match_len,
                    const tuz_byte* cur);
+        typedef TSuffixString::TInt     TInt;
+        typedef uint32_t                TUInt;
+        typedef TSuffixString::TLCPInt  TLCPInt;
     private:
         TSuffixString               sstring;
-        const ICode&                coder;
+        const TTuzCode&             coder;
         const tuz_TCompressProps&   props;
         
-        typedef TSuffixString::TInt     TInt;
-        typedef TSuffixString::TLCPInt  TLCPInt;
         std::vector<TInt>           dictPos;
         std::vector<TLCPInt>        saveLen;
         void _cost_match(TInt it_inc,const TInt curString,const size_t curi,
-                         TInt* curMinDictMatchLen,std::vector<TInt>& cost);
+                         TInt* curMinDictMatchLen,std::vector<TUInt>& cost);
         void _getCost(const tuz_byte* cur0);
     };
     

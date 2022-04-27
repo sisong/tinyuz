@@ -25,6 +25,7 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     if (props){
         checkv((props->dictSize>=1)&(props->dictSize<=tuz_kMaxOfDictSize));
         checkv(props->dictSize==(tuz_size_t)props->dictSize);
+        checkv(props->maxSaveLength==(tuz_length_t)props->maxSaveLength);
         checkv((props->maxSaveLength>=tuz_kMinOfMaxSaveLength)&(props->maxSaveLength<=tuz_kMaxOfMaxSaveLength));
     }
     
@@ -40,7 +41,8 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     {//head
         TTuzCode coder(code);
 		checkv(selfProps.dictSize==(tuz_size_t)selfProps.dictSize);
-        coder.outDictSize((tuz_size_t)selfProps.dictSize);
+        checkv(selfProps.maxSaveLength==(tuz_length_t)selfProps.maxSaveLength);
+        coder.outDictSize(selfProps.dictSize);
     }
     {
         hpatch_StreamPos_t clipSize;

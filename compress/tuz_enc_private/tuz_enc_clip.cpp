@@ -11,7 +11,7 @@ namespace _tuz_private{
     static void _outData(const tuz_byte* back,size_t unmatched_len,
                          _tuz_private::TTuzCode& coder,const tuz_TCompressProps& props){
         while (unmatched_len){
-            size_t len=(unmatched_len<=props.maxSaveLength)?(tuz_length_t)unmatched_len:props.maxSaveLength;
+            size_t len=(unmatched_len<=props.maxSaveLength)?unmatched_len:props.maxSaveLength;
             coder.outData(back,back+len);
             back+=len;
             unmatched_len-=len;
@@ -45,7 +45,7 @@ void compress_clip(TTuzCode& coder,const hpatch_TStreamInput* data,hpatch_Stream
         const tuz_byte* back=cur;
         while (cur!=end){
             const tuz_byte*     matched;
-            tuz_length_t        match_len;
+            size_t              match_len;
             if (matcher.match(&matched,&match_len,cur)){
                 assert(matched<cur);
                 assert(cur+match_len<=end);
@@ -56,7 +56,7 @@ void compress_clip(TTuzCode& coder,const hpatch_TStreamInput* data,hpatch_Stream
                     _outData(back,unmatched_len,coder,props);
                 size_t dict_pos=(cur-matched)-1;
                 assert(dict_pos<props.dictSize);
-                coder.outDict(match_len,(tuz_length_t)dict_pos);
+                coder.outDict(match_len,dict_pos);
                 cur+=match_len;
                 back=cur;
             }else{

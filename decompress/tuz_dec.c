@@ -291,7 +291,7 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
                         if (tuz_ctrlType_clipEnd==ctrlType){ //clip end
                             goto type_process;
                         }else if (tuz_ctrlType_streamEnd==ctrlType){ //stream end
-                            *data_size=cur_out_data-out_data;
+                            *data_size=(tuz_size_t)(cur_out_data-out_data);
                             return tuz_STREAM_END;
                         }else{
                             return _tuz_cache_success_finish(&self->_code_cache)?
@@ -417,7 +417,7 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* _in_code,tuz_size_t code_size,tuz
                 }
 #ifdef __RUN_MEM_SAFE_CHECK
                 if (saved_dict_pos>(tuz_size_t)(cur_out_data-out_data)) return tuz_DICT_POS_ERROR;
-                if (dictType_len>(out_data_end-cur_out_data)) return tuz_OUT_SIZE_OR_CODE_ERROR;
+                if (dictType_len>(tuz_size_t)(out_data_end-cur_out_data)) return tuz_OUT_SIZE_OR_CODE_ERROR;
 #endif
                 {
                     const tuz_byte* src=cur_out_data-saved_dict_pos;
@@ -430,7 +430,7 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* _in_code,tuz_size_t code_size,tuz
                     literalType_len+=(tuz_kMinLiteralLen-1);
 #ifdef __RUN_MEM_SAFE_CHECK
                     if (literalType_len>(tuz_size_t)(self.in_code_end-self.in_code)) return tuz_READ_CODE_ERROR;
-                    if (literalType_len>(out_data_end-cur_out_data)) return tuz_OUT_SIZE_OR_CODE_ERROR;
+                    if (literalType_len>(tuz_size_t)(out_data_end-cur_out_data)) return tuz_OUT_SIZE_OR_CODE_ERROR;
 #endif
                     {
                         const tuz_byte* src=self.in_code;
