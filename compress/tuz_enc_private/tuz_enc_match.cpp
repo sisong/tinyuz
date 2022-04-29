@@ -12,9 +12,17 @@ namespace _tuz_private{
     typedef TMatch::TLCPInt  TLCPInt;
     const TUInt kNullCostValue=~(TUInt)0;
     const TInt  kTInt_Max=(TInt)((~(uint32_t)0)>>1);
+
+    static TInt _sstr_eqLen(const tuz_byte* ss_end,const  tuz_byte* matchedString,const tuz_byte* curString){
+        TInt eqLen=0;
+        while ((curString<ss_end)&&((*curString)==matchedString[eqLen])){
+            ++eqLen; ++curString;
+        }
+        return eqLen;
+    }
     
     void TMatch::_cost_match(TInt it_inc,const TInt curString,const size_t curi,
-                             TInt* curMinDictMatchLen,std::vector<TUInt>& cost){
+                             TInt* curMinDictMatchLen,std::vector<TUInt>& cost,bool isMatch_back_pos){
         const TInt it_cur=sstring.R[curString];
         TInt it=it_cur+it_inc;
         TInt it_end;
@@ -28,10 +36,30 @@ namespace _tuz_private{
             LCP=sstring.LCP.data()+it_cur-1;
         }
         
+        const size_t back_pos=dictPos[curi-1];
+        const size_t isHaveData=(saveLen[curi-1]==0)?1:0;
         TInt minDictMatchLen=*curMinDictMatchLen;
-        TInt curMinLcp=kTInt_Max;
         const size_t props_dictSize=props.dictSize;
         const TInt* SA=sstring.SA.data();
+        if (isMatch_back_pos&&isHaveData){
+            TInt matchedString=curString-(TInt)(back_pos+1);
+            TInt curLCP=_sstr_eqLen(sstring.src_end,sstring.src+matchedString,sstring.src+curString);
+            if (curLCP>=minDictMatchLen){
+                const size_t curSaveDictCost=cost[curi-1]+coder.getSavedDictPosBiti<true>(back_pos,1);
+                for (TInt mLen=minDictMatchLen;mLen<=curLCP;++mLen){
+                    size_t ni=curi+mLen-1;
+                    const size_t dictCost=curSaveDictCost+coder.getSavedDictLenBiti(mLen);
+                    if (dictCost<cost[ni]){
+                        cost[ni]=(TUInt)dictCost;
+                        saveLen[ni]=mLen;
+                        dictPos[ni]=(TInt)back_pos;
+                    }
+                }
+                minDictMatchLen=curLCP+1;
+            }
+        }
+
+        TInt curMinLcp = kTInt_Max;
         for (;(it!=it_end);it+=it_inc,LCP+=it_inc){
             TInt curLCP=*LCP;
             curMinLcp=(curLCP<curMinLcp)?curLCP:curMinLcp;
@@ -39,20 +67,21 @@ namespace _tuz_private{
             TInt matchedString=SA[it];
             const size_t dict_pos=(curString-matchedString)-1;
             if (dict_pos>=props_dictSize) continue; //same as ((TInt)dict_pos<0)|(dict_pos>=props.dictSize)
-            
-            const size_t curSaveDictCost=cost[curi-1]+coder.getSavedDictPosBit(dict_pos,
-                                                                dictPos[curi-1],(saveLen[curi-1]==0));
+            if (dict_pos==back_pos) continue;
+
+            const size_t curSaveDictCost=cost[curi-1]+coder.getSavedDictPosBiti<false>(dict_pos,isHaveData);
             for (TInt mLen=minDictMatchLen;mLen<=curMinLcp;++mLen){
                 size_t ni=curi+mLen-1;
-                const size_t dictCost=curSaveDictCost+coder.getSavedDictLenBit(mLen);
+                const size_t dictCost=curSaveDictCost+coder.getSavedDictLenBiti(mLen);
                 if (dictCost<cost[ni]){
                     cost[ni]=(TUInt)dictCost;
                     saveLen[ni]=mLen;
                     dictPos[ni]=(TInt)dict_pos;
                 }
             }
-            minDictMatchLen=curMinLcp;
-        }
+            const size_t _kMStep=0; //0 1 16
+            minDictMatchLen=(curMinLcp>minDictMatchLen+_kMStep)?curMinLcp-_kMStep:minDictMatchLen;
+         }
         *curMinDictMatchLen=minDictMatchLen;
     }
     
@@ -118,9 +147,9 @@ void TMatch::_getCost(const tuz_byte* cur0){
         }
 
         const TInt curString=(TInt)(cur0+i-sstring.src);
-        TInt minDictMatchLen=tuz_kMinDictMatchLen;
-        _cost_match(-1,curString,i,&minDictMatchLen,cost);
-        _cost_match( 1,curString,i,&minDictMatchLen,cost);
+        TInt curDictMatchLen=tuz_kMinDictMatchLen;
+        _cost_match(-1,curString,i,&curDictMatchLen,cost,true);
+        _cost_match( 1,curString,i,&curDictMatchLen,cost,false);
         if ((costUnmatchStill_dict_i==_kNullValue)&&(saveLen[i]>0))
             costUnmatchStill_dict_i=i;
     }

@@ -55,35 +55,41 @@ _debug_log _;
 #endif
 
 namespace _tuz_private{
-    const int kDictLenPackBit    =2;
-    const int kDictPosLenPackBit =2; // 4?
+    const int kDictLenPackBit    =1;
+    const int kDictPosLenPackBit =2;
 
     //low to high bitmap: xx?xx? xx?xx? ...
-    static tuz_inline size_t _pack_v_count(size_t v,int packBit){
-        size_t count=0;
-        do {
-            v>>=packBit;
+    static tuz_inline size_t _getOutCount(size_t v,int packBit,size_t* dec=0){ // v>=0
+        size_t count=1;
+        size_t _v=v;
+        while (1){
+            size_t m=1<<(count*packBit);
+            if (v<m) break;
+            v-=m;
             ++count;
-        }while(v>0);
+        }
+        if (dec) *dec=_v-v;
         return count;
     }
-    static tuz_inline size_t _getSavedLenBit(size_t len,int packBit){
-        return _pack_v_count(len,packBit)*(packBit+1);
+    static tuz_force_inline size_t _getSavedLenBit(size_t v,int packBit){
+        return _getOutCount(v,packBit)*(packBit+1);
     }
+
+void TTuzCode::outLen(size_t v,int packBit){ //v>=0
+    size_t dec;
+    size_t c=_getOutCount(v,packBit,&dec);
+    v-=dec;
+    while(c--){
+        for (size_t i=0;i<packBit;++i)
+            outType((v>>(c*packBit+i))&1);
+        outType((c>0)?1:0);
+    }
+}
 
 #define outDictLen(len)             outLen(len,kDictLenPackBit)
 #define outDictPosLen(len)          outLen(len,kDictPosLenPackBit)
 #define _getDictLenBit(len)         _getSavedLenBit(len,kDictLenPackBit)
 #define _getDictPosLenBit(len)      _getSavedLenBit(len,kDictPosLenPackBit)
-
-void TTuzCode::outLen(size_t len,int packBit){
-    size_t c=_pack_v_count(len,packBit);
-    while (c--) {
-        for (size_t i=0;i<packBit;++i)
-            outType((len>>(c*packBit+i))&1);
-        outType((c>0)?1:0);
-    }
-}
 
 void TTuzCode::outType(size_t bit1v){
     if (type_count==0){
@@ -94,7 +100,7 @@ void TTuzCode::outType(size_t bit1v){
     (*types)|=(bit1v<<type_count);
     ++type_count;
     if (type_count==tuz_kMaxTypeBitCount)
-        type_count = 0;
+        type_count=0;
 }
 
 void TTuzCode::outDictSize(size_t dict_size){
@@ -134,13 +140,14 @@ void TTuzCode::outData(const tuz_byte* data,const tuz_byte* data_end){
         outDictPos(0); //dict_pos==0
         outDictPosLen(len-(tuz_kMinLiteralLen-1)); //0 is ctrl
         code.insert(code.end(),data,data_end);
+        _isHaveData_back=false;
     }else{
         while (len--){
             outType(tuz_codeType_data);
             code.push_back(*data++);
         }
+        _isHaveData_back=true;
     }
-    _isHaveData_back=true;
 }
 
 
@@ -150,19 +157,21 @@ size_t TTuzCode::getSavedDictPosBit(size_t pos,size_t back_pos,bool isHaveData)c
     }else{
         //type bit + pos bit
         ++pos; //0 for ctrl or literal
-        const tuz_BOOL isOutLen=(pos>0x7F)?1:0;
+        const tuz_BOOL isOutLen=(pos>=(1<<7))?1:0;
+        if (isOutLen) pos-=(1<<7);
         return 1+(isHaveData?1:0)+8+(isOutLen?_getDictPosLenBit(pos>>7):0);
     }
 }
 void TTuzCode::outDictPos(size_t pos){
-    const tuz_BOOL isOutLen=(pos>0x7F)?1:0;
-    code.push_back((tuz_byte)((pos&0x7F)|(isOutLen<<7)));
+    const tuz_BOOL isOutLen=(pos>=(1<<7))?1:0;
+    if (isOutLen) pos-=(1<<7);
+    code.push_back((tuz_byte)((pos&((1<<7)-1))|(isOutLen<<7)));
     if (isOutLen)
         outDictPosLen(pos>>7);
 }
 
 size_t TTuzCode::getSavedDictLenBit(size_t match_len)const{
-    return (match_len<(tuz_kMinDictMatchLen+2))?2:_getDictLenBit(match_len-(tuz_kMinDictMatchLen+2));
+    return _getDictLenBit(match_len-tuz_kMinDictMatchLen);
 }
 void TTuzCode::outDict(size_t match_len,size_t dict_pos){
     size_t len=match_len-tuz_kMinDictMatchLen;
@@ -174,13 +183,7 @@ void TTuzCode::outDict(size_t match_len,size_t dict_pos){
             outType(0);
         outDictPos(dict_pos+1); //>0
     }
-    if (len<=1){
-        outType(0);
-        outType(len);
-    }else{
-        outType(1);
-        outDictLen(len-2);
-    }
+    outDictLen(len);
     _isHaveData_back=false;
     _dictPos_back=dict_pos+1;
 #if (_TEST_COUNT)

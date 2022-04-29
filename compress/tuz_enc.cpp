@@ -47,7 +47,7 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     {
         hpatch_StreamPos_t clipSize;
         {
-            clipSize=selfProps.dictSize*16;
+            clipSize=selfProps.dictSize*(hpatch_StreamPos_t)16;
             if (clipSize<kMinBestClipSize) clipSize=kMinBestClipSize;
             if (clipSize>kMaxBestClipSize) clipSize=kMaxBestClipSize;
             hpatch_StreamPos_t clipCount=(data->streamSize+clipSize)/clipSize;
