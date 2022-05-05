@@ -47,15 +47,16 @@ void compress_clip(TTuzCode& coder,const hpatch_TStreamInput* data,hpatch_Stream
             const tuz_byte*     matched;
             size_t              match_len;
             if (matcher.match(&matched,&match_len,cur)){
-                assert(matched<cur);
-                assert(cur+match_len<=end);
-                assert(match_len>=tuz_kMinDictMatchLen);
-                assert(match_len<=props.maxSaveLength);
+                checkv(matched<cur);
+                checkv(matched>=data_buf.data());
+                checkv(cur+match_len<=end);
+                checkv(match_len>=tuz_kMinDictMatchLen);
+                checkv(match_len<=props.maxSaveLength);
                 const size_t unmatched_len=(cur-back);
                 if (unmatched_len>0)
                     _outData(back,unmatched_len,coder,props);
                 size_t dict_pos=(cur-matched)-1;
-                assert(dict_pos<props.dictSize);
+                checkv(dict_pos<props.dictSize);
                 coder.outDict(match_len,dict_pos);
                 cur+=match_len;
                 back=cur;

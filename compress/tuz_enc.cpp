@@ -20,8 +20,8 @@ hpatch_StreamPos_t tuz_maxCompressedSize(hpatch_StreamPos_t data_size){
 
 hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatch_TStreamInput* data,
                                 const tuz_TCompressProps* props){
-    assert(out_code&&(out_code->write));
-    assert(data&&(data->read));
+    checkv(out_code&&(out_code->write));
+    checkv(data&&(data->read));
     if (props){
         checkv((props->dictSize>=1)&(props->dictSize<=tuz_kMaxOfDictSize));
         checkv(props->dictSize==(tuz_size_t)props->dictSize);
@@ -47,7 +47,7 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     {
         hpatch_StreamPos_t clipSize;
         {
-            clipSize=selfProps.dictSize*(hpatch_StreamPos_t)16;
+            clipSize=((hpatch_StreamPos_t)selfProps.dictSize+1)/2;
             if (clipSize<kMinBestClipSize) clipSize=kMinBestClipSize;
             if (clipSize>kMaxBestClipSize) clipSize=kMaxBestClipSize;
             hpatch_StreamPos_t clipCount=(data->streamSize+clipSize)/clipSize;

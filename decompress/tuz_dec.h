@@ -27,7 +27,7 @@ typedef enum tuz_TResult{
 } tuz_TResult;
 
 //-----------------------------------------------------------------------------------------------------------------
-// decompress by tuz_TStream: compiled by Mbed Studio is 868 bytes
+// decompress by tuz_TStream: compiled by Mbed Studio is 898 bytes
 
 typedef struct tuz_TStream{
     _tuz_TInputCache    _code_cache;

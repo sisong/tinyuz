@@ -17,13 +17,19 @@ extern "C" {
     
     typedef enum tuz_TCtrlType{
         //0 for error type
-        tuz_ctrlType_streamEnd=1,
+    #if tuz_isNeedLiteralLine
+        tuz_ctrlType_literalLine=1,
+    #endif
         tuz_ctrlType_clipEnd=2,
+        tuz_ctrlType_streamEnd=3,
     } tuz_TCtrlType;
-    
-    #define tuz_kMinLiteralLen      13
+
+    #if tuz_isNeedLiteralLine
+    #   define tuz_kMinLiteralLen   15
+    #endif
     #define tuz_kMinDictMatchLen    2
     #define tuz_kMaxTypeBitCount    8
+    #define tuz_kBigPosForLen       ((1<<11)+(1<<9)+(1<<7)-1)
 
     tuz_fast_uint8 _tuz_cache_read_1byte(struct _tuz_TInputCache* self);
     tuz_BOOL _tuz_cache_update(struct _tuz_TInputCache* self);

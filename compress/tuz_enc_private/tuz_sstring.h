@@ -16,9 +16,9 @@ namespace _tuz_private{
         
         const tuz_byte* const src;
         const tuz_byte* const src_end;
-        std::vector<TInt>   SA;     // suffix string
-        std::vector<TInt>   R;      // rank of sstring
-        std::vector<TLCPInt> LCP;    // lcp(i,i+1), longest common prefix between adjacent sstring
+        std::vector<TInt>     SA;     // suffix string
+        std::vector<TInt>     R;      // rank of sstring
+        std::vector<TLCPInt>  LCP;    // lcp(i,i+1), longest common prefix between adjacent sstring
         inline size_t size()const { return src_end-src; }
     private:
         void _init(TLCPInt maxLCPValue);

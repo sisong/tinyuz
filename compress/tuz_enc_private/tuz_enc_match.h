@@ -25,10 +25,14 @@ namespace _tuz_private{
         const tuz_TCompressProps&   props;
         
         std::vector<TInt>           dictPos;
-        std::vector<TLCPInt>        saveLen;
+        std::vector<TLCPInt>        matchLen;
         void _cost_match(const TInt curString,const size_t curi,
-                         TInt* curMinDictMatchLen,std::vector<TUInt>& cost);
+                         size_t* curMinDictMatchLen,std::vector<TUInt>& cost);
         void _getCost(const tuz_byte* cur0);
+        void _getCostByMatch(const tuz_byte* cur0,std::vector<TUInt>& cost);
+      #if tuz_isNeedLiteralLine
+        void _getCostByLiteralLen(const tuz_byte* cur0,std::vector<TUInt>& cost);
+      #endif
     };
     
 }

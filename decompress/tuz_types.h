@@ -74,24 +74,23 @@ extern "C" {
 #   define tuz_try_inline tuz_inline
 #endif
 
-#ifndef _IS_RUN_MEM_SAFE_CHECK
+#ifndef _IS_RUN_MEM_SAFE_CHECK 
 #   define _IS_RUN_MEM_SAFE_CHECK  1
 #endif
 
-#ifndef _IS_USED_C_MEMCPY  // use memcpy in <string.h>?
+#ifndef _IS_USED_C_MEMCPY  // use memcpy() in <string.h>?
 #   define _IS_USED_C_MEMCPY  1
 #endif
 
-#ifndef tuz_TInputStreamHandle
-    typedef void*   tuz_TInputStreamHandle;
-#endif
-
-#ifndef tuz_isNeedSaveDictSize
-#   define tuz_isNeedSaveDictSize 1
+#ifndef tuz_isNeedLiteralLine  // optimize for can not compress data
+#   define tuz_isNeedLiteralLine 1
 #endif
 
 #ifndef tuz_kMaxOfDictSize
 #   define tuz_kMaxOfDictSize  ((1<<24)-1)
+#endif
+#ifndef tuz_isNeedSaveDictSize // saved dictSize(3 bytes) before compressed data
+#   define tuz_isNeedSaveDictSize 1
 #endif
 #if ((tuz_kMaxOfDictSize>>31)>=1)
 #   error tuz_kMaxOfDictSize error
@@ -105,6 +104,11 @@ extern "C" {
 #   define tuz_kDictSizeSavedCount 1
 #else
 #   error tuz_kMaxOfDictSize error
+#endif
+
+
+#ifndef tuz_TInputStreamHandle
+    typedef void*   tuz_TInputStreamHandle;
 #endif
 
 //read (*data_size) data to out_data from sequence stream; if input stream end,set *data_size readed size; if read error return tuz_FALSE;
@@ -127,7 +131,9 @@ typedef struct _tuz_TState{
     tuz_size_t      dictType_pos_inc;
     tuz_size_t      dict_pos_back;
     tuz_length_t    dictType_len;
+  #if tuz_isNeedLiteralLine
     tuz_length_t    literalType_len;
+  #endif
     tuz_fast_uint8  types;
     tuz_fast_uint8  type_count;
     tuz_BOOL        isHaveData_back;

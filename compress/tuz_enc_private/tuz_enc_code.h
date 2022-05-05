@@ -20,27 +20,35 @@ namespace _tuz_private{
         void outCtrl_streamEnd();
         void outCtrl_clipEnd();
         
-        size_t getSavedDataBit(size_t data_len)const;
-        size_t getSavedDictLenBit(size_t match_len)const;
-        inline size_t getSavedDictLenBiti(size_t match_len)const{
-            if (match_len<_len2bit_count) return _len2bit[match_len];
-            else return getSavedDictLenBit(match_len);  //error
+        inline size_t getSavedDataBit(size_t data_len)const{
+        #if tuz_isNeedLiteralLine
+            if (data_len>=tuz_kMinLiteralLen){
+                size_t len=data_len-tuz_kMinLiteralLen;
+                return data_len*8+1+2+8+__getDictPosLenBit(len);
+            }else
+        #endif
+                return data_len*(1+8);
         }
-        size_t getSavedDictPosBit(size_t pos,size_t back_pos,bool isHaveData)const;
+        template<bool isSavedSamePos> inline 
+        size_t getSavedDictLenBit(size_t match_len,size_t pos)const{
+            size_t len=match_len-((pos+1)>tuz_kBigPosForLen?1:0)-tuz_kMinDictMatchLen;
+            if (len<_len2bit_count) return _len2bit[len];
+            else if (len<match_len) return _getSavedDictLenBit(len);
+            else return 8*tuz_kMaxOfDictSize; //fail pos
+        }
         template<bool isSamePos> inline 
-        size_t getSavedDictPosBiti(size_t pos,size_t isHaveData)const{
+        size_t getSavedDictPosBit(size_t pos,size_t isHaveData)const{
             if (isSamePos&&isHaveData) return 2;
             else if (pos<_pos2bit_count) return _pos2bit[pos]+isHaveData;
-            else return getSavedDictPosBit(pos,-1,(bool)isHaveData);
+            else return _getSavedDictPosBit(pos)+isHaveData;
         }
-        size_t getLiteralCostBit()const;
     private:
-        enum {_len2bit_count=1024*8, _pos2bit_count=1024*32 };
+        enum { _len2bit_count=1024*8, _pos2bit_count=1024*32 };
         tuz_byte _pos2bit[_pos2bit_count];
         tuz_byte _len2bit[_len2bit_count];
         void _init_2bit(){
-            for (size_t i=0;i<_len2bit_count;++i) _len2bit[i]=getSavedDictLenBit(i); 
-            for (size_t i=0;i<_pos2bit_count;++i) _pos2bit[i]=getSavedDictPosBit(i,-1,false); }
+            for (size_t i=0;i<_pos2bit_count;++i) _pos2bit[i]=(tuz_byte)_getSavedDictPosBit(i); 
+            for (size_t i=0;i<_len2bit_count;++i) _len2bit[i]=(tuz_byte)_getSavedDictLenBit(i); }
         std::vector<tuz_byte>& code;
         size_t    types_index;
         size_t    type_count;
@@ -49,6 +57,11 @@ namespace _tuz_private{
         void outType(size_t bit1v);
         void outCtrl(tuz_TCtrlType ctrl);
         void outLen(size_t len,int packBit);
+        size_t _getSavedDictPosBit(size_t pos)const;
+        size_t _getSavedDictLenBit(size_t len)const;
+        #if tuz_isNeedLiteralLine
+        size_t __getDictPosLenBit(size_t len)const;
+        #endif
     };
     
 }//end namespace
