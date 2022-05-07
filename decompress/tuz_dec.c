@@ -372,7 +372,7 @@ typedef struct _mem_TStream{
         return tuz_READ_CODE_ERROR; \
     } }
 
-static tuz_fast_uint8 _mem_read_lowbits(_mem_TStream* self,tuz_fast_uint8 bitCount){
+static tuz_try_inline tuz_fast_uint8 _mem_read_lowbits(_mem_TStream* self,tuz_fast_uint8 bitCount){
     tuz_fast_uint8 count=self->type_count;
     tuz_fast_uint8 result=self->types;
     if (count>=bitCount){

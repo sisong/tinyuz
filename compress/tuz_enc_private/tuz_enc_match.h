@@ -27,7 +27,7 @@ namespace _tuz_private{
         std::vector<TInt>           dictPos;
         std::vector<TLCPInt>        matchLen;
         void _cost_match(const TInt curString,const size_t curi,
-                         size_t* curMinDictMatchLen,std::vector<TUInt>& cost);
+                         size_t* out_maxMatchLen,std::vector<TUInt>& cost);
         void _getCost(const tuz_byte* cur0);
         void _getCostByMatch(const tuz_byte* cur0,std::vector<TUInt>& cost);
       #if tuz_isNeedLiteralLine

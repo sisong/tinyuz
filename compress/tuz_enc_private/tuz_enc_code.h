@@ -31,7 +31,7 @@ namespace _tuz_private{
         }
         template<bool isSavedSamePos> inline 
         size_t getSavedDictLenBit(size_t match_len,size_t pos)const{
-            size_t len=match_len-((pos+1)>tuz_kBigPosForLen?1:0)-tuz_kMinDictMatchLen;
+            size_t len=match_len-(((!isSavedSamePos)&&(pos>=tuz_kBigPosForLen))?1:0)-tuz_kMinDictMatchLen;
             if (len<_len2bit_count) return _len2bit[len];
             else if (len<match_len) return _getSavedDictLenBit(len);
             else return 8*tuz_kMaxOfDictSize; //fail pos
