@@ -1,5 +1,5 @@
 # [tinyuz](https://github.com/sisong/tinyuz)
-[![release](https://img.shields.io/badge/release-v0.8.0-blue.svg)](https://github.com/sisong/tinyuz/releases) 
+[![release](https://img.shields.io/badge/release-v0.8.1-blue.svg)](https://github.com/sisong/tinyuz/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/tinyuz/blob/master/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/tinyuz/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/tinyuz?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/tinyuz/issues)
