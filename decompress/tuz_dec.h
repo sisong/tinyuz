@@ -26,19 +26,18 @@ typedef enum tuz_TResult{
 
 } tuz_TResult;
 
-//-----------------------------------------------------------------------------------------------------------------
-// decompress by tuz_TStream: compiled by Mbed Studio is 898 bytes
 
+//-----------------------------------------------------------------------------------------------------------------
+
+// decompress by tuz_TStream: compiled by Mbed Studio is 886 bytes
 typedef struct tuz_TStream{
     _tuz_TInputCache    _code_cache;
     _tuz_TDict          _dict;
     _tuz_TState         _state;
 } tuz_TStream;
 
-#if (tuz_isNeedSaveDictSize)
-//read dict size from inputStream
+//read dict_size from inputStream
 tuz_size_t tuz_TStream_read_dict_size(tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code);
-#endif
 
 //open tuz_TStream
 //  not need clear tuz_TStream before open;
@@ -49,7 +48,7 @@ tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStrea
                              tuz_byte* cache,tuz_size_t cache_size,tuz_size_t dict_size);
 
 //decompress partial to out_data
-//  data_size: input out_data buf's size,output decompressed data size;
+//  data_size: input out_data buf's size, output decompressed data size when return tuz_STREAM_END;
 //  if success return tuz_OK or tuz_STREAM_END, tuz_STREAM_END means decompress finish;
 tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,tuz_size_t* data_size);
 
@@ -57,7 +56,8 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
 //-----------------------------------------------------------------------------------------------------------------
 
 //decompress all to out_data
-//  compiled by Mbed Studio is 428 bytes; faster than decompress by tuz_TStream; 
+//  compiled by Mbed Studio is 424 bytes; faster than decompress by tuz_TStream; 
+//  data_size: input out_data buf's size, output decompressed data size;
 //  if success return tuz_STREAM_END;
 tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_byte* out_data,tuz_size_t* data_size);
 

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tinyuz", "tinyuz.vcxproj", "{6609E1CF-8DAE-41E9-BC20-1574E49EC91B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tinyuz", "libtinyuz.vcxproj", "{6609E1CF-8DAE-41E9-BC20-1574E49EC91B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unitTest", "unitTest.vcxproj", "{EF8D668D-DF30-4CC6-AFAC-929D951BC8E7}"
 EndProject

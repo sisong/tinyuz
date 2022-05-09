@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="tinyuz.vcxproj">
+    <ProjectReference Include="libtinyuz.vcxproj">
       <Project>{6609e1cf-8dae-41e9-bc20-1574e49ec91b}</Project>
     </ProjectReference>
   </ItemGroup>

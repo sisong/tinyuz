@@ -60,7 +60,7 @@ namespace _tuz_private{
     const int kDictPosLenPackBit =2;
 
     //low to high bitmap: xx?xx? xx?xx? ...
-    static tuz_inline size_t _getOutCount(size_t v,int packBit,size_t* dec=0){ // v>=0
+    static tuz_inline size_t _getOutCount(size_t v,size_t packBit,size_t* dec=0){ // v>=0
         size_t count=1;
         size_t _v=v;
         while (1){
@@ -72,11 +72,11 @@ namespace _tuz_private{
         if (dec) *dec=_v-v;
         return count;
     }
-    static tuz_force_inline size_t _getSavedLenBit(size_t v,int packBit){
+    static tuz_force_inline size_t _getSavedLenBit(size_t v,size_t packBit){
         return _getOutCount(v,packBit)*(packBit+1);
     }
 
-void TTuzCode::outLen(size_t v,int packBit){ //v>=0
+void TTuzCode::outLen(size_t v,size_t packBit){ //v>=0
     size_t dec;
     size_t c=_getOutCount(v,packBit,&dec);
     v-=dec;
@@ -106,12 +106,10 @@ void TTuzCode::outType(size_t bit1v){
 
 void TTuzCode::outDictSize(size_t dict_size){
     checkv((dict_size>0)&&(dict_size<=tuz_kMaxOfDictSize));
-#if (tuz_isNeedSaveDictSize)
-    for (size_t i=0;i<tuz_kDictSizeSavedCount;++i){
+    for (size_t i=0;i<tuz_kDictSizeSavedBytes;++i){
         code.push_back(dict_size&0xFF);
         dict_size>>=8;
     }
-#endif
 }
 
 void TTuzCode::outData(const tuz_byte* data,const tuz_byte* data_end){

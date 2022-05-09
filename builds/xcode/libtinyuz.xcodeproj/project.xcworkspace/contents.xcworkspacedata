@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:tinyuz.xcodeproj">
+      location = "self:libtinyuz.xcodeproj">
    </FileRef>
 </Workspace>

@@ -14,9 +14,10 @@ namespace _tuz_private{
     const TInt  kTInt_Max=(TInt)((~(uint32_t)0)>>1);
     #define _k_kBMatchStep   512  // skip by a big match
 
-    static TInt _sstr_eqLen(const tuz_byte* ss_end,const  tuz_byte* matchedString,const tuz_byte* curString){
+    static TInt _sstr_eqLen(const tuz_byte* ss_end,size_t maxSaveLength,
+                            const  tuz_byte* matchedString,const tuz_byte* curString){
         TInt eqLen=0;
-        while ((curString<ss_end)&&((*curString)==matchedString[eqLen])){
+        while ((curString<ss_end)&&((*curString)==matchedString[eqLen])&&(eqLen<(TInt)maxSaveLength)){
             ++eqLen; ++curString;
         }
         return eqLen;
@@ -31,12 +32,12 @@ namespace _tuz_private{
             if (dictCost<=cost_ni){         \
                 cost[ni]=(TUInt)dictCost;   \
                 matchLen[ni]=mLen;          \
-                dictPos[ni]=(TInt)dict_pos; \
+                dictPos[ni]=(TPosInt)dict_pos;  \
             }else if (dictCost>cost_ni+4){  \
                 break;                      \
             }   \
         }       \
-        (*out_maxMatchLen)=(curMinLcp>(*out_maxMatchLen))?curMinLcp:(*out_maxMatchLen); \
+        (*out_maxMatchLen)=((size_t)curMinLcp>(*out_maxMatchLen))?curMinLcp:(*out_maxMatchLen); \
         if (curMinLcp>=_k_kBMatchStep) return; }
     
     void TMatch::_cost_match(const TInt curString,const size_t curi,
@@ -50,22 +51,27 @@ namespace _tuz_private{
 
         if (isHaveData){ //same pos match
             TInt matchedString=curString-(TInt)(back_pos+1);
-            TInt curMinLcp=_sstr_eqLen(sstring.src_end,sstring.src+matchedString,sstring.src+curString);
+            TInt curMinLcp=_sstr_eqLen(sstring.src_end,props.maxSaveLength,
+                                      sstring.src+matchedString,sstring.src+curString);
             if (curMinLcp>=tuz_kMinDictMatchLen)
                 _MatchedAt(true,back_pos);
         }
 
         size_t maxDictPos=props.dictSize-1;
-        if (maxDictPos>=curString) maxDictPos=curString-1;
+        if (maxDictPos>=(size_t)curString) maxDictPos=curString-1;
         {// short pos match
             #define _kShortPosForLen  (((1<<7)-1)-1)
+            //#define _kShortPosForLen  (((1<<9)-1)-1) // better(0.2%) but slower(30%)
             const TInt kShortPos=(TInt)((maxDictPos>=_kShortPosForLen)?_kShortPosForLen:maxDictPos);
             for (TInt dict_pos=kShortPos;dict_pos>=0;dict_pos--){
                 TInt matchedString=curString-(dict_pos+1);
-                TInt curMinLcp=_sstr_eqLen(sstring.src_end,sstring.src+matchedString,sstring.src+curString);
+                TInt curMinLcp=_sstr_eqLen(sstring.src_end,props.maxSaveLength,
+                                           sstring.src+matchedString,sstring.src+curString);
                 if (curMinLcp>=tuz_kMinDictMatchLen)
                     _MatchedAt(false,dict_pos);
             }
+            if (maxDictPos<=_kShortPosForLen) 
+                return;
         }
 
         {//match by LCP
@@ -159,8 +165,8 @@ void TMatch::_getCostByLiteralLen(const tuz_byte* cur0,std::vector<TUInt>& cost)
         if (mlen==0){
             ++unmatched_len;
         }else{
-            const TInt curPos=dictPos[i];
-            TInt nextPos=curPos-1; //not same
+            const size_t curPos=dictPos[i];
+            size_t nextPos=curPos-1; //not same
             size_t j=i+mlen;
             while (j<costSize){
                 if (matchLen[j]>0){

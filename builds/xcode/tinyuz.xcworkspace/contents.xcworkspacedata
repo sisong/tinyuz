@@ -8,6 +8,6 @@
       location = "group:speedTest.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:tinyuz.xcodeproj">
+      location = "group:libtinyuz.xcodeproj">
    </FileRef>
 </Workspace>

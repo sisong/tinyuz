@@ -25,7 +25,7 @@
     <ProjectReference Include="..\..\..\HDiffPatch\builds\vc\zlib.vcxproj">
       <Project>{35ed7715-6b17-4225-8171-c954968d8f8c}</Project>
     </ProjectReference>
-    <ProjectReference Include="tinyuz.vcxproj">
+    <ProjectReference Include="libtinyuz.vcxproj">
       <Project>{6609e1cf-8dae-41e9-bc20-1574e49ec91b}</Project>
     </ProjectReference>
   </ItemGroup>

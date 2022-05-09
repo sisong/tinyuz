@@ -34,7 +34,7 @@ namespace _tuz_private{
             size_t len=match_len-(((!isSavedSamePos)&&(pos>=tuz_kBigPosForLen))?1:0)-tuz_kMinDictMatchLen;
             if (len<_len2bit_count) return _len2bit[len];
             else if (len<match_len) return _getSavedDictLenBit(len);
-            else return 8*tuz_kMaxOfDictSize; //fail pos
+            else return match_len*(1+8+1)+128; //fail pos,return a large bit count
         }
         template<bool isSamePos> inline 
         size_t getSavedDictPosBit(size_t pos,size_t isHaveData)const{
@@ -56,7 +56,7 @@ namespace _tuz_private{
         bool      _isHaveData_back;
         void outType(size_t bit1v);
         void outCtrl(tuz_TCtrlType ctrl);
-        void outLen(size_t len,int packBit);
+        void outLen(size_t len,size_t packBit);
         size_t _getSavedDictPosBit(size_t pos)const;
         size_t _getSavedDictLenBit(size_t len)const;
         #if tuz_isNeedLiteralLine
