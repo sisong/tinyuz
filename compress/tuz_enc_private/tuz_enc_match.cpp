@@ -47,7 +47,6 @@ namespace _tuz_private{
         const size_t isHaveData=((matchLen[curi-1]==0)&&(curi>1))?1:0;
         const TInt* SA=sstring.SA.data();
         const TInt it_cur=sstring.R[curString];
-        const size_t _kMinSaveNoSamePosCost=coder.getSavedDictPosBit<false>(0,0);
 
         if (isHaveData){ //same pos match
             TInt matchedString=curString-(TInt)(back_pos+1);

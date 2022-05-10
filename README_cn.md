@@ -2,7 +2,9 @@
 [![release](https://img.shields.io/badge/release-v0.9.0-blue.svg)](https://github.com/sisong/tinyuz/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/tinyuz/blob/master/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/tinyuz/pulls)
-[![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/tinyuz?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/tinyuz/issues)
+[![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/tinyuz?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/tinyuz/issues)   
+
+[![Build Status](https://github.com/sisong/tinyuz/workflows/ci/badge.svg?branch=master)](https://github.com/sisong/tinyuz/actions?query=workflow%3Aci+branch%3Amaster)   
 
  中文版 | [english](README.md)   
 
@@ -14,6 +16,11 @@
 
 ## 自己编译
 编译时需要[HDiffPatch](https://github.com/sisong/HDiffPatch)库   
+```
+$ cd <dir>/tinyuz
+$ git clone https://github.com/sisong/HDiffPatch.git ../HDiffPatch
+$ make
+```
 
 ---
 ## 库 API 使用:

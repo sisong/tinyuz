@@ -4,6 +4,8 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/tinyuz/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/tinyuz?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/tinyuz/issues)   
 
+[![Build Status](https://github.com/sisong/tinyuz/workflows/ci/badge.svg?branch=master)](https://github.com/sisong/tinyuz/actions?query=workflow%3Aci+branch%3Amaster)   
+
  english | [中文版](README_cn.md)   
    
 **tinyuz** is a lossless compression algorithm, which is characterized by a very small decompress code(disk or Flash occupancy, compiled from source code); The code compiled by Mbed Studio is 882 bytes. 
@@ -14,6 +16,11 @@ The compress and decompress speed is related to the characteristics of the input
 
 ## Build it yourself
 need library [HDiffPatch](https://github.com/sisong/HDiffPatch)
+```
+$ cd <dir>/tinyuz
+$ git clone https://github.com/sisong/HDiffPatch.git ../HDiffPatch
+$ make
+```
 
 ---
 ## library API usage:
