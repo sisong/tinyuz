@@ -50,6 +50,7 @@ jobs:
       - name: initAndClone
         run: |
           git clone --depth=1 https://github.com/sisong/HDiffPatch.git ../HDiffPatch
+          git clone --depth=1 https://github.com/sisong/zlib.git ../zlib
       - name: buildByVC
         run: |
           msbuild builds/vc2019/tinyuz.sln -t:rebuild -verbosity:diag -property:Configuration=Release
