@@ -191,19 +191,18 @@ tuz_size_t tuz_TStream_read_dict_size(tuz_TInputStreamHandle inputStream,tuz_TIn
 }
 
 tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
-                             tuz_byte* cache,tuz_size_t cache_size,tuz_size_t dict_size){
-    assert((read_code!=0)&&(cache!=0));
+                             tuz_byte* dict_and_cache,tuz_size_t dict_size,tuz_size_t cache_size){
+    assert((read_code!=0)&&(dict_and_cache!=0));
     if (dict_size==0) return tuz_READ_DICT_SIZE_ERROR;
-    if (cache_size<=dict_size) return tuz_CACHE_SIZE_ERROR;
-    cache_size-=dict_size;
+    if (cache_size==0) return tuz_CACHE_SIZE_ERROR;
     self->_code_cache.cache_begin=cache_size;
     self->_code_cache.cache_end=cache_size;
-    self->_code_cache.cache_buf=cache+dict_size;
+    self->_code_cache.cache_buf=dict_and_cache+dict_size;
     self->_code_cache.inputStream=inputStream;
     self->_code_cache.read_code=read_code;
     self->_dict.dict_cur=0;
     self->_dict.dict_size=dict_size;
-    self->_dict.dict_buf=cache;
+    self->_dict.dict_buf=dict_and_cache;
     
     self->_state.dictType_pos=0;
     self->_state.dictType_pos_inc=0;

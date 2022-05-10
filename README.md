@@ -26,7 +26,7 @@ decompress:
 ```
 tuz_size_t tuz_TStream_read_dict_size(tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code);
 tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
-                             tuz_byte* cache,tuz_size_t cache_size,tuz_size_t dict_size);
+                             tuz_byte* dict_and_cache,tuz_size_t dict_size,tuz_size_t cache_size);
 tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,tuz_size_t* data_size);
 ```
 can also decompress at once in memory:

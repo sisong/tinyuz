@@ -7,8 +7,9 @@
 #include "tuz_enc_private/tuz_enc_clip.h"
 using namespace _tuz_private;
 
+#define tuz_kDefaultDictSize  (1<<24)
 
-const tuz_TCompressProps tuz_kDefaultCompressProps={tuz_kMaxOfDictSize,tuz_kMaxOfMaxSaveLength,1};
+const tuz_TCompressProps tuz_kDefaultCompressProps={tuz_kDefaultDictSize,tuz_kMaxOfMaxSaveLength,1};
 
 static const size_t   kMaxPackedPosByteSize =sizeof(hpatch_StreamPos_t)*3/2+1;
 

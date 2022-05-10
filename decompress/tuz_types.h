@@ -87,13 +87,13 @@ extern "C" {
 #endif
 
 #ifndef tuz_kMaxOfDictSize
-#   define tuz_kMaxOfDictSize   _tuz_kMaxOfDictSize_MAX
+#   define tuz_kMaxOfDictSize   __tuz_kMaxOfDictSize_MAX
 //#   define tuz_kMaxOfDictSize   ((1<<24)-1)   //3 bytes
 //#   define tuz_kMaxOfDictSize   ((1<<16)-1)   //2 bytes
 #endif
 
-#define _tuz_kMaxOfDictSize_MAX  (1<<30) //now limit for uint32
-#if (tuz_kMaxOfDictSize>_tuz_kMaxOfDictSize_MAX)
+#define __tuz_kMaxOfDictSize_MAX  (1<<30) //now limit for uint32
+#if (tuz_kMaxOfDictSize>__tuz_kMaxOfDictSize_MAX)
 #   error tuz_kMaxOfDictSize error
 #elif ((tuz_kMaxOfDictSize>>24)>=1)
 #   define tuz_kDictSizeSavedBytes 4

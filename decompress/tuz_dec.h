@@ -41,11 +41,11 @@ tuz_size_t tuz_TStream_read_dict_size(tuz_TInputStreamHandle inputStream,tuz_TIn
 
 //open tuz_TStream
 //  not need clear tuz_TStream before open;
-//  cache lifetime need holding by caller;
-//  must cache_size>dict_size, cache_size only affect decompress speed;
+//  dict_and_cache lifetime need holding by caller;
+//  must cache_size>0, cache_size only affect decompress speed;
 //  if success return tuz_OK
 tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
-                             tuz_byte* cache,tuz_size_t cache_size,tuz_size_t dict_size);
+                             tuz_byte* dict_and_cache,tuz_size_t dict_size,tuz_size_t cache_size);
 
 //decompress partial to out_data
 //  data_size: input out_data buf's size, output decompressed data size when return tuz_STREAM_END;

@@ -110,6 +110,7 @@ void TTuzCode::outDictSize(size_t dict_size){
         code.push_back(dict_size&0xFF);
         dict_size>>=8;
     }
+    checkv(dict_size==0);
 }
 
 void TTuzCode::outData(const tuz_byte* data,const tuz_byte* data_end){
