@@ -22,7 +22,7 @@
     <ClCompile Include="..\..\speed_test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\HDiffPatch\builds\vc\zlib.vcxproj">
+    <ProjectReference Include="..\..\..\HDiffPatch\builds\vc2019\zlib.vcxproj">
       <Project>{35ed7715-6b17-4225-8171-c954968d8f8c}</Project>
     </ProjectReference>
     <ProjectReference Include="libtinyuz.vcxproj">
