@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0D7FEA82282A676D0029772D /* patch.c in Sources */ = {isa = PBXBuildFile; fileRef = 0D7FEA81282A676D0029772D /* patch.c */; };
+		0D7FEA84282A67830029772D /* divsufsort.c in Sources */ = {isa = PBXBuildFile; fileRef = 0D7FEA83282A67830029772D /* divsufsort.c */; };
 		D6F3B7C82427B30E0066B989 /* tuz_enc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7BB2427B30E0066B989 /* tuz_enc.cpp */; };
 		D6F3B7C92427B30E0066B989 /* tuz_enc_types.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7BC2427B30E0066B989 /* tuz_enc_types.h */; };
 		D6F3B7CA2427B30E0066B989 /* tuz_enc.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7BD2427B30E0066B989 /* tuz_enc.h */; };
@@ -22,13 +24,14 @@
 		D6F3B7D82427B3150066B989 /* tuz_dec.c in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7D52427B3150066B989 /* tuz_dec.c */; };
 		D6F3B7D92427B3150066B989 /* tuz_types.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7D62427B3150066B989 /* tuz_types.h */; };
 		D6F3B7DA2427B3150066B989 /* tuz_dec.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7D72427B3150066B989 /* tuz_dec.h */; };
-		D6F3B7F12427B4240066B989 /* patch.c in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7F02427B4240066B989 /* patch.c */; };
-		D6F3B7F32427B4380066B989 /* divsufsort.c in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7F22427B4370066B989 /* divsufsort.c */; };
 		D6F3B803242C69590066B989 /* tuz_types_private.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B802242C69590066B989 /* tuz_types_private.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		D6F3B7B32427B2D20066B989 /* libtinyuz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libtinyuz.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		0D7FEA81282A676D0029772D /* patch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = patch.c; path = ../../../HDiffPatch/libHDiffPatch/HPatch/patch.c; sourceTree = "<group>"; };
+		0D7FEA83282A67830029772D /* divsufsort.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = divsufsort.c; path = ../../../HDiffPatch/libHDiffPatch/HDiff/private_diff/libdivsufsort/divsufsort.c; sourceTree = "<group>"; };
+		0D7FEA9C282A6BC60029772D /* tinyuz.xcworkspace */ = {isa = PBXFileReference; lastKnownFileType = wrapper.workspace; path = tinyuz.xcworkspace; sourceTree = "<group>"; };
+		D6F3B7B32427B2D20066B989 /* liblibtinyuz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblibtinyuz.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6F3B7BB2427B30E0066B989 /* tuz_enc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tuz_enc.cpp; sourceTree = "<group>"; };
 		D6F3B7BC2427B30E0066B989 /* tuz_enc_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc_types.h; sourceTree = "<group>"; };
 		D6F3B7BD2427B30E0066B989 /* tuz_enc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc.h; sourceTree = "<group>"; };
@@ -44,8 +47,6 @@
 		D6F3B7D52427B3150066B989 /* tuz_dec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tuz_dec.c; sourceTree = "<group>"; };
 		D6F3B7D62427B3150066B989 /* tuz_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_types.h; sourceTree = "<group>"; };
 		D6F3B7D72427B3150066B989 /* tuz_dec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_dec.h; sourceTree = "<group>"; };
-		D6F3B7F02427B4240066B989 /* patch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = patch.c; path = ../../../libHDiffPatch/HPatch/patch.c; sourceTree = "<group>"; };
-		D6F3B7F22427B4370066B989 /* divsufsort.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = divsufsort.c; path = ../../../libHDiffPatch/HDiff/private_diff/libdivsufsort/divsufsort.c; sourceTree = "<group>"; };
 		D6F3B802242C69590066B989 /* tuz_types_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_types_private.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -63,6 +64,7 @@
 		D6F3B7AA2427B2D20066B989 = {
 			isa = PBXGroup;
 			children = (
+				0D7FEA9C282A6BC60029772D /* tinyuz.xcworkspace */,
 				D6F3B7BA2427B30E0066B989 /* compress */,
 				D6F3B7D42427B3150066B989 /* decompress */,
 				D6F3B7EF2427B3F40066B989 /* HDiffPatch */,
@@ -73,7 +75,7 @@
 		D6F3B7B42427B2D20066B989 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D6F3B7B32427B2D20066B989 /* libtinyuz.a */,
+				D6F3B7B32427B2D20066B989 /* liblibtinyuz.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -121,8 +123,8 @@
 		D6F3B7EF2427B3F40066B989 /* HDiffPatch */ = {
 			isa = PBXGroup;
 			children = (
-				D6F3B7F22427B4370066B989 /* divsufsort.c */,
-				D6F3B7F02427B4240066B989 /* patch.c */,
+				0D7FEA83282A67830029772D /* divsufsort.c */,
+				0D7FEA81282A676D0029772D /* patch.c */,
 			);
 			name = HDiffPatch;
 			sourceTree = "<group>";
@@ -150,9 +152,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		D6F3B7B22427B2D20066B989 /* tinyuz */ = {
+		D6F3B7B22427B2D20066B989 /* libtinyuz */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D6F3B7B72427B2D20066B989 /* Build configuration list for PBXNativeTarget "tinyuz" */;
+			buildConfigurationList = D6F3B7B72427B2D20066B989 /* Build configuration list for PBXNativeTarget "libtinyuz" */;
 			buildPhases = (
 				D6F3B7AF2427B2D20066B989 /* Headers */,
 				D6F3B7B02427B2D20066B989 /* Sources */,
@@ -162,9 +164,9 @@
 			);
 			dependencies = (
 			);
-			name = tinyuz;
+			name = libtinyuz;
 			productName = tinyuz;
-			productReference = D6F3B7B32427B2D20066B989 /* libtinyuz.a */;
+			productReference = D6F3B7B32427B2D20066B989 /* liblibtinyuz.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -173,7 +175,7 @@
 		D6F3B7AB2427B2D20066B989 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1030;
+				LastUpgradeCheck = 1310;
 				ORGANIZATIONNAME = sisong;
 				TargetAttributes = {
 					D6F3B7B22427B2D20066B989 = {
@@ -181,19 +183,20 @@
 					};
 				};
 			};
-			buildConfigurationList = D6F3B7AE2427B2D20066B989 /* Build configuration list for PBXProject "tinyuz" */;
+			buildConfigurationList = D6F3B7AE2427B2D20066B989 /* Build configuration list for PBXProject "libtinyuz" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = D6F3B7AA2427B2D20066B989;
 			productRefGroup = D6F3B7B42427B2D20066B989 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D6F3B7B22427B2D20066B989 /* tinyuz */,
+				D6F3B7B22427B2D20066B989 /* libtinyuz */,
 			);
 		};
 /* End PBXProject section */
@@ -203,13 +206,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D6F3B7F12427B4240066B989 /* patch.c in Sources */,
+				0D7FEA82282A676D0029772D /* patch.c in Sources */,
 				D6F3B7CF2427B30E0066B989 /* tuz_sstring.cpp in Sources */,
 				D6F3B7CB2427B30E0066B989 /* tuz_enc_clip.cpp in Sources */,
 				D6F3B7D82427B3150066B989 /* tuz_dec.c in Sources */,
 				D6F3B7D12427B30E0066B989 /* tuz_enc_match.cpp in Sources */,
 				D6F3B7CD2427B30E0066B989 /* tuz_enc_code.cpp in Sources */,
-				D6F3B7F32427B4380066B989 /* divsufsort.c in Sources */,
+				0D7FEA84282A67830029772D /* divsufsort.c in Sources */,
 				D6F3B7C82427B30E0066B989 /* tuz_enc.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -242,6 +245,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -267,7 +271,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../../;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -300,6 +304,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -312,6 +317,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = NDEBUG;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -319,7 +325,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../../;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -349,7 +355,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D6F3B7AE2427B2D20066B989 /* Build configuration list for PBXProject "tinyuz" */ = {
+		D6F3B7AE2427B2D20066B989 /* Build configuration list for PBXProject "libtinyuz" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D6F3B7B52427B2D20066B989 /* Debug */,
@@ -358,7 +364,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D6F3B7B72427B2D20066B989 /* Build configuration list for PBXNativeTarget "tinyuz" */ = {
+		D6F3B7B72427B2D20066B989 /* Build configuration list for PBXNativeTarget "libtinyuz" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D6F3B7B82427B2D20066B989 /* Debug */,

@@ -11,7 +11,6 @@ namespace _tuz_private{
     typedef TMatch::TUInt    TUInt;
     typedef TMatch::TLCPInt  TLCPInt;
     const TUInt kNullCostValue=~(TUInt)0;
-    const TInt  kTInt_Max=(TInt)((~(uint32_t)0)>>1);
     #define _k_kBMatchStep   512  // skip by a big match
 
     static TInt _sstr_eqLen(const tuz_byte* ss_end,size_t maxSaveLength,

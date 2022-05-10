@@ -98,13 +98,13 @@ long attack_decompress(const tuz_byte* _code,const tuz_byte* _code_end,tuz_size_
         }
         tuz_byte* code_end=code+codeSize;
         if ((rand()%8)==0){
-            size_t lcodeSize=(size_t)(codeSize*rand()*(1.0/(RAND_MAX+1)));
+            size_t lcodeSize=(size_t)(codeSize*rand()*(1.0/(RAND_MAX+1.0)));
             assert(lcodeSize<codeSize);
             code_end=code+lcodeSize;
         }
         size_t uncompress_size=_test_data.size();
         if ((rand()%8)==0){
-            uncompress_size=(size_t)(uncompress_size*rand()*(1.0/(RAND_MAX+1)));
+            uncompress_size=(size_t)(uncompress_size*rand()*(1.0/(RAND_MAX+1.0)));
             assert(uncompress_size<_test_data.size());
         }
 
