@@ -18,9 +18,9 @@ extern "C" {
 #endif
     
 #define TINYUZ_VERSION_MAJOR    0
-#define TINYUZ_VERSION_MINOR    8
-#define TINYUZ_VERSION_RELEASE  1
-    
+#define TINYUZ_VERSION_MINOR    9
+#define TINYUZ_VERSION_RELEASE  0
+
 #define _TINYUZ_VERSION                 TINYUZ_VERSION_MAJOR.TINYUZ_VERSION_MINOR.TINYUZ_VERSION_RELEASE
 #define _TINYUZ_QUOTE(str)              #str
 #define _TINYUZ_EXPAND_AND_QUOTE(str)   _TINYUZ_QUOTE(str)

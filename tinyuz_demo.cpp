@@ -214,12 +214,14 @@ int tinyuz_by_file(const char* inputFile,const char* outputFile,bool isCompress,
         outputSize=outputData.out_length;
     }
     check(hpatch_TFileStreamOutput_close(&outputData),TINY_FILECLOSE_ERROR,"outpuFile close");
-    hpatch_StreamPos_t uncompressSize=isCompress?inputData.base.streamSize:outputSize;
-    hpatch_StreamPos_t compressedSize=(!isCompress)?inputData.base.streamSize:outputSize;
-    double runTime=(clock_s()-time0);
-    printf("outputSize: %" PRIu64 " Bytes \t( %.3f %% )\n",outputSize,compressedSize*100.0/uncompressSize);
-    printf("run   time: %.3f S     \t( %.3f MB/S )\n",runTime,uncompressSize/runTime/1024/1024);
-    printf("  out file ok!\n");
+    {//out result info
+        hpatch_StreamPos_t uncompressSize=isCompress?inputData.base.streamSize:outputSize;
+        hpatch_StreamPos_t compressedSize=(!isCompress)?inputData.base.streamSize:outputSize;
+        double runTime=(clock_s()-time0);
+        printf("outputSize: %" PRIu64 " Bytes \t( %.3f %% )\n",outputSize,compressedSize*100.0/uncompressSize);
+        printf("run   time: %.3f S     \t( %.3f MB/S )\n",runTime,uncompressSize/runTime/1024/1024);
+        printf("  out file ok!\n"); 
+    }
 clear:
     _isInClear=tuz_TRUE;
     if (temp_cache) free(temp_cache);
