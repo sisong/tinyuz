@@ -18,9 +18,9 @@ extern "C" {
 #endif
     
 #define TINYUZ_VERSION_MAJOR    0
-#define TINYUZ_VERSION_MINOR    8
-#define TINYUZ_VERSION_RELEASE  1
-    
+#define TINYUZ_VERSION_MINOR    9
+#define TINYUZ_VERSION_RELEASE  0
+
 #define _TINYUZ_VERSION                 TINYUZ_VERSION_MAJOR.TINYUZ_VERSION_MINOR.TINYUZ_VERSION_RELEASE
 #define _TINYUZ_QUOTE(str)              #str
 #define _TINYUZ_EXPAND_AND_QUOTE(str)   _TINYUZ_QUOTE(str)
@@ -87,21 +87,22 @@ extern "C" {
 #endif
 
 #ifndef tuz_kMaxOfDictSize
-#   define tuz_kMaxOfDictSize  ((1<<24)-1)
+#   define tuz_kMaxOfDictSize   __tuz_kMaxOfDictSize_MAX
+//#   define tuz_kMaxOfDictSize   ((1<<24)-1)   //3 bytes
+//#   define tuz_kMaxOfDictSize   ((1<<16)-1)   //2 bytes
 #endif
-#ifndef tuz_isNeedSaveDictSize // saved dictSize(3 bytes) before compressed data
-#   define tuz_isNeedSaveDictSize 1
-#endif
-#if ((tuz_kMaxOfDictSize>>31)>=1)
+
+#define __tuz_kMaxOfDictSize_MAX  (1<<30) //now limit for uint32
+#if (tuz_kMaxOfDictSize>__tuz_kMaxOfDictSize_MAX)
 #   error tuz_kMaxOfDictSize error
 #elif ((tuz_kMaxOfDictSize>>24)>=1)
-#   define tuz_kDictSizeSavedCount 4
+#   define tuz_kDictSizeSavedBytes 4
 #elif ((tuz_kMaxOfDictSize>>16)>=1)
-#   define tuz_kDictSizeSavedCount 3
+#   define tuz_kDictSizeSavedBytes 3
 #elif ((tuz_kMaxOfDictSize>>8)>=1)
-#   define tuz_kDictSizeSavedCount 2
+#   define tuz_kDictSizeSavedBytes 2
 #elif (tuz_kMaxOfDictSize>=1)
-#   define tuz_kDictSizeSavedCount 1
+#   define tuz_kDictSizeSavedBytes 1
 #else
 #   error tuz_kMaxOfDictSize error
 #endif

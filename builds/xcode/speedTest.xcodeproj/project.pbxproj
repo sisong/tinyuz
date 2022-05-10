@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0D7FEA88282A69080029772D /* liblibtinyuz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D7FEA87282A69080029772D /* liblibtinyuz.a */; };
 		D6F3B7A92427B24A0066B989 /* speed_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7A82427B24A0066B989 /* speed_test.cpp */; };
-		D6F3B7F62427B46D0066B989 /* libtinyuz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6F3B7F52427B46D0066B989 /* libtinyuz.a */; };
 		D6F3B7F82427BA8F0066B989 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = D6F3B7F72427BA8F0066B989 /* libz.tbd */; };
 /* End PBXBuildFile section */
 
@@ -25,6 +25,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0D7FEA87282A69080029772D /* liblibtinyuz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = liblibtinyuz.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6F3B7982427B2090066B989 /* speedTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = speedTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6F3B7A82427B24A0066B989 /* speed_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speed_test.cpp; path = ../../speed_test.cpp; sourceTree = "<group>"; };
 		D6F3B7F52427B46D0066B989 /* libtinyuz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libtinyuz.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -36,8 +37,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D7FEA88282A69080029772D /* liblibtinyuz.a in Frameworks */,
 				D6F3B7F82427BA8F0066B989 /* libz.tbd in Frameworks */,
-				D6F3B7F62427B46D0066B989 /* libtinyuz.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -64,6 +65,7 @@
 		D6F3B7F42427B46D0066B989 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0D7FEA87282A69080029772D /* liblibtinyuz.a */,
 				D6F3B7F72427BA8F0066B989 /* libz.tbd */,
 				D6F3B7F52427B46D0066B989 /* libtinyuz.a */,
 			);
@@ -96,7 +98,7 @@
 		D6F3B7902427B2090066B989 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1030;
+				LastUpgradeCheck = 1310;
 				ORGANIZATIONNAME = sisong;
 				TargetAttributes = {
 					D6F3B7972427B2090066B989 = {
@@ -110,6 +112,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = D6F3B78F2427B2090066B989;
 			productRefGroup = D6F3B7992427B2090066B989 /* Products */;
@@ -159,6 +162,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -185,7 +189,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../../;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -219,6 +223,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -239,7 +244,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../../;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -249,6 +254,7 @@
 		D6F3B7A02427B2090066B989 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -257,6 +263,7 @@
 		D6F3B7A12427B2090066B989 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

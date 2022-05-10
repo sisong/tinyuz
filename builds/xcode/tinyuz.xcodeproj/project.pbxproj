@@ -3,160 +3,82 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D6F3B7C82427B30E0066B989 /* tuz_enc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7BB2427B30E0066B989 /* tuz_enc.cpp */; };
-		D6F3B7C92427B30E0066B989 /* tuz_enc_types.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7BC2427B30E0066B989 /* tuz_enc_types.h */; };
-		D6F3B7CA2427B30E0066B989 /* tuz_enc.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7BD2427B30E0066B989 /* tuz_enc.h */; };
-		D6F3B7CB2427B30E0066B989 /* tuz_enc_clip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7BF2427B30E0066B989 /* tuz_enc_clip.cpp */; };
-		D6F3B7CC2427B30E0066B989 /* tuz_enc_code.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7C02427B30E0066B989 /* tuz_enc_code.h */; };
-		D6F3B7CD2427B30E0066B989 /* tuz_enc_code.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7C12427B30E0066B989 /* tuz_enc_code.cpp */; };
-		D6F3B7CE2427B30E0066B989 /* tuz_sstring.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7C22427B30E0066B989 /* tuz_sstring.h */; };
-		D6F3B7CF2427B30E0066B989 /* tuz_sstring.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7C32427B30E0066B989 /* tuz_sstring.cpp */; };
-		D6F3B7D02427B30E0066B989 /* tuz_enc_match.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7C42427B30E0066B989 /* tuz_enc_match.h */; };
-		D6F3B7D12427B30E0066B989 /* tuz_enc_match.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7C52427B30E0066B989 /* tuz_enc_match.cpp */; };
-		D6F3B7D22427B30E0066B989 /* tuz_enc_clip.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7C62427B30E0066B989 /* tuz_enc_clip.h */; };
-		D6F3B7D32427B30E0066B989 /* tuz_enc_types_private.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7C72427B30E0066B989 /* tuz_enc_types_private.h */; };
-		D6F3B7D82427B3150066B989 /* tuz_dec.c in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7D52427B3150066B989 /* tuz_dec.c */; };
-		D6F3B7D92427B3150066B989 /* tuz_types.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7D62427B3150066B989 /* tuz_types.h */; };
-		D6F3B7DA2427B3150066B989 /* tuz_dec.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7D72427B3150066B989 /* tuz_dec.h */; };
-		D6F3B7F12427B4240066B989 /* patch.c in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7F02427B4240066B989 /* patch.c */; };
-		D6F3B7F32427B4380066B989 /* divsufsort.c in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7F22427B4370066B989 /* divsufsort.c */; };
-		D6F3B803242C69590066B989 /* tuz_types_private.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B802242C69590066B989 /* tuz_types_private.h */; };
+		0D7FEA9E282A6BF80029772D /* tinyuz_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0D7FEA9D282A6BF80029772D /* tinyuz_demo.cpp */; };
+		0D7FEAA1282A6C0E0029772D /* liblibtinyuz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D7FEAA0282A6C0E0029772D /* liblibtinyuz.a */; };
+		0D7FEAA3282A6C400029772D /* file_for_patch.c in Sources */ = {isa = PBXBuildFile; fileRef = 0D7FEAA2282A6C400029772D /* file_for_patch.c */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		0D7FEA90282A6B2D0029772D /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		D6F3B7B32427B2D20066B989 /* libtinyuz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libtinyuz.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		D6F3B7BB2427B30E0066B989 /* tuz_enc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tuz_enc.cpp; sourceTree = "<group>"; };
-		D6F3B7BC2427B30E0066B989 /* tuz_enc_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc_types.h; sourceTree = "<group>"; };
-		D6F3B7BD2427B30E0066B989 /* tuz_enc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc.h; sourceTree = "<group>"; };
-		D6F3B7BF2427B30E0066B989 /* tuz_enc_clip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tuz_enc_clip.cpp; sourceTree = "<group>"; };
-		D6F3B7C02427B30E0066B989 /* tuz_enc_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc_code.h; sourceTree = "<group>"; };
-		D6F3B7C12427B30E0066B989 /* tuz_enc_code.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tuz_enc_code.cpp; sourceTree = "<group>"; };
-		D6F3B7C22427B30E0066B989 /* tuz_sstring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_sstring.h; sourceTree = "<group>"; };
-		D6F3B7C32427B30E0066B989 /* tuz_sstring.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tuz_sstring.cpp; sourceTree = "<group>"; };
-		D6F3B7C42427B30E0066B989 /* tuz_enc_match.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc_match.h; sourceTree = "<group>"; };
-		D6F3B7C52427B30E0066B989 /* tuz_enc_match.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tuz_enc_match.cpp; sourceTree = "<group>"; };
-		D6F3B7C62427B30E0066B989 /* tuz_enc_clip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc_clip.h; sourceTree = "<group>"; };
-		D6F3B7C72427B30E0066B989 /* tuz_enc_types_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_enc_types_private.h; sourceTree = "<group>"; };
-		D6F3B7D52427B3150066B989 /* tuz_dec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tuz_dec.c; sourceTree = "<group>"; };
-		D6F3B7D62427B3150066B989 /* tuz_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_types.h; sourceTree = "<group>"; };
-		D6F3B7D72427B3150066B989 /* tuz_dec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_dec.h; sourceTree = "<group>"; };
-		D6F3B7F02427B4240066B989 /* patch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = patch.c; path = ../../../libHDiffPatch/HPatch/patch.c; sourceTree = "<group>"; };
-		D6F3B7F22427B4370066B989 /* divsufsort.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = divsufsort.c; path = ../../../libHDiffPatch/HDiff/private_diff/libdivsufsort/divsufsort.c; sourceTree = "<group>"; };
-		D6F3B802242C69590066B989 /* tuz_types_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tuz_types_private.h; sourceTree = "<group>"; };
+		0D7FEA92282A6B2D0029772D /* tinyuz */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = tinyuz; sourceTree = BUILT_PRODUCTS_DIR; };
+		0D7FEA9D282A6BF80029772D /* tinyuz_demo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyuz_demo.cpp; path = ../../tinyuz_demo.cpp; sourceTree = "<group>"; };
+		0D7FEAA0282A6C0E0029772D /* liblibtinyuz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = liblibtinyuz.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		0D7FEAA2282A6C400029772D /* file_for_patch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = file_for_patch.c; path = ../../../HDiffPatch/file_for_patch.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		D6F3B7B12427B2D20066B989 /* Frameworks */ = {
+		0D7FEA8F282A6B2D0029772D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D7FEAA1282A6C0E0029772D /* liblibtinyuz.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D6F3B7AA2427B2D20066B989 = {
+		0D7FEA89282A6B2D0029772D = {
 			isa = PBXGroup;
 			children = (
-				D6F3B7BA2427B30E0066B989 /* compress */,
-				D6F3B7D42427B3150066B989 /* decompress */,
-				D6F3B7EF2427B3F40066B989 /* HDiffPatch */,
-				D6F3B7B42427B2D20066B989 /* Products */,
+				0D7FEAA2282A6C400029772D /* file_for_patch.c */,
+				0D7FEA9D282A6BF80029772D /* tinyuz_demo.cpp */,
+				0D7FEA93282A6B2D0029772D /* Products */,
+				0D7FEA9F282A6C0E0029772D /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
-		D6F3B7B42427B2D20066B989 /* Products */ = {
+		0D7FEA93282A6B2D0029772D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D6F3B7B32427B2D20066B989 /* libtinyuz.a */,
+				0D7FEA92282A6B2D0029772D /* tinyuz */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		D6F3B7BA2427B30E0066B989 /* compress */ = {
+		0D7FEA9F282A6C0E0029772D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				D6F3B7BD2427B30E0066B989 /* tuz_enc.h */,
-				D6F3B7BB2427B30E0066B989 /* tuz_enc.cpp */,
-				D6F3B7BC2427B30E0066B989 /* tuz_enc_types.h */,
-				D6F3B7BE2427B30E0066B989 /* tuz_enc_private */,
+				0D7FEAA0282A6C0E0029772D /* liblibtinyuz.a */,
 			);
-			name = compress;
-			path = ../../compress;
-			sourceTree = "<group>";
-		};
-		D6F3B7BE2427B30E0066B989 /* tuz_enc_private */ = {
-			isa = PBXGroup;
-			children = (
-				D6F3B7C62427B30E0066B989 /* tuz_enc_clip.h */,
-				D6F3B7BF2427B30E0066B989 /* tuz_enc_clip.cpp */,
-				D6F3B7C02427B30E0066B989 /* tuz_enc_code.h */,
-				D6F3B7C12427B30E0066B989 /* tuz_enc_code.cpp */,
-				D6F3B7C42427B30E0066B989 /* tuz_enc_match.h */,
-				D6F3B7C52427B30E0066B989 /* tuz_enc_match.cpp */,
-				D6F3B7C22427B30E0066B989 /* tuz_sstring.h */,
-				D6F3B7C32427B30E0066B989 /* tuz_sstring.cpp */,
-				D6F3B7C72427B30E0066B989 /* tuz_enc_types_private.h */,
-			);
-			path = tuz_enc_private;
-			sourceTree = "<group>";
-		};
-		D6F3B7D42427B3150066B989 /* decompress */ = {
-			isa = PBXGroup;
-			children = (
-				D6F3B7D72427B3150066B989 /* tuz_dec.h */,
-				D6F3B7D52427B3150066B989 /* tuz_dec.c */,
-				D6F3B7D62427B3150066B989 /* tuz_types.h */,
-				D6F3B802242C69590066B989 /* tuz_types_private.h */,
-			);
-			name = decompress;
-			path = ../../decompress;
-			sourceTree = "<group>";
-		};
-		D6F3B7EF2427B3F40066B989 /* HDiffPatch */ = {
-			isa = PBXGroup;
-			children = (
-				D6F3B7F22427B4370066B989 /* divsufsort.c */,
-				D6F3B7F02427B4240066B989 /* patch.c */,
-			);
-			name = HDiffPatch;
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
-/* Begin PBXHeadersBuildPhase section */
-		D6F3B7AF2427B2D20066B989 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				D6F3B7D92427B3150066B989 /* tuz_types.h in Headers */,
-				D6F3B7C92427B30E0066B989 /* tuz_enc_types.h in Headers */,
-				D6F3B7D22427B30E0066B989 /* tuz_enc_clip.h in Headers */,
-				D6F3B7D02427B30E0066B989 /* tuz_enc_match.h in Headers */,
-				D6F3B803242C69590066B989 /* tuz_types_private.h in Headers */,
-				D6F3B7CC2427B30E0066B989 /* tuz_enc_code.h in Headers */,
-				D6F3B7CA2427B30E0066B989 /* tuz_enc.h in Headers */,
-				D6F3B7D32427B30E0066B989 /* tuz_enc_types_private.h in Headers */,
-				D6F3B7CE2427B30E0066B989 /* tuz_sstring.h in Headers */,
-				D6F3B7DA2427B3150066B989 /* tuz_dec.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXHeadersBuildPhase section */
-
 /* Begin PBXNativeTarget section */
-		D6F3B7B22427B2D20066B989 /* tinyuz */ = {
+		0D7FEA91282A6B2D0029772D /* tinyuz */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D6F3B7B72427B2D20066B989 /* Build configuration list for PBXNativeTarget "tinyuz" */;
+			buildConfigurationList = 0D7FEA99282A6B2D0029772D /* Build configuration list for PBXNativeTarget "tinyuz" */;
 			buildPhases = (
-				D6F3B7AF2427B2D20066B989 /* Headers */,
-				D6F3B7B02427B2D20066B989 /* Sources */,
-				D6F3B7B12427B2D20066B989 /* Frameworks */,
+				0D7FEA8E282A6B2D0029772D /* Sources */,
+				0D7FEA8F282A6B2D0029772D /* Frameworks */,
+				0D7FEA90282A6B2D0029772D /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -164,76 +86,72 @@
 			);
 			name = tinyuz;
 			productName = tinyuz;
-			productReference = D6F3B7B32427B2D20066B989 /* libtinyuz.a */;
-			productType = "com.apple.product-type.library.static";
+			productReference = 0D7FEA92282A6B2D0029772D /* tinyuz */;
+			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		D6F3B7AB2427B2D20066B989 /* Project object */ = {
+		0D7FEA8A282A6B2D0029772D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1030;
-				ORGANIZATIONNAME = sisong;
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1310;
 				TargetAttributes = {
-					D6F3B7B22427B2D20066B989 = {
-						CreatedOnToolsVersion = 10.3;
+					0D7FEA91282A6B2D0029772D = {
+						CreatedOnToolsVersion = 13.1;
 					};
 				};
 			};
-			buildConfigurationList = D6F3B7AE2427B2D20066B989 /* Build configuration list for PBXProject "tinyuz" */;
-			compatibilityVersion = "Xcode 9.3";
+			buildConfigurationList = 0D7FEA8D282A6B2D0029772D /* Build configuration list for PBXProject "tinyuz" */;
+			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
-			mainGroup = D6F3B7AA2427B2D20066B989;
-			productRefGroup = D6F3B7B42427B2D20066B989 /* Products */;
+			mainGroup = 0D7FEA89282A6B2D0029772D;
+			productRefGroup = 0D7FEA93282A6B2D0029772D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D6F3B7B22427B2D20066B989 /* tinyuz */,
+				0D7FEA91282A6B2D0029772D /* tinyuz */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		D6F3B7B02427B2D20066B989 /* Sources */ = {
+		0D7FEA8E282A6B2D0029772D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D6F3B7F12427B4240066B989 /* patch.c in Sources */,
-				D6F3B7CF2427B30E0066B989 /* tuz_sstring.cpp in Sources */,
-				D6F3B7CB2427B30E0066B989 /* tuz_enc_clip.cpp in Sources */,
-				D6F3B7D82427B3150066B989 /* tuz_dec.c in Sources */,
-				D6F3B7D12427B30E0066B989 /* tuz_enc_match.cpp in Sources */,
-				D6F3B7CD2427B30E0066B989 /* tuz_enc_code.cpp in Sources */,
-				D6F3B7F32427B4380066B989 /* divsufsort.c in Sources */,
-				D6F3B7C82427B30E0066B989 /* tuz_enc.cpp in Sources */,
+				0D7FEAA3282A6C400029772D /* file_for_patch.c in Sources */,
+				0D7FEA9E282A6BF80029772D /* tinyuz_demo.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		D6F3B7B52427B2D20066B989 /* Debug */ = {
+		0D7FEA97282A6B2D0029772D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = NO;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
@@ -242,17 +160,18 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -266,8 +185,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../../../;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -275,23 +193,24 @@
 			};
 			name = Debug;
 		};
-		D6F3B7B62427B2D20066B989 /* Release */ = {
+		0D7FEA98282A6B2D0029772D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = NO;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
@@ -300,74 +219,73 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "-";
-				COPY_PHASE_STRIP = NO;
+				COPY_PHASE_STRIP = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEPLOYMENT_POSTPROCESSING = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = NDEBUG;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../../../;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
 			};
 			name = Release;
 		};
-		D6F3B7B82427B2D20066B989 /* Debug */ = {
+		0D7FEA9A282A6B2D0029772D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				EXECUTABLE_PREFIX = lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
 			};
 			name = Debug;
 		};
-		D6F3B7B92427B2D20066B989 /* Release */ = {
+		0D7FEA9B282A6B2D0029772D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				EXECUTABLE_PREFIX = lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D6F3B7AE2427B2D20066B989 /* Build configuration list for PBXProject "tinyuz" */ = {
+		0D7FEA8D282A6B2D0029772D /* Build configuration list for PBXProject "tinyuz" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D6F3B7B52427B2D20066B989 /* Debug */,
-				D6F3B7B62427B2D20066B989 /* Release */,
+				0D7FEA97282A6B2D0029772D /* Debug */,
+				0D7FEA98282A6B2D0029772D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D6F3B7B72427B2D20066B989 /* Build configuration list for PBXNativeTarget "tinyuz" */ = {
+		0D7FEA99282A6B2D0029772D /* Build configuration list for PBXNativeTarget "tinyuz" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D6F3B7B82427B2D20066B989 /* Debug */,
-				D6F3B7B92427B2D20066B989 /* Release */,
+				0D7FEA9A282A6B2D0029772D /* Debug */,
+				0D7FEA9B282A6B2D0029772D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = D6F3B7AB2427B2D20066B989 /* Project object */;
+	rootObject = 0D7FEA8A282A6B2D0029772D /* Project object */;
 }

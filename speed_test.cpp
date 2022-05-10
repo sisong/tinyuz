@@ -164,7 +164,7 @@ int zlib_compress(unsigned char* out_data,unsigned char* out_data_end,
     return zipLen;
 }
 
-const tuz_size_t kCodeCacheSize=1024*1/4;
+const tuz_size_t kCodeCacheSize=1024*16;
 
 bool zlib_decompress(unsigned char* out_data,unsigned char* out_data_end,
                     const unsigned char* zip_code,const unsigned char* zip_code_end){
@@ -253,14 +253,10 @@ tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
     tuz_byte* _dict_buf=0;
     tuz_TStream tuz;
     tuz_TResult result=tuz_OK;
-#if (tuz_isNeedSaveDictSize)
     tuz_size_t dictSize=tuz_TStream_read_dict_size(&listener,listener.read_code);
-#else
-    tuz_size_t dictSize=_tuz_kDictSize;//unknow dictSize
-#endif
     _dict_buf=(tuz_byte*)malloc(dictSize+kCodeCacheSize);
     assert(_dict_buf!=0);
-    result=tuz_TStream_open(&tuz,&listener,listener.read_code,_dict_buf,dictSize+kCodeCacheSize,dictSize);
+    result=tuz_TStream_open(&tuz,&listener,listener.read_code,_dict_buf,dictSize,kCodeCacheSize);
     if (is_decode_step){
         const size_t buf_size=*uncompress_size;
         size_t data_size=0;
@@ -290,8 +286,8 @@ bool _test_tuz_decompress_stream(unsigned char* out_data,unsigned char* out_data
 }
 
 bool _test_tuz_decompress_mem(unsigned char* out_data,unsigned char* out_data_end,const unsigned char* zip_code,const unsigned char* zip_code_end){
-    tuz_size_t uncompress_size=out_data_end-out_data;
-    tuz_TResult ret=tuz_decompress_mem(zip_code,zip_code_end-zip_code,out_data,&uncompress_size);
+    tuz_size_t uncompress_size=(tuz_size_t)(out_data_end-out_data);
+    tuz_TResult ret=tuz_decompress_mem(zip_code,(tuz_size_t)(zip_code_end-zip_code),out_data,&uncompress_size);
     return (ret==tuz_STREAM_END)&&(uncompress_size==(out_data_end-out_data));
 }
 
@@ -303,7 +299,7 @@ static void testFile(const char* srcFileName){
 }
 
 int main(int argc, const char * argv[]){
-    const int testDictBit=12;
+    const int testDictBit=15;
     zlib_windowBits=-testDictBit;
     _tuz_kDictSize=(1<<testDictBit);
     if (argc!=2){
@@ -337,6 +333,7 @@ int main(int argc, const char * argv[]){
     testFile("A10.jpg");
     testFile("enwik8");
     testFile("silesia.tar");
+    //testFile("enwik9");
     //*/
 
     std::cout << "done!\n";

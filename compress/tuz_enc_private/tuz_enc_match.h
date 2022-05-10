@@ -23,8 +23,12 @@ namespace _tuz_private{
         TSuffixString               sstring;
         const TTuzCode&             coder;
         const tuz_TCompressProps&   props;
-        
-        std::vector<TInt>           dictPos;
+        #if (tuz_kMaxOfDictSize>=(1<<16))
+            typedef  TUInt   TPosInt;
+        #else
+            typedef  TLCPInt TPosInt;
+        #endif
+        std::vector<TPosInt>        dictPos;
         std::vector<TLCPInt>        matchLen;
         void _cost_match(const TInt curString,const size_t curi,
                          size_t* out_maxMatchLen,std::vector<TUInt>& cost);

@@ -16,8 +16,8 @@
 
 namespace _tuz_private{
 
-    static const size_t   kMinBestClipSize = 1024*256;
-    static const size_t   kMaxBestClipSize = (size_t)(tuz_kMaxOfDictSize+1)/2;
+    static const size_t   kMinBestClipSize = 1024*128;
+    static const size_t   kMaxBestClipSize = (size_t)(tuz_kMaxOfDictSize-1)/3;
 
 }
 #endif //_tuz_enc_types_private_h
