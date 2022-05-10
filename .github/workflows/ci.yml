@@ -52,4 +52,4 @@ jobs:
           git clone --depth=1 https://github.com/sisong/HDiffPatch.git ../HDiffPatch
       - name: buildByVC
         run: |
-          msbuild builds/vc/tinyuz.sln -t:rebuild -verbosity:diag -property:Configuration=Release
+          msbuild builds/vc2019/tinyuz.sln -t:rebuild -verbosity:diag -property:Configuration=Release
