@@ -1,5 +1,5 @@
 # [tinyuz](https://github.com/sisong/tinyuz)
-[![release](https://img.shields.io/badge/release-v0.9.0-blue.svg)](https://github.com/sisong/tinyuz/releases) 
+[![release](https://img.shields.io/badge/release-v0.9.1-blue.svg)](https://github.com/sisong/tinyuz/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/tinyuz/blob/master/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/tinyuz/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/tinyuz?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/tinyuz/issues)   
@@ -8,12 +8,13 @@
 
  中文版 | [english](README.md)   
 
-**tinyuz** 是一个无损压缩算法，特色是编译后的解压缩代码(磁盘或Flash占用)非常的小，用 Mbed Studio 编译后为 882 字节；
-并且解压时内存(RAM 占用)也可以非常的小，大小为 压缩时指定的字典大小(1Byte--16MB) + 解压缩输入缓存区大小(>=1Byte)；提示：字典越小压缩率越低，而输入缓存区较小时只影响解压缩速度。   
+**tinyuz** 是一个无损压缩算法，特色是编译后的解压缩代码(磁盘或Flash占用)非常的小，用 Mbed Studio 编译后为 856 字节；
+并且解压时内存(RAM 占用)也可以非常的小，大小为 压缩时指定的字典大小(1Byte--1GB) + 解压缩时输入的缓存区大小(>=2Byte)；提示：字典越小压缩率越低，而输入缓存区较小时只影响解压缩速度。   
 支持处理巨大的数据，压缩和解压缩时都是流式处理。   
-压缩和解压缩速度和数据特性有关；在现代 CPU 上，压缩时比较慢约 0.4MB/S--2MB/S，解压缩较快约 180MB/S--250MB/S。   
+压缩和解压缩速度与数据特性和参数设置有关；在现代 CPU 上，压缩时比较慢约 0.4MB/S--2MB/S，约占用 字典大小*18 的内存；解压缩较快约 180MB/S--300MB/S。   
 (开发评估中...)
 
+---
 ## 自己编译
 编译时需要[HDiffPatch](https://github.com/sisong/HDiffPatch)库   
 ```

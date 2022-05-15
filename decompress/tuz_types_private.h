@@ -31,12 +31,6 @@ extern "C" {
     #define tuz_kMaxTypeBitCount    8
     #define tuz_kBigPosForLen       ((1<<11)+(1<<9)+(1<<7)-1)
 
-    tuz_fast_uint8 _tuz_cache_read_1byte(struct _tuz_TInputCache* self);
-    tuz_BOOL _tuz_cache_update(struct _tuz_TInputCache* self);
-
-    static tuz_force_inline tuz_BOOL _tuz_cache_success_finish(const _tuz_TInputCache* self){
-        return (self->cache_end!=0); }
-
 #ifdef __cplusplus
 }
 #endif

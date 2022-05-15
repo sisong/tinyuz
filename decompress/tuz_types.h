@@ -5,6 +5,42 @@
 */
 #ifndef _tuz_types_h
 #define _tuz_types_h
+#ifndef _IS_USED_SHARE_hpatch_lite_types
+//if _IS_USED_SHARE_hpatch_lite_types==1, share _hpi_TInputCache can reduce 52 bytes
+#   define  _IS_USED_SHARE_hpatch_lite_types 0
+#endif
+
+#if (_IS_USED_SHARE_hpatch_lite_types)
+#   include "hpatch_lite_types.h"  //in "HDiffPatch/libHDiffPatch/HPatchLite/"
+#   include "hpatch_lite_input_cache.h"
+#   define     _tuz_TInputCache         _hpi_TInputCache
+
+#   define     tuz_byte         hpi_byte
+#   define     tuz_fast_uint8   hpi_fast_uint8
+#   define     tuz_BOOL         hpi_BOOL
+#   define     tuz_FALSE        hpi_FALSE
+#   define     tuz_TRUE         hpi_TRUE
+#   define     tuz_size_t       hpi_size_t  //memory size type
+#   define     tuz_inline               hpi_inline
+#   define     tuz_force_inline         hpi_force_inline
+#   define     tuz_try_inline           hpi_try_inline
+#   define     tuz_TInputStreamHandle   hpi_TInputStreamHandle
+#   define     tuz_TInputStream_read    hpi_TInputStream_read
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define TINYUZ_VERSION_MAJOR    0
+#define TINYUZ_VERSION_MINOR    9
+#define TINYUZ_VERSION_RELEASE  1
+
+#define _TINYUZ_VERSION                 TINYUZ_VERSION_MAJOR.TINYUZ_VERSION_MINOR.TINYUZ_VERSION_RELEASE
+#define _TINYUZ_QUOTE(str)              #str
+#define _TINYUZ_EXPAND_AND_QUOTE(str)   _TINYUZ_QUOTE(str)
+#define TINYUZ_VERSION_STRING           _TINYUZ_EXPAND_AND_QUOTE(_TINYUZ_VERSION)
+
 #ifdef NDEBUG
 # ifndef assert
 #   define  assert(expression) ((void)0)
@@ -13,23 +49,22 @@
 #   include <assert.h> //assert
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
-#define TINYUZ_VERSION_MAJOR    0
-#define TINYUZ_VERSION_MINOR    9
-#define TINYUZ_VERSION_RELEASE  0
-
-#define _TINYUZ_VERSION                 TINYUZ_VERSION_MAJOR.TINYUZ_VERSION_MINOR.TINYUZ_VERSION_RELEASE
-#define _TINYUZ_QUOTE(str)              #str
-#define _TINYUZ_EXPAND_AND_QUOTE(str)   _TINYUZ_QUOTE(str)
-#define TINYUZ_VERSION_STRING           _TINYUZ_EXPAND_AND_QUOTE(_TINYUZ_VERSION)
-
-
 #ifndef tuz_byte
     typedef  unsigned char      tuz_byte;
 #endif
+#ifndef tuz_fast_uint8
+    typedef  unsigned int       tuz_fast_uint8; //>= 8bit uint
+#endif
+#ifndef tuz_BOOL
+    typedef  tuz_fast_uint8     tuz_BOOL;
+#endif
+#ifndef tuz_FALSE
+    #define  tuz_FALSE      0
+#endif
+#ifndef tuz_TRUE
+    #define  tuz_TRUE       1
+#endif
+
 #ifndef tuz_length_t
     //tuz_length_t must can saved CompressProps.maxSaveLength & dictSize value
     //  if tuz_length_t==uint8_t, must CompressProps.maxSaveLength & dictSize <= 255 when compress;
@@ -39,15 +74,6 @@ extern "C" {
 #ifndef tuz_size_t
     typedef  tuz_length_t       tuz_size_t; //memory size type
 #endif
-
-#ifndef tuz_fast_uint8
-    typedef  unsigned int       tuz_fast_uint8; //>= 8bit uint
-#endif
-#ifndef tuz_BOOL
-    typedef  tuz_fast_uint8     tuz_BOOL;
-#endif
-#define      tuz_FALSE      0
-#define      tuz_TRUE       1
 
 #ifndef tuz_inline
 #if (defined(_MSC_VER))
@@ -67,11 +93,10 @@ extern "C" {
 #   define tuz_force_inline tuz_inline
 #endif
 #endif
-    
-#if 1
+
+#ifndef tuz_try_inline
+//#   define tuz_try_inline   tuz_inline
 #   define tuz_try_inline
-#else
-#   define tuz_try_inline tuz_inline
 #endif
 
 #ifndef _IS_RUN_MEM_SAFE_CHECK 
@@ -107,14 +132,15 @@ extern "C" {
 #   error tuz_kMaxOfDictSize error
 #endif
 
-
 #ifndef tuz_TInputStreamHandle
     typedef void*   tuz_TInputStreamHandle;
 #endif
-
+#ifndef tuz_TInputStream_read
 //read (*data_size) data to out_data from sequence stream; if input stream end,set *data_size readed size; if read error return tuz_FALSE;
 typedef tuz_BOOL (*tuz_TInputStream_read)(tuz_TInputStreamHandle inputStream,tuz_byte* out_data,tuz_size_t* data_size);
+#endif
 
+#ifndef _tuz_TInputCache
 typedef struct _tuz_TInputCache{
     tuz_size_t      cache_begin;
     tuz_size_t      cache_end;
@@ -122,6 +148,7 @@ typedef struct _tuz_TInputCache{
     tuz_TInputStreamHandle  inputStream;
     tuz_TInputStream_read   read_code;
 } _tuz_TInputCache;
+#endif
 typedef struct _tuz_TDict{
     tuz_size_t      dict_cur;
     tuz_size_t      dict_size;
