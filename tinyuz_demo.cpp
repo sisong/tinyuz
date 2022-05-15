@@ -143,6 +143,7 @@ TTinyResult _tuz_decompress_stream(const hpatch_TStreamOutput* out_code,
     tuz_TStream tuz;
     tuz_TResult result=tuz_OK;
     tuz_size_t dictSize=tuz_TStream_read_dict_size(&listener,listener.read_code);
+    assert((tuz_size_t)(dictSize-1)<tuz_kMaxOfDictSize);
     printf("  decompress with  dict size : %" PRIu64 "\n",(hpatch_StreamPos_t)dictSize);
     tuz_byte* _buf=0;
     cache_size>>=1;

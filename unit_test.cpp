@@ -51,6 +51,7 @@ tuz_TResult tuz_decompress_stream(const tuz_byte* code,const tuz_byte* code_end,
     tuz_TStream tuz;
     tuz_TResult result=tuz_OK;
     tuz_size_t dictSize=tuz_TStream_read_dict_size(&listener,listener.read_code);
+    assert((tuz_size_t)(dictSize-1)<tuz_kMaxOfDictSize);
     _dict_buf=(tuz_byte*)malloc(dictSize+kCodeCacheSize);
     assert(_dict_buf!=0);
     result=tuz_TStream_open(&tuz,&listener,listener.read_code,_dict_buf,dictSize,kCodeCacheSize);

@@ -34,7 +34,20 @@
         v+=1;           \
     } }
 
-tuz_BOOL _tuz_cache_update(struct _tuz_TInputCache* self){
+
+#define _TInputCache                _tuz_TInputCache
+#define _cache_read_typeBits        _cache_read_1byte
+
+#if (_IS_USED_SHARE_hpatch_lite_types)
+#   define _cache_success_finish    _hpi_cache_success_finish
+#   define _cache_update            _hpi__cache_update
+#   define _cache_read_1byte        _hpi_cache_read_1byte
+#else
+
+static tuz_force_inline 
+tuz_BOOL _cache_success_finish(const _TInputCache* self){ return (self->cache_end!=0); }
+
+static tuz_BOOL _cache_update(struct _TInputCache* self){
     //    [                    cache  buf                        ]
     tuz_size_t len=self->cache_end;
     assert(len==self->cache_begin); //empty
@@ -46,19 +59,19 @@ tuz_BOOL _tuz_cache_update(struct _tuz_TInputCache* self){
     return len!=0;
 }
 
-tuz_fast_uint8 _tuz_cache_read_1byte(struct _tuz_TInputCache* self){
+static tuz_try_inline 
+tuz_fast_uint8 _cache_read_1byte(struct _TInputCache* self){
     if (self->cache_begin!=self->cache_end){
 __cache_read_1byte:
         return self->cache_buf[self->cache_begin++];
     }
-    if(_tuz_cache_update(self))
+    if(_cache_update(self))
         goto __cache_read_1byte;
     else
         return 0;
 }
 
-#define _cache_read_1byte       _tuz_cache_read_1byte
-#define _cache_read_typeBits    _cache_read_1byte
+#endif //_IS_USED_SHARE_hpatch_lite_types
 
 static tuz_try_inline tuz_fast_uint8 _cache_read_lowbits(tuz_TStream* self,tuz_fast_uint8 bitCount){
     tuz_fast_uint8 count=self->_state.type_count;
@@ -180,7 +193,7 @@ tuz_size_t tuz_TStream_read_dict_size(tuz_TInputStreamHandle inputStream,tuz_TIn
             assert((v>0)&(((v>>8)&0xFF)==saved[1])&((v>>16)==saved[2]));
         #elif (tuz_kDictSizeSavedBytes==4)
             v=saved[0]|(((tuz_size_t)saved[1])<<8)|(((tuz_size_t)saved[2])<<16)|(((tuz_size_t)saved[3])<<24);
-            assert((v>0)&(((v>>8)&0xFF)==saved[1])&((v>>16)==saved[2])&((v>>24)==saved[3]));
+            assert((v>0)&(((v>>8)&0xFF)==saved[1])&(((v>>16)&0xFF)==saved[2])&((v>>24)==saved[3]));
         #else
         #   error unsupport tuz_kDictSizeSavedBytes
         #endif
@@ -314,7 +327,7 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
                         *data_size=(tuz_size_t)(cur_out_data-out_data);
                         return tuz_STREAM_END;
                     }else{
-                        return _tuz_cache_success_finish(&self->_code_cache)?
+                        return _cache_success_finish(&self->_code_cache)?
                                     tuz_CTRLTYPE_UNKNOW_ERROR:tuz_READ_CODE_ERROR;
                     }
                 }
@@ -337,7 +350,7 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
         assert(dsize==0);
         if (out_data!=cur_out_data)
             _update_dict(self,out_data,cur_out_data);
-        if (!_tuz_cache_success_finish(&self->_code_cache))
+        if (!_cache_success_finish(&self->_code_cache))
             return tuz_READ_CODE_ERROR;
 
         #ifdef __RUN_MEM_SAFE_CHECK
