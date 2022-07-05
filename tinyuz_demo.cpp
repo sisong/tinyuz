@@ -21,22 +21,26 @@
 #   define  _IS_NEED_MAIN 1
 #endif
 
-typedef enum TTinyResult {
-    TINY_SUCCESS=0,
-    TINY_OPTIONS_ERROR,
-    TINY_OPENREAD_ERROR,
-    TINY_OPENWRITE_ERROR,
-    TINY_FILECLOSE_ERROR,
-    TINY_MEM_ERROR, // 5
-    TINY_COMPRESS_ERROR,
-    TINY_DECOMPRESS_ERROR,
-} TTinyResult;
+typedef enum TTinyuzResult {
+    TINYUZ_SUCCESS=0,
+    TINYUZ_OPTIONS_ERROR,
+    TINYUZ_OPENREAD_ERROR,
+    TINYUZ_OPENWRITE_ERROR,
+    TINYUZ_FILEREAD_ERROR,
+    TINYUZ_FILEWRITE_ERROR,// 5
+    TINYUZ_FILECLOSE_ERROR,
+    TINYUZ_MEM_ERROR, 
+    TINYUZ_COMPRESS_ERROR,
+    TINYUZ_DECOMPRESS_ERROR,
+} TTinyuzResult;
 
 int tinyuz_cmd_line(int argc, const char * argv[]);
 int tinyuz_by_file(const char* inputFile,const char* out_inputFile,bool isCompress,size_t runWithSize);
 
+static void printVersion(){
+    printf("tinyuz v" TINYUZ_VERSION_STRING "\n");
+}
 static void printHelpInfo(){
-    //printf("tinyuz v" TINYUZ_VERSION_STRING "\n");
     std::cout << "compress   : tinyuz -c[-dictSize[k|m]]  inputFile outputFile\n";
     std::cout << "deccompress: tinyuz -d[-cacheSize[k|m]] inputFile outputFile\n";
 }
@@ -47,7 +51,7 @@ int wmain(int argc,wchar_t* argv_w[]){
     hdiff_private::TAutoMem  _mem(hpatch_kPathMaxSize*4);
     char** argv_utf8=(char**)_mem.data();
     if (!_wFileNames_to_utf8((const wchar_t**)argv_w,argc,argv_utf8,_mem.size()))
-        return TINY_OPTIONS_ERROR;
+        return TINYUZ_OPTIONS_ERROR;
     SetDefaultStringLocale();
     return tinyuz_cmd_line(argc,(const char**)argv_utf8);
 }
@@ -60,15 +64,16 @@ int main(int argc,char* argv[]){
 
 
 #define _options_check(value,errorInfo){ \
-    if (!(value)) { LOG_ERR("options " errorInfo " ERROR!\n\n"); printHelpInfo(); return TINY_OPTIONS_ERROR; } }
+    if (!(value)) { LOG_ERR("options " errorInfo " ERROR!\n\n"); printHelpInfo(); return TINYUZ_OPTIONS_ERROR; } }
 
 #define _kNULL_VALUE    ((tuz_BOOL)(-1))
 #define _kNULL_SIZE     (~(size_t)0)
 
 int tinyuz_cmd_line(int argc, const char * argv[]){
+    printVersion();
     if (argc!=4){
         printHelpInfo();
-        return TINY_OPTIONS_ERROR;
+        return TINYUZ_OPTIONS_ERROR;
     }
 
     tuz_BOOL isCompress=_kNULL_VALUE;
@@ -137,7 +142,7 @@ struct TTuzListener{
     }
 };
 
-TTinyResult _tuz_decompress_stream(const hpatch_TStreamOutput* out_code,
+TTinyuzResult _tuz_decompress_stream(const hpatch_TStreamOutput* out_code,
                                    const hpatch_TStreamInput* data,size_t cache_size){
     TTuzListener  listener={data,0};
     tuz_TStream tuz;
@@ -148,7 +153,7 @@ TTinyResult _tuz_decompress_stream(const hpatch_TStreamOutput* out_code,
     tuz_byte* _buf=0;
     cache_size>>=1;
     _buf=(tuz_byte*)malloc(dictSize+cache_size*2);
-    if (_buf==0) return TINY_MEM_ERROR;
+    if (_buf==0) return TINYUZ_MEM_ERROR;
     result=tuz_TStream_open(&tuz,&listener,listener.read_code,_buf+cache_size,
                             (tuz_size_t)dictSize,(tuz_size_t)cache_size);
     hpatch_StreamPos_t data_size=0;
@@ -160,23 +165,23 @@ TTinyResult _tuz_decompress_stream(const hpatch_TStreamOutput* out_code,
                 data_size+=step_size;
             }else{
                 free(_buf); 
-                return TINY_OPENWRITE_ERROR;
+                return TINYUZ_OPENWRITE_ERROR;
             }
         }
     }
     free(_buf);
-    return (result==tuz_STREAM_END)?TINY_SUCCESS:TINY_DECOMPRESS_ERROR;
+    return (result==tuz_STREAM_END)?TINYUZ_SUCCESS:TINYUZ_DECOMPRESS_ERROR;
 }
 
 #define  _check_on_error(errorType) { \
-    if (result==TINY_SUCCESS) result=errorType; if (!_isInClear){ goto clear; } }
+    if (result==TINYUZ_SUCCESS) result=errorType; if (!_isInClear){ goto clear; } }
 #define check(value,errorType,errorInfo) { \
     std::string erri=std::string()+errorInfo+" ERROR!\n"; \
     if (!(value)){ hpatch_printStdErrPath_utf8(erri.c_str()); _check_on_error(errorType); } }
 
 int tinyuz_by_file(const char* inputFile,const char* outputFile,bool isCompress,size_t runWithSize){
     int _isInClear=tuz_FALSE;
-    TTinyResult result=TINY_SUCCESS;
+    TTinyuzResult result=TINYUZ_SUCCESS;
     tuz_byte*   temp_cache=0;
     hpatch_TFileStreamInput   inputData;
     hpatch_TFileStreamOutput  outputData;
@@ -186,9 +191,9 @@ int tinyuz_by_file(const char* inputFile,const char* outputFile,bool isCompress,
     hpatch_StreamPos_t outputSize;
     double time0=clock_s();
     
-    check(hpatch_TFileStreamInput_open(&inputData,inputFile),TINY_OPENREAD_ERROR,"open inputFile");
+    check(hpatch_TFileStreamInput_open(&inputData,inputFile),TINYUZ_OPENREAD_ERROR,"open inputFile");
     check(hpatch_TFileStreamOutput_open(&outputData,outputFile,~(hpatch_StreamPos_t)0),
-          TINY_OPENREAD_ERROR,"open outputFile");
+          TINYUZ_OPENWRITE_ERROR,"open outputFile");
     inputSize=inputData.base.streamSize;
     printf("inputSize : %" PRIu64 " Bytes\n",inputSize);
     if (isCompress){
@@ -200,21 +205,21 @@ int tinyuz_by_file(const char* inputFile,const char* outputFile,bool isCompress,
             outputSize=tuz_compress(&outputData.base,&inputData.base,&props);
             assert(outputSize==outputData.out_length);
         }catch(const std::exception& e){
-            check(!inputData.fileError,TINY_OPENREAD_ERROR,"read inputFile");
-            check(!outputData.fileError,TINY_OPENWRITE_ERROR,"write outputFile");
-            check(false,TINY_COMPRESS_ERROR,"tuz_compress() run an error: "+e.what());
+            check(!inputData.fileError,TINYUZ_FILEREAD_ERROR,"read inputFile");
+            check(!outputData.fileError,TINYUZ_FILEWRITE_ERROR,"write outputFile");
+            check(false,TINYUZ_COMPRESS_ERROR,"tuz_compress() run an error: "+e.what());
         }
     }else{
         printf("  decompress with cache size : %" PRIu64 "\n",(hpatch_StreamPos_t)(runWithSize>>1<<1));
         result=_tuz_decompress_stream(&outputData.base,&inputData.base,runWithSize);
-        if (result!=TINY_SUCCESS){
-            check(!inputData.fileError,TINY_OPENREAD_ERROR,"read inputFile");
-            check(!outputData.fileError,TINY_OPENWRITE_ERROR,"write outputFile");
+        if (result!=TINYUZ_SUCCESS){
+            check(!inputData.fileError,TINYUZ_FILEREAD_ERROR,"read inputFile");
+            check(!outputData.fileError,TINYUZ_FILEWRITE_ERROR,"write outputFile");
             check(false,result,"_tuz_decompress_stream()");
         }
         outputSize=outputData.out_length;
     }
-    check(hpatch_TFileStreamOutput_close(&outputData),TINY_FILECLOSE_ERROR,"outpuFile close");
+    check(hpatch_TFileStreamOutput_close(&outputData),TINYUZ_FILECLOSE_ERROR,"outpuFile close");
     {//out result info
         hpatch_StreamPos_t uncompressSize=isCompress?inputData.base.streamSize:outputSize;
         hpatch_StreamPos_t compressedSize=(!isCompress)?inputData.base.streamSize:outputSize;
@@ -226,7 +231,7 @@ int tinyuz_by_file(const char* inputFile,const char* outputFile,bool isCompress,
 clear:
     _isInClear=tuz_TRUE;
     if (temp_cache) free(temp_cache);
-    check(hpatch_TFileStreamOutput_close(&outputData),TINY_FILECLOSE_ERROR,"outpuFile close");
-    check(hpatch_TFileStreamInput_close(&inputData),TINY_FILECLOSE_ERROR,"inputFile close");
+    check(hpatch_TFileStreamOutput_close(&outputData),TINYUZ_FILECLOSE_ERROR,"outpuFile close");
+    check(hpatch_TFileStreamInput_close(&inputData),TINYUZ_FILECLOSE_ERROR,"inputFile close");
     return result;
 }
