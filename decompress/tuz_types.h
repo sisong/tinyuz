@@ -10,6 +10,11 @@
 #   define  _IS_USED_SHARE_hpatch_lite_types 0
 #endif
 
+#ifndef tuz_isNeedLiteralLine  // optimize incompressible data for improve compression ratio
+//if tuz_isNeedLiteralLine==0 when decompress, must also be set to 0 when compress, can reduce 80 bytes
+#   define tuz_isNeedLiteralLine 1
+#endif
+
 #if (_IS_USED_SHARE_hpatch_lite_types)
 #   include "hpatch_lite_types.h"  //in "HDiffPatch/libHDiffPatch/HPatchLite/"
 #   include "hpatch_lite_input_cache.h"
@@ -107,16 +112,13 @@ extern "C" {
 #   define _IS_USED_C_MEMCPY  1
 #endif
 
-#ifndef tuz_isNeedLiteralLine  // optimize for can not compress data
-#   define tuz_isNeedLiteralLine 1
-#endif
-
 #ifndef tuz_kMaxOfDictSize
 #   define tuz_kMaxOfDictSize   __tuz_kMaxOfDictSize_MAX
 //#   define tuz_kMaxOfDictSize   ((1<<24)-1)   //3 bytes
 //#   define tuz_kMaxOfDictSize   ((1<<16)-1)   //2 bytes
 #endif
 
+//save dictSize at the beginning of the compressed code stream, little-endian order, tuz_kDictSizeSavedBytes bytes
 #define __tuz_kMaxOfDictSize_MAX  (1<<30) //now limit for uint32
 #if (tuz_kMaxOfDictSize>__tuz_kMaxOfDictSize_MAX)
 #   error tuz_kMaxOfDictSize error
@@ -136,7 +138,7 @@ extern "C" {
     typedef void*   tuz_TInputStreamHandle;
 #endif
 #ifndef tuz_TInputStream_read
-//read (*data_size) data to out_data from sequence stream; if input stream end,set *data_size readed size; if read error return tuz_FALSE;
+//read (*data_size) bytes data from inputStream to out_data; if input stream end,set *data_size readed size; if read error return tuz_FALSE;
 typedef tuz_BOOL (*tuz_TInputStream_read)(tuz_TInputStreamHandle inputStream,tuz_byte* out_data,tuz_size_t* data_size);
 #endif
 

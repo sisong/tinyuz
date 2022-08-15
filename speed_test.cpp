@@ -9,6 +9,7 @@
 #include <math.h>
 #include <algorithm>
 #include <vector>
+#include <string>
 #include "../HDiffPatch/_clock_for_demo.h" //in HDiffPatch
 #include "decompress/tuz_dec.h"
 #include "compress/tuz_enc.h"
@@ -19,6 +20,10 @@
 #endif
 
 std::string TEST_FILE_DIR;
+
+tuz_BOOL isDictSizeTest=0;
+static const tuz_size_t tDictSizes[]={24,79,255,1<<10,5<<10,32<<10,1<<20,32<<20};
+static const char*  tDictSizes_tag[]={"24","79","255","1k","5k","32k","1m","32m"};
 
 void readFile(std::vector<unsigned char>& data,const char* fileName){
     FILE	* file=fopen(fileName, "rb");
@@ -62,14 +67,16 @@ double minDecTestTime=0.5;
 double testDecodeProc(T_decompress proc_decompress,unsigned char* out_data,unsigned char* out_data_end,const unsigned char* zip_code,const unsigned char* zip_code_end){
     int testDecompressCount=0;
     double time1=clock_s();
+    double time2=time1;
     do {
         for (int i=0; i<10; ++i){
             bool ret=proc_decompress(out_data,out_data_end,zip_code,zip_code_end);
             ++testDecompressCount;
             if (!ret) throw "error result!";
+            if (isDictSizeTest) break;
         }
-    }while ((clock_s()-time1)<minDecTestTime);
-    double time2=clock_s();
+        time2=clock_s();
+    }while ((time2-time1)<minDecTestTime);
     double decompressTime_s=(time2-time1)/testDecompressCount;
     return  decompressTime_s;
 }
@@ -124,14 +131,29 @@ TTestResult testProc(const char* srcFileName,T_compress proc_compress,const char
 
 
 static void outResult(const TTestResult& rt){
-    std::cout<<"\""<<rt.srcFileName.c_str()<< "\"\t";
-    std::cout<<rt.srcSize/1024.0/1024<<"M\t";
-    std::cout<<rt.procName.c_str()<< "\t";
-    std::cout<<rt.zipSize*100.0/rt.srcSize<<"% ("<<rt.zipSize<<") \t";
-    //std::cout<<rt.compressTime_s<<"S\t";
-    std::cout<<rt.srcSize/rt.compressTime_s/1024/1024<<"M/S\t";
-    //std::cout<<rt.decompressTime_s<<"S\t";
-    std::cout<<rt.srcSize/rt.decompressTime_s/1024/1024<<"M/S\n";
+    const bool isSimpleView=isDictSizeTest;
+    if (isSimpleView){
+        static tuz_BOOL isOutedTag=0;
+        if (!isOutedTag){
+            isOutedTag=1;
+            printf("|zlib -9");
+            for (int i=(sizeof(tDictSizes)/sizeof(tDictSizes[0])-1);i>=0; --i) {
+                std::string tag=std::string("tuz -")+tDictSizes_tag[i];
+                printf("|%s",tag.c_str());
+            }
+        }
+
+        static std::string srcFileName_back;
+        if (srcFileName_back!=rt.srcFileName) {
+            srcFileName_back=rt.srcFileName;
+            printf("\n%s",rt.srcFileName.c_str());
+        }
+        printf("|%.2f%%",rt.zipSize*100.0/rt.srcSize);
+    }else{//default view
+        printf("%s\t%d\t%s\t",rt.srcFileName.c_str(),rt.srcSize,rt.procName.c_str());
+        printf("%.2fMB/s\t%.0fMB/s\t",rt.srcSize/rt.compressTime_s/1024/1024,rt.srcSize/rt.decompressTime_s/1024/1024);
+        printf("%d\t%.2f%%\n",rt.zipSize,rt.zipSize*100.0/rt.srcSize);
+    }
 }
 
 
@@ -293,45 +315,59 @@ bool _test_tuz_decompress_mem(unsigned char* out_data,unsigned char* out_data_en
 }
 
 static void testFile(const char* srcFileName){
-    outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"       zlib_9"));
-    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tinyuz_stream"));
-    outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_mem   ,"   tinyuz_mem"));
-    //std::cout << "\n";
+    if (!isDictSizeTest){
+        outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"       zlib -9"));
+        outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tinyuz_stream"));
+        outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_mem   ,"   tinyuz_mem"));
+    }else{
+        zlib_windowBits=-15;
+        outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"zlib -9"));
+        for (int i=(sizeof(tDictSizes)/sizeof(tDictSizes[0])-1);i>=0; --i) {
+            std::string tag=std::string("tinyuz -c-")+tDictSizes_tag[i];
+            _tuz_kDictSize=tDictSizes[i];
+            outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,tag.c_str()));
+        }
+    }
 }
 
 int main(int argc, const char * argv[]){
-    const int testDictBit=15;
-    zlib_windowBits=-testDictBit;
-    _tuz_kDictSize=(1<<testDictBit);
     if (argc!=2){
-        std::cout << "speed_test testFile\n";
+        std::cout << "speed_test \"testFile\"\n";
         return -1;
     }
-    std::cout << "  ( dictSize: " << _tuz_kDictSize
-              << "   codeCacheSize: " << kCodeCacheSize << " )\n";
+    isDictSizeTest=0;
+    const int testDictBit=15;
+    zlib_windowBits=-testDictBit;
+    _tuz_kDictSize = (1 << testDictBit);
+    if (!isDictSizeTest){
+        std::cout << "  ( dictSize: " << _tuz_kDictSize
+                  << "   codeCacheSize: " << kCodeCacheSize << " )\n";
+    }
 
     testFile(argv[1]);
 
     /* //for test
     std::cout << "test start> \n";
-    minEncTestTime=0.2;
-    minDecTestTime=0.3;
 
     //testFile("empty1.txt");
-    testFile("V0.pat"); testFile("V1.pat"); testFile("V2.pat"); testFile("V3.pat");
-    testFile("V0.bin"); testFile("V1.bin"); testFile("V2.bin"); testFile("V3.bin"); testFile("V4.bin");
+    //testFile("V0.pat"); testFile("V1.pat"); testFile("V2.pat"); testFile("V3.pat");
+    //testFile("V0.bin"); testFile("V1.bin"); testFile("V2.bin"); testFile("V3.bin"); testFile("V4.bin");
 
     //*
-    testFile("world95.txt");
-    testFile("ohs.doc");
-    testFile("FP.LOG");
-    testFile("vcfiu.hlp");
+    testFile("aMCU.bin");
+    testFile("aMCU.bin.diff");
+
+    testFile("A10.jpg");
     testFile("AcroRd32.exe");
-    testFile("MSO97.DLL");
     testFile("english.dic");
     testFile("FlashMX.pdf");
+    testFile("FP.LOG");
+    testFile("MSO97.DLL");
+    testFile("ohs.doc");
     testFile("rafale.bmp");
-    testFile("A10.jpg");
+    testFile("vcfiu.hlp");
+    testFile("world95.txt");
+
     testFile("enwik8");
     testFile("silesia.tar");
     //testFile("enwik9");
