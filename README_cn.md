@@ -9,17 +9,17 @@
  中文版 | [english](README.md)   
 
 **tinyuz** 是一个无损压缩算法，为超小型设备(MCU、NB-IoT等)设计，保持还不错的压缩率。   
-特色是编译后的解压缩代码(磁盘或Flash占用)非常的小； 
-流模式解压用 Mbed Studio 编译后为 856 字节(可以调整宏定义后到758bytes)； 
-而内存模式解压用 Mbed Studio 编译后为 424 字节(可以调整宏定义后到298bytes)。   
+特色是编译后的解压缩代码(ROM占用)非常的小； 
+流模式解压用 Mbed Studio 编译后为 856 字节(可以调整宏定义后到758字节)； 
+而内存模式解压用 Mbed Studio 编译后为 424 字节(可以调整宏定义后到298字节)。   
 同时，解压时内存(RAM占用)也可以非常的小，大小为 压缩时指定的字典大小(1Byte--1GB) + 解压缩时输入的缓存区大小(>=2Byte)； 
 提示：字典越小压缩率越低，而输入缓存区较小时只影响解压缩速度。   
 支持处理巨大的数据，压缩和解压缩时都支持流式处理。   
-压缩和解压缩速度与数据特性和参数设置有关；在现代 CPU 上，压缩时比较慢约 0.4MB/S--2MB/S，约占用 字典大小*18 的内存；解压缩较快约 180MB/S--300MB/S。   
+压缩和解压缩速度与数据特性和参数设置有关；在现代 CPU 上，压缩时比较慢约 0.4MB/S--2MB/S，解压缩较快约 180MB/S--300MB/S。   
 
 ---
 ## 二进制发布包
-[从 release 下载](https://github.com/sisong/tinyuz/releases) : 分别运行在 Windows、Linux、MacOS操作系统的命令行程序.     
+[从 release 下载](https://github.com/sisong/tinyuz/releases) : 分别运行在 Windows、Linux、MacOS操作系统的命令行程序。     
 ( 编译出这些发布文件的项目路径在 `tinyuz/builds` )   
 
 ## 自己编译
