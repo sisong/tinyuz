@@ -9,7 +9,8 @@
 namespace _tuz_private{
     
     void compress_clip(TTuzCode& out_code,const hpatch_TStreamInput* data,hpatch_StreamPos_t clipBegin,
-                       hpatch_StreamPos_t clipEnd,const tuz_TCompressProps& props);
+                       hpatch_StreamPos_t clipEnd,const tuz_TCompressProps& props,
+                       hdiff_private::TAutoMem& dict_buf);
     
 }
 #endif //_tuz_enc_clip_h
