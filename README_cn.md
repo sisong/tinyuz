@@ -1,5 +1,5 @@
 # [tinyuz](https://github.com/sisong/tinyuz)
-[![release](https://img.shields.io/badge/release-v0.9.2-blue.svg)](https://github.com/sisong/tinyuz/releases) 
+[![release](https://img.shields.io/badge/release-v0.9.3-blue.svg)](https://github.com/sisong/tinyuz/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/tinyuz/blob/master/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/tinyuz/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/tinyuz?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/tinyuz/issues)   
@@ -82,7 +82,7 @@ tinyuz v0.9.2: 测试时设置多个不同的字典大小 32MB,1MB,32KB,5KB,1KB,
   (表中'tuz -32m' 表示: tinyuz -c-32m)   
    
 "aMCU.bin" 是一个MCU设备的固件文件;   
-"aMCU.bin.diff" 是一个用两个不同版本的固件文件来创建的未压缩的补丁文件(用 [HPatchLite](https://github.com/sisong/HPatchLite) 所创建);   
+"aMCU.bin.diff" 是用两个不同版本的固件文件来创建的一个未压缩的补丁文件(用 [HPatchLite](https://github.com/sisong/HPatchLite) 所创建);   
 "A10.jpg"--"world95.txt" 从 http://www.maximumcompression.com/data/files/index.html 下载   
 "enwik8" 从 https://data.deepai.org/enwik8.zip 下载   
 "silesia.tar" 从 https://sun.aei.polsl.pl//~sdeor/index.php?page=silesia 下载

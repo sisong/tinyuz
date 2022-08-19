@@ -55,14 +55,16 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
             clipSize=(data->streamSize+clipCount-1)/clipCount;
         }
         
+        hdiff_private::TAutoMem dict_buf;
         for (hpatch_StreamPos_t clipBegin=0;true;clipBegin+=clipSize) {
             hpatch_StreamPos_t clipEnd=clipBegin+clipSize;
             bool isToStreamEnd=(clipEnd>=data->streamSize);
             if (isToStreamEnd) clipEnd=data->streamSize;
 
             TTuzCode coder(code);
-            if (clipBegin<clipEnd)
-                compress_clip(coder,data,clipBegin,clipEnd,selfProps);
+            if (clipBegin<clipEnd){
+                compress_clip(coder,data,clipBegin,clipEnd,selfProps,dict_buf);
+            }
             if (!isToStreamEnd)
                 coder.outCtrl_clipEnd();
             else

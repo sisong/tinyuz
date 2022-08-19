@@ -19,23 +19,27 @@ namespace _tuz_private{
     }
     
 void compress_clip(TTuzCode& coder,const hpatch_TStreamInput* data,hpatch_StreamPos_t clipBegin,
-                   hpatch_StreamPos_t clipEnd,const tuz_TCompressProps& props){
-    //            [           |clipBegin       endPos|
-    //       |     dict       |
-    //               | dict   |
+                   hpatch_StreamPos_t clipEnd,const tuz_TCompressProps& props,
+                   hdiff_private::TAutoMem& dict_buf){
+    //    [           |clipBegin       clipEnd|                   ]
+    //     |   dict   |
+    //                           |  new dict  |
     size_t mem_size;
     {
         hpatch_StreamPos_t _mem_size;
-        if (props.dictSize>=clipBegin)
-            _mem_size=clipEnd;
-        else
-            _mem_size=props.dictSize+(clipEnd-clipBegin);
+        assert(clipBegin>=dict_buf.size());
+        _mem_size=dict_buf.size()+(clipEnd-clipBegin);
         mem_size=(size_t)_mem_size;
         checkv(mem_size==_mem_size);
     }
     TAutoMem data_buf(mem_size);
     {
-        checkv(data->read(data,clipEnd-mem_size,data_buf.data(),data_buf.data_end()));
+        memcpy(data_buf.data(),dict_buf.data(),dict_buf.size());
+        checkv(data->read(data,clipBegin,data_buf.data()+dict_buf.size(),data_buf.data_end()));
+        //update dict
+        size_t newDictSize=(props.dictSize<=clipBegin)?props.dictSize:(size_t)clipBegin;
+        dict_buf.realloc(newDictSize);
+        memcpy(dict_buf.data(),data_buf.data_end()-newDictSize,newDictSize);
     }
     
     TMatch   matcher(data_buf.data(),data_buf.data_end(),coder,props);
