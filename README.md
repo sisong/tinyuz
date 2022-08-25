@@ -15,7 +15,7 @@ and the memory decompresser is 424 bytes(can define to unsafe mode 298bytes).
 At the same time, the stream decompress memory(RAM occupancy) can also be very small, 
 RAM size = dictionary size(1Byte--1GB) specified when compress + input cache size(>=2Byte) when decompress. 
 Tip: The smaller the dictionary, the lower the compression ratio; while the smaller input cache only affects the decompress speed.   
-( other decompresser compiled by Mbed Studio: zlib v1.2.12 stream decompresser >~10k; lzma v20.01 stream decompresser ~6k; minilzo v2.10 memory decompresser 868 bytes(unsafe mode 628 bytes). )   
+( other decompresser compiled by Mbed Studio: zlib v1.2.12 stream decompresser >~10k; lzma v22.01 stream decompresser ~6k; minilzo v2.10 memory decompresser 868 bytes(unsafe mode 628 bytes). )   
    
 Large data are supported, both compress and decompress support streaming. 
 The compress and decompress speed is related to the characteristics of the input data and parameter settings; 
