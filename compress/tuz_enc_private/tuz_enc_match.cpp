@@ -151,7 +151,6 @@ void TMatch::_getCostByMatch(const tuz_byte* cur0,std::vector<TUInt>& cost){
     }
 }
 
-#if tuz_isNeedLiteralLine
 void TMatch::_getCostByLiteralLen(const tuz_byte* cur0,std::vector<TUInt>& cost){
     size_t costSize=cost.size();
     size_t unmatched_len=0;
@@ -196,7 +195,6 @@ void TMatch::_getCostByLiteralLen(const tuz_byte* cur0,std::vector<TUInt>& cost)
         ++i;
     }    
 }
-#endif
 void TMatch::_getCost(const tuz_byte* cur0){
     std::vector<TUInt> cost;
     size_t costSize=(sstring.src_end-cur0)+1;
@@ -216,18 +214,16 @@ void TMatch::_getCost(const tuz_byte* cur0){
         if (mlen>0){
             dictPos[i-mlen+1]=dictPos[i];
             matchLen[i-mlen+1]=mlen;
-#if tuz_isNeedLiteralLine
-            cost[i-mlen+1]=cost[i];
-#endif
+            if (props.isNeedLiteralLine)
+                cost[i-mlen+1]=cost[i];
             i_inc-=mlen;
         }else{
             --i_inc;
         }
     }
 
-#if tuz_isNeedLiteralLine
-    _getCostByLiteralLen(cur0,cost);
-#endif
+    if (props.isNeedLiteralLine)
+        _getCostByLiteralLen(cur0,cost);
 }
 
 bool TMatch::match(const tuz_byte** out_matched,size_t* out_match_len,

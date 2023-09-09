@@ -35,14 +35,18 @@ typedef enum TTinyuzResult {
 } TTinyuzResult;
 
 int tinyuz_cmd_line(int argc, const char * argv[]);
-int tinyuz_by_file(const char* inputFile,const char* out_inputFile,bool isCompress,size_t runWithSize);
+int tinyuz_by_file(const char* inputFile,const char* out_inputFile,bool isCompress,size_t runWithSize,bool isNeedLiteralLine);
 
 static void printVersion(){
     printf("tinyuz v" TINYUZ_VERSION_STRING "\n");
 }
 static void printHelpInfo(){
-    std::cout << "compress   : tinyuz -c[-dictSize[k|m]]  inputFile outputFile\n";
-    std::cout << "deccompress: tinyuz -d[-cacheSize[k|m]] inputFile outputFile\n";
+    printf("compress   : tinyuz -c[-dictSize[k|m]]  inputFile outputFile\n"
+           "compress ci: tinyuz -ci[-dictSize[k|m]] inputFile outputFile\n"
+           "deccompress: tinyuz -d[-cacheSize[k|m]] inputFile outputFile\n"
+           "  Note: -c is default compressor;\n"
+           "    But if your compile deccompressor source code, set tuz_isNeedLiteralLine=0,\n"
+           "    then must used -ci compressor.");
 }
 
 #if (_IS_NEED_MAIN)
@@ -76,6 +80,7 @@ int tinyuz_cmd_line(int argc, const char * argv[]){
         return TINYUZ_OPTIONS_ERROR;
     }
 
+    tuz_BOOL isCi=tuz_FALSE;
     tuz_BOOL isCompress=_kNULL_VALUE;
     size_t   runWithSize=_kNULL_SIZE;
     std::vector<const char *> arg_values;
@@ -88,11 +93,15 @@ int tinyuz_cmd_line(int argc, const char * argv[]){
         }
         switch (op[1]) {
             case 'c':{
+                if (op[2]=='i'){
+                    ++op;
+                    isCi=tuz_TRUE;
+                }
                 _options_check((isCompress==_kNULL_VALUE)&&((op[2]=='-')||(op[2]=='\0')),"-c");
                 isCompress=tuz_TRUE;
                 if (op[2]=='-'){
                     const char* pnum=op+3;
-                    _options_check(kmg_to_size(pnum,strlen(pnum),&runWithSize),"-c-?");
+                    _options_check(kmg_to_size(pnum,strlen(pnum),&runWithSize),"-c?");
                 }
             } break;
             case 'd':{
@@ -122,7 +131,8 @@ int tinyuz_cmd_line(int argc, const char * argv[]){
         runWithSize=defaultSize;
     }
 
-    return tinyuz_by_file(arg_values[0],arg_values[1],isCompress?true:false,runWithSize);
+    bool isNeedLiteralLine=(!isCi);
+    return tinyuz_by_file(arg_values[0],arg_values[1],isCompress?true:false,runWithSize,isNeedLiteralLine);
 }
 
 struct TTuzListener{
@@ -179,7 +189,7 @@ TTinyuzResult _tuz_decompress_stream(const hpatch_TStreamOutput* out_code,
     std::string erri=std::string()+errorInfo+" ERROR!\n"; \
     if (!(value)){ hpatch_printStdErrPath_utf8(erri.c_str()); _check_on_error(errorType); } }
 
-int tinyuz_by_file(const char* inputFile,const char* outputFile,bool isCompress,size_t runWithSize){
+int tinyuz_by_file(const char* inputFile,const char* outputFile,bool isCompress,size_t runWithSize,bool isNeedLiteralLine){
     int _isInClear=tuz_FALSE;
     TTinyuzResult result=TINYUZ_SUCCESS;
     tuz_byte*   temp_cache=0;
@@ -202,6 +212,7 @@ int tinyuz_by_file(const char* inputFile,const char* outputFile,bool isCompress,
         try{
             tuz_TCompressProps props=tuz_kDefaultCompressProps;
             props.dictSize=runWithSize;
+            props.isNeedLiteralLine=isNeedLiteralLine;
             outputSize=tuz_compress(&outputData.base,&inputData.base,&props);
             assert(outputSize==outputData.out_length);
         }catch(const std::exception& e){
@@ -233,5 +244,7 @@ clear:
     if (temp_cache) free(temp_cache);
     check(hpatch_TFileStreamOutput_close(&outputData),TINYUZ_FILECLOSE_ERROR,"outpuFile close");
     check(hpatch_TFileStreamInput_close(&inputData),TINYUZ_FILECLOSE_ERROR,"inputFile close");
+    if (result!=0)
+        LOG_ERR("error code: %d\n",result);
     return result;
 }

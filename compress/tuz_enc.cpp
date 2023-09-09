@@ -9,7 +9,8 @@ using namespace _tuz_private;
 
 #define tuz_kDefaultDictSize  (1<<24)
 
-const tuz_TCompressProps tuz_kDefaultCompressProps={tuz_kDefaultDictSize,tuz_kMaxOfMaxSaveLength,1};
+const tuz_TCompressProps tuz_kDefaultCompressProps={tuz_kDefaultDictSize,tuz_kMaxOfMaxSaveLength,1,
+                                                    tuz_isNeedLiteralLine?true:false};
 
 static const size_t   kMaxPackedPosByteSize =sizeof(hpatch_StreamPos_t)*3/2+1;
 
@@ -40,7 +41,7 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     hpatch_StreamPos_t cur_out_pos=0;
     std::vector<tuz_byte> code;
     {//head
-        TTuzCode coder(code);
+        TTuzCode coder(code,selfProps.isNeedLiteralLine);
 		checkv(selfProps.dictSize==(tuz_size_t)selfProps.dictSize);
         checkv(selfProps.maxSaveLength==(tuz_length_t)selfProps.maxSaveLength);
         coder.outDictSize(selfProps.dictSize);
@@ -61,7 +62,7 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
             bool isToStreamEnd=(clipEnd>=data->streamSize);
             if (isToStreamEnd) clipEnd=data->streamSize;
 
-            TTuzCode coder(code);
+            TTuzCode coder(code,selfProps.isNeedLiteralLine);
             if (clipBegin<clipEnd){
                 compress_clip(coder,data,clipBegin,clipEnd,selfProps,dict_buf);
             }

@@ -39,7 +39,7 @@ void TSuffixString::_init(TLCPInt maxLCPValue){
     LCP.resize(sa_size);
     if (sa_size==0) return;
     
-    checkv(0==divsufsort(src,(saidx_t*)SA.data(),(saidx_t)sa_size));
+    checkv(0==divsufsort(src,(saidx32_t*)SA.data(),(saidx32_t)sa_size,(int)threadNum));
     _Rank_create((TInt)SA.size(),SA.data(),R.data());
     _LCP_create_withR(src,(TInt)SA.size(),SA.data(),R.data(),LCP.data(),maxLCPValue);
 }

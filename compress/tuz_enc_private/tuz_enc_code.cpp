@@ -123,13 +123,11 @@ void TTuzCode::outData(const tuz_byte* data,const tuz_byte* data_end){
     mdata_len_bit[get_bit(len-1)]++;
     if (len-1<kMCount) mdata_len[len-1]++;
 #endif
-  #if tuz_isNeedLiteralLine
-    if (len>=tuz_kMinLiteralLen){
+    if (isNeedLiteralLine&&(len>=tuz_kMinLiteralLen)){
         outCtrl(tuz_ctrlType_literalLine);
         outDictPosLen(len-tuz_kMinLiteralLen);
         code.insert(code.end(),data,data_end);
     }else
-  #endif
     {
         while (len--){
             outType(tuz_codeType_data);
@@ -139,11 +137,9 @@ void TTuzCode::outData(const tuz_byte* data,const tuz_byte* data_end){
     _isHaveData_back=true;
 }
 
-#if tuz_isNeedLiteralLine
 size_t TTuzCode::__getDictPosLenBit(size_t len)const{
     return _getDictPosLenBit(len);
 }
-#endif
 size_t TTuzCode::_getSavedDictPosBit(size_t pos)const{
     //type bit + pos bit
     ++pos; //0 for ctrl

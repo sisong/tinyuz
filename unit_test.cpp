@@ -217,7 +217,7 @@ int main(int argc, const char * argv[]){
     std::vector<int> seeds(kRandTestCount);
     //srand( (unsigned int)time(0) );
     for (int i=0; i<kRandTestCount; ++i)
-        seeds[i]=rand();
+        seeds[i]=((unsigned int)rand())*(unsigned int)(RAND_MAX+1)+(unsigned int)rand();
 
     //seeds[0]=?; //for debug error testSeed
     for (int i=0; i<kRandTestCount; ++i) {

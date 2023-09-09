@@ -9,8 +9,9 @@
 namespace _tuz_private{
     
     struct TTuzCode{
-        explicit TTuzCode(std::vector<tuz_byte>& out_code)
-        :code(out_code),type_count(0),_dictPos_back(1),_isHaveData_back(false){ _init_2bit(); }
+        explicit TTuzCode(std::vector<tuz_byte>& out_code,bool _isNeedLiteralLine)
+        :code(out_code),isNeedLiteralLine(_isNeedLiteralLine),
+        type_count(0),_dictPos_back(1),_isHaveData_back(false){ _init_2bit(); }
         
         void outDictPos(size_t pos);
         void outDictSize(size_t dict_size);
@@ -21,12 +22,10 @@ namespace _tuz_private{
         void outCtrl_clipEnd();
         
         inline size_t getSavedDataBit(size_t data_len)const{
-        #if tuz_isNeedLiteralLine
-            if (data_len>=tuz_kMinLiteralLen){
+            if (isNeedLiteralLine&&(data_len>=tuz_kMinLiteralLen)){
                 size_t len=data_len-tuz_kMinLiteralLen;
                 return data_len*8+1+2+8+__getDictPosLenBit(len);
             }else
-        #endif
                 return data_len*(1+8);
         }
         template<bool isSavedSamePos> inline 
@@ -50,6 +49,7 @@ namespace _tuz_private{
             for (size_t i=0;i<_pos2bit_count;++i) _pos2bit[i]=(tuz_byte)_getSavedDictPosBit(i); 
             for (size_t i=0;i<_len2bit_count;++i) _len2bit[i]=(tuz_byte)_getSavedDictLenBit(i); }
         std::vector<tuz_byte>& code;
+        bool                   isNeedLiteralLine;
         size_t    types_index;
         size_t    type_count;
         size_t    _dictPos_back;
@@ -59,9 +59,7 @@ namespace _tuz_private{
         void outLen(size_t len,size_t packBit);
         size_t _getSavedDictPosBit(size_t pos)const;
         size_t _getSavedDictLenBit(size_t len)const;
-        #if tuz_isNeedLiteralLine
         size_t __getDictPosLenBit(size_t len)const;
-        #endif
     };
     
 }//end namespace

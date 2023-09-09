@@ -12,7 +12,7 @@ namespace _tuz_private{
     struct TMatch{
         explicit TMatch(const tuz_byte* data,const tuz_byte* data_end,
                         const TTuzCode& _coder,const tuz_TCompressProps& _props)
-        :sstring(data,data_end,(TLCPInt)_props.maxSaveLength), coder(_coder),
+        :sstring(data,data_end,(TLCPInt)_props.maxSaveLength,_props.threadNum), coder(_coder),
         props(_props){ }
         bool match(const tuz_byte** out_matched,size_t* out_match_len,
                    const tuz_byte* cur);
@@ -34,9 +34,7 @@ namespace _tuz_private{
                          size_t* out_maxMatchLen,std::vector<TUInt>& cost);
         void _getCost(const tuz_byte* cur0);
         void _getCostByMatch(const tuz_byte* cur0,std::vector<TUInt>& cost);
-      #if tuz_isNeedLiteralLine
         void _getCostByLiteralLen(const tuz_byte* cur0,std::vector<TUInt>& cost);
-      #endif
     };
     
 }

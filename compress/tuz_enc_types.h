@@ -17,6 +17,7 @@ extern "C" {
         size_t      dictSize;        // >=1 & <=16m-1;   default 64k-1;  220,255,1k,4k,64k-1,1m,...
         size_t      maxSaveLength;   // >=127 & <64k;    default 64k-1;  1023,16k-1 ...
         size_t      threadNum;       // default 1;
+        bool        isNeedLiteralLine;// default true;
     } tuz_TCompressProps;
     
     static const size_t tuz_kMinOfMaxSaveLength = 127;

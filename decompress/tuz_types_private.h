@@ -17,16 +17,12 @@ extern "C" {
     
     typedef enum tuz_TCtrlType{
         //0 for error type
-    #if tuz_isNeedLiteralLine
         tuz_ctrlType_literalLine=1,
-    #endif
         tuz_ctrlType_clipEnd=2,
         tuz_ctrlType_streamEnd=3,
     } tuz_TCtrlType;
 
-    #if tuz_isNeedLiteralLine
-    #   define tuz_kMinLiteralLen   15
-    #endif
+    #define tuz_kMinLiteralLen      15
     #define tuz_kMinDictMatchLen    2
     #define tuz_kMaxTypeBitCount    8
     #define tuz_kBigPosForLen       ((1<<11)+(1<<9)+(1<<7)-1)

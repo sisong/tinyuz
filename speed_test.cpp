@@ -150,15 +150,17 @@ static void outResult(const TTestResult& rt){
         }
         printf("|%.2f%%",rt.zipSize*100.0/rt.srcSize);
     }else{//default view
-        printf("%s\t%d\t%s\t",rt.srcFileName.c_str(),rt.srcSize,rt.procName.c_str());
-        printf("%.2fMB/s\t%.0fMB/s\t",rt.srcSize/rt.compressTime_s/1024/1024,rt.srcSize/rt.decompressTime_s/1024/1024);
-        printf("%d\t%.2f%%\n",rt.zipSize,rt.zipSize*100.0/rt.srcSize);
+        printf("%s|%d|%s|",rt.srcFileName.c_str(),rt.srcSize,rt.procName.c_str());
+        printf("%.2f|%.0f|",rt.srcSize/rt.compressTime_s/1024/1024,rt.srcSize/rt.decompressTime_s/1024/1024);
+        printf("%.2f|%.0f|",rt.zipSize/rt.compressTime_s/1024/1024,rt.zipSize/rt.decompressTime_s/1024/1024);
+        printf("%d|%.2f%%\n",rt.zipSize,rt.zipSize*100.0/rt.srcSize);
     }
 }
 
 
 ////
-int zlib_windowBits=0;
+int zlib_windowBits = 0;
+int zlib_level = 9;
 
 int zlib_compress(unsigned char* out_data,unsigned char* out_data_end,
                  const unsigned char* src,const unsigned char* src_end){
@@ -173,7 +175,7 @@ int zlib_compress(unsigned char* out_data,unsigned char* out_data_end,
     c_stream.avail_in = (int)(src_end-src);
     c_stream.next_out = (Bytef*)_zipDst;
     c_stream.avail_out = (unsigned int)(out_data_end-out_data);
-    int ret = deflateInit2(&c_stream,9,Z_DEFLATED,zlib_windowBits,MAX_MEM_LEVEL,Z_DEFAULT_STRATEGY);
+    int ret = deflateInit2(&c_stream,zlib_level,Z_DEFLATED,zlib_windowBits,MAX_MEM_LEVEL,Z_DEFAULT_STRATEGY);
     if(ret!=Z_OK)
         throw "deflateInit2 error !";
     ret = deflate(&c_stream,Z_FINISH);
@@ -315,7 +317,11 @@ bool _test_tuz_decompress_mem(unsigned char* out_data,unsigned char* out_data_en
 }
 
 static void testFile(const char* srcFileName){
-    if (!isDictSizeTest){
+    zlib_level=6;
+    outResult(testProc(srcFileName, zlib_compress, "", zlib_decompress, "       zlib -6"));
+
+    /*
+    if (!isDictSizeTest) {
         outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"       zlib -9"));
         outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tinyuz_stream"));
         outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_mem   ,"   tinyuz_mem"));
@@ -327,11 +333,11 @@ static void testFile(const char* srcFileName){
             _tuz_kDictSize=tDictSizes[i];
             outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,tag.c_str()));
         }
-    }
+    }*/
 }
 
 int main(int argc, const char * argv[]){
-    if (argc!=2){
+    if (argc>2){
         std::cout << "speed_test \"testFile\"\n";
         return -1;
     }
@@ -344,9 +350,9 @@ int main(int argc, const char * argv[]){
                   << "   codeCacheSize: " << kCodeCacheSize << " )\n";
     }
 
-    testFile(argv[1]);
+    if (argc==2) { testFile(argv[1]); return 0; }
 
-    /* //for test
+    //* //for test
     std::cout << "test start> \n";
 
     //testFile("empty1.txt");
@@ -354,8 +360,8 @@ int main(int argc, const char * argv[]){
     //testFile("V0.bin"); testFile("V1.bin"); testFile("V2.bin"); testFile("V3.bin"); testFile("V4.bin");
 
     //*
-    testFile("aMCU.bin");
-    testFile("aMCU.bin.diff");
+    //testFile("aMCU.bin");
+    //testFile("aMCU.bin.diff");
 
     testFile("A10.jpg");
     testFile("AcroRd32.exe");
