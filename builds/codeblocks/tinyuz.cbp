@@ -39,13 +39,12 @@
 			<Add option="-fexceptions" />
 			<Add option="-D_LARGEFILE_SOURCE" />
 			<Add option="-D_FILE_OFFSET_BITS=64" />
+			<Add option="-D_IS_USED_MULTITHREAD=0" />
 		</Compiler>
 		<Unit filename="../../../HDiffPatch/file_for_patch.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="../../../HDiffPatch/libHDiffPatch/HDiff/private_diff/libdivsufsort/divsufsort.c">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Unit filename="../../../HDiffPatch/libHDiffPatch/HDiff/private_diff/libdivsufsort/divsufsort.cpp" />
 		<Unit filename="../../../HDiffPatch/libHDiffPatch/HPatch/patch.c">
 			<Option compilerVar="CC" />
 		</Unit>
