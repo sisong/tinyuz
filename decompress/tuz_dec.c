@@ -365,8 +365,8 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
 //---------------------------------------------------------------------------------------------
 
 typedef struct _mem_TStream{
-    const tuz_byte* in_code;
-    const tuz_byte* in_code_end;
+    tuz_pbyte_r     in_code;
+    tuz_pbyte_r     in_code_end;
     tuz_fast_uint8  types;
     tuz_fast_uint8  type_count;
 } _mem_TStream;
@@ -426,10 +426,10 @@ static tuz_length_t _mem_unpack_pos_len(_mem_TStream* self){
         return tuz_READ_CODE_ERROR;     \
     } }
 
-tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_byte* out_data,tuz_size_t* data_size){
+tuz_TResult tuz_decompress_mem(tuz_pbyte_r in_code,tuz_size_t code_size,tuz_pbyte_rw out_data,tuz_size_t* data_size){
     _mem_TStream self={in_code+tuz_kDictSizeSavedBytes,in_code+code_size,0,0};
-    tuz_byte*  cur_out_data=out_data;
-    tuz_byte*  out_data_end=out_data+(*data_size);
+    tuz_pbyte_rw cur_out_data=out_data;
+    tuz_pbyte_rw out_data_end=out_data+(*data_size);
     tuz_size_t dict_pos_back=1;
     tuz_BOOL   isHaveData_back=tuz_FALSE;
     for(;;){
@@ -451,7 +451,7 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_
                 if (dictType_len>(tuz_size_t)(out_data_end-cur_out_data)) return tuz_OUT_SIZE_OR_CODE_ERROR;
 #endif
                 {
-                    const tuz_byte* src=cur_out_data-saved_dict_pos;
+                    tuz_pbyte_rw src=cur_out_data-saved_dict_pos;
                     while (dictType_len--)
                         *cur_out_data++=*src++;
                 }
@@ -459,7 +459,7 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_
             #if tuz_isNeedLiteralLine
                 if (tuz_ctrlType_literalLine==saved_len){
                     tuz_size_t literalType_len=_mem_unpack_pos_len(&self)+tuz_kMinLiteralLen;
-                    const tuz_byte* src=self.in_code;
+                    tuz_pbyte_r src=self.in_code;
 #ifdef __RUN_MEM_SAFE_CHECK
                     if (literalType_len>(tuz_size_t)(self.in_code_end-src)) return tuz_READ_CODE_ERROR;
                     if (literalType_len>(tuz_size_t)(out_data_end-cur_out_data)) return tuz_OUT_SIZE_OR_CODE_ERROR;

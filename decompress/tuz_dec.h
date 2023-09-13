@@ -56,12 +56,20 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
 
 //-----------------------------------------------------------------------------------------------------------------
 
+#ifndef tuz_pbyte_r
+typedef const tuz_byte* tuz_pbyte_r;  // read only 
+#endif
+#ifndef tuz_pbyte_rw
+typedef tuz_byte*       tuz_pbyte_rw; // read & write
+#endif
+
 //decompress all to out_data memory
 //  compiled by Mbed Studio is 424 bytes; faster than decompress by tuz_TStream; 
 //    if set tuz_isNeedLiteralLine=0 & _IS_RUN_MEM_SAFE_CHECK=0, compiled by Mbed Studio is 298 bytes
 //  data_size: input out_data buf's size, output decompressed data size;
+//  tip: dict_size no limit when compress;
 //  if success return tuz_STREAM_END;
-tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_byte* out_data,tuz_size_t* data_size);
+tuz_TResult tuz_decompress_mem(tuz_pbyte_r in_code,tuz_size_t code_size,tuz_pbyte_rw out_data,tuz_size_t* data_size);
 
 
 #ifdef __cplusplus
