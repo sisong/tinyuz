@@ -204,6 +204,7 @@ int tinyuz_by_file(const char* inputFile,const char* outputFile,bool isCompress,
     check(hpatch_TFileStreamInput_open(&inputData,inputFile),TINYUZ_OPENREAD_ERROR,"open inputFile");
     check(hpatch_TFileStreamOutput_open(&outputData,outputFile,~(hpatch_StreamPos_t)0),
           TINYUZ_OPENWRITE_ERROR,"open outputFile");
+    hpatch_TFileStreamOutput_setRandomOut(&outputData,hpatch_TRUE);
     inputSize=inputData.base.streamSize;
     printf("inputSize : %" PRIu64 " Bytes\n",inputSize);
     if (isCompress){

@@ -117,6 +117,9 @@ extern "C" {
 //#   define tuz_kMaxOfDictSize   ((1<<24)-1)   //3 bytes
 //#   define tuz_kMaxOfDictSize   ((1<<16)-1)   //2 bytes
 #endif
+#ifndef tuz_kMinOfDictSize
+#   define tuz_kMinOfDictSize   1
+#endif
 
 //save dictSize at the beginning of the compressed code stream, little-endian order, tuz_kDictSizeSavedBytes bytes
 #define __tuz_kMaxOfDictSize_MAX  (1<<30) //now limit for uint32

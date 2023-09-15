@@ -5,6 +5,7 @@
 */
 #include "tuz_enc.h"
 #include "tuz_enc_private/tuz_enc_clip.h"
+#include <algorithm> //std::max
 using namespace _tuz_private;
 
 #define tuz_kDefaultDictSize  (1<<24)
@@ -18,6 +19,12 @@ hpatch_StreamPos_t tuz_maxCompressedSize(hpatch_StreamPos_t data_size){
     const hpatch_StreamPos_t u_size=data_size/8+1;
     hpatch_StreamPos_t c_count=data_size/kMinBestClipSize+1;
     return data_size + u_size + 1+kMaxPackedPosByteSize + 4*c_count + 4;
+}
+
+inline void _flush_code(const hpatch_TStreamOutput* out_code,hpatch_StreamPos_t& cur_out_pos,std::vector<tuz_byte>& code){
+    checkv(out_code->write(out_code,cur_out_pos,code.data(),code.data()+code.size()));
+    cur_out_pos+=code.size();
+    code.clear();
 }
 
 hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatch_TStreamInput* data,
@@ -41,11 +48,14 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
     hpatch_StreamPos_t cur_out_pos=0;
     std::vector<tuz_byte> code;
     {//head
+        assert(code.empty());
         TTuzCode coder(code,selfProps.isNeedLiteralLine);
 		checkv(selfProps.dictSize==(tuz_size_t)selfProps.dictSize);
         checkv(selfProps.maxSaveLength==(tuz_length_t)selfProps.maxSaveLength);
         coder.outDictSize(selfProps.dictSize);
+        _flush_code(out_code,cur_out_pos,code);
     }
+    size_t curDictSizeMax=tuz_kMinOfDictSize;
     {
         hpatch_StreamPos_t clipSize;
         {
@@ -62,6 +72,7 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
             bool isToStreamEnd=(clipEnd>=data->streamSize);
             if (isToStreamEnd) clipEnd=data->streamSize;
 
+            assert(code.empty());
             TTuzCode coder(code,selfProps.isNeedLiteralLine);
             if (clipBegin<clipEnd){
                 compress_clip(coder,data,clipBegin,clipEnd,selfProps,dict_buf);
@@ -70,13 +81,24 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
                 coder.outCtrl_clipEnd();
             else
                 coder.outCtrl_streamEnd();
-                
-            checkv(out_code->write(out_code,cur_out_pos,code.data(),code.data()+code.size()));
-            cur_out_pos+=code.size();
-            code.clear();
+            
+            curDictSizeMax=std::max(curDictSizeMax,coder.getCurDictSizeMax());
+            _flush_code(out_code,cur_out_pos,code);
             if (isToStreamEnd) break;
         }
     }
+
+    {//update dictSize
+        checkv(curDictSizeMax<=selfProps.dictSize);
+        if (curDictSizeMax<selfProps.dictSize){
+            assert(code.empty());
+            TTuzCode coder(code,selfProps.isNeedLiteralLine);
+            coder.outDictSize(curDictSizeMax);
+            hpatch_StreamPos_t dict_out_pos=0;
+            _flush_code(out_code,dict_out_pos,code);
+        }
+    }
+
     return cur_out_pos;
 }
 
