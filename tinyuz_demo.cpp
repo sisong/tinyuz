@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include "../HDiffPatch/libParallel/parallel_import.h"
 #include "../HDiffPatch/_clock_for_demo.h" //in HDiffPatch
 #include "../HDiffPatch/_atosize.h"
 #include "../HDiffPatch/file_for_patch.h"
@@ -35,7 +36,8 @@ typedef enum TTinyuzResult {
 } TTinyuzResult;
 
 int tinyuz_cmd_line(int argc, const char * argv[]);
-int tinyuz_by_file(const char* inputFile,const char* out_inputFile,bool isCompress,size_t runWithSize,bool isNeedLiteralLine);
+int tinyuz_by_file(const char* inputFile,const char* out_inputFile,bool isCompress,
+                   bool isNeedLiteralLine,size_t runWithSize,size_t threadNum);
 
 static void printVersion(){
     printf("tinyuz v" TINYUZ_VERSION_STRING "\n");
@@ -46,7 +48,13 @@ static void printHelpInfo(){
            "deccompress: tinyuz -d[-cacheSize[k|m]] inputFile outputFile\n"
            "  Note: -c is default compressor;\n"
            "    But if your compile deccompressor source code, set tuz_isNeedLiteralLine=0,\n"
-           "    then must used -ci compressor.");
+           "    then must used -ci compressor.\n"
+#if (_IS_USED_MULTITHREAD)
+           "  -p-parallelThreadNumber\n"
+           "      if parallelThreadNumber>1 then open multi-thread Parallel compress mode;\n"
+           "      DEFAULT -p-4; multi-thread requires more memory!\n"
+#endif
+           );
 }
 
 #if (_IS_NEED_MAIN)
@@ -73,9 +81,14 @@ int main(int argc,char* argv[]){
 #define _kNULL_VALUE    ((tuz_BOOL)(-1))
 #define _kNULL_SIZE     (~(size_t)0)
 
+#define _THREAD_NUMBER_NULL     0
+#define _THREAD_NUMBER_MIN      1
+#define _THREAD_NUMBER_DEFUALT  4
+#define _THREAD_NUMBER_MAX      (1<<8)
+
 int tinyuz_cmd_line(int argc, const char * argv[]){
     printVersion();
-    if (argc!=4){
+    if (argc<4) {
         printHelpInfo();
         return TINYUZ_OPTIONS_ERROR;
     }
@@ -83,6 +96,7 @@ int tinyuz_cmd_line(int argc, const char * argv[]){
     tuz_BOOL isCi=tuz_FALSE;
     tuz_BOOL isCompress=_kNULL_VALUE;
     size_t   runWithSize=_kNULL_SIZE;
+    size_t   threadNum=_THREAD_NUMBER_NULL;
     std::vector<const char *> arg_values;
     for (int i=1; i<argc; ++i) {
         const char* op=argv[i];
@@ -112,6 +126,14 @@ int tinyuz_cmd_line(int argc, const char * argv[]){
                     _options_check(kmg_to_size(pnum,strlen(pnum),&runWithSize),"-d-?");
                 }
             } break;
+#if (_IS_USED_MULTITHREAD)
+            case 'p':{
+                _options_check((threadNum==_THREAD_NUMBER_NULL)&&(op[2]=='-'),"-p-?");
+                const char* pnum=op+3;
+                _options_check(a_to_size(pnum,strlen(pnum),&threadNum),"-p-?");
+                _options_check(threadNum>=_THREAD_NUMBER_MIN,"-p-?");
+            } break;
+#endif
             default: {
                 _options_check(tuz_FALSE,"-?");
             } break;
@@ -120,6 +142,11 @@ int tinyuz_cmd_line(int argc, const char * argv[]){
 
     _options_check(arg_values.size()==2,"must input two files");
     _options_check(isCompress!=_kNULL_VALUE,"must run with -c or -d");
+
+    if (threadNum==_THREAD_NUMBER_NULL)
+        threadNum=_THREAD_NUMBER_DEFUALT;
+    else if (threadNum>_THREAD_NUMBER_MAX)
+        threadNum=_THREAD_NUMBER_MAX;
 
     if (runWithSize!=_kNULL_SIZE){
         const size_t minSize=isCompress?1:2;
@@ -132,7 +159,8 @@ int tinyuz_cmd_line(int argc, const char * argv[]){
     }
 
     bool isNeedLiteralLine=(!isCi);
-    return tinyuz_by_file(arg_values[0],arg_values[1],isCompress?true:false,runWithSize,isNeedLiteralLine);
+    return tinyuz_by_file(arg_values[0],arg_values[1],isCompress?true:false,
+                          isNeedLiteralLine,runWithSize,threadNum);
 }
 
 struct TTuzListener{
@@ -189,7 +217,8 @@ TTinyuzResult _tuz_decompress_stream(const hpatch_TStreamOutput* out_code,
     std::string erri=std::string()+errorInfo+" ERROR!\n"; \
     if (!(value)){ hpatch_printStdErrPath_utf8(erri.c_str()); _check_on_error(errorType); } }
 
-int tinyuz_by_file(const char* inputFile,const char* outputFile,bool isCompress,size_t runWithSize,bool isNeedLiteralLine){
+int tinyuz_by_file(const char* inputFile,const char* outputFile,bool isCompress,
+                   bool isNeedLiteralLine,size_t runWithSize,size_t threadNum){
     int _isInClear=tuz_FALSE;
     TTinyuzResult result=TINYUZ_SUCCESS;
     tuz_byte*   temp_cache=0;
@@ -214,6 +243,7 @@ int tinyuz_by_file(const char* inputFile,const char* outputFile,bool isCompress,
             tuz_TCompressProps props=tuz_kDefaultCompressProps;
             props.dictSize=runWithSize;
             props.isNeedLiteralLine=isNeedLiteralLine;
+            props.threadNum=threadNum;
             outputSize=tuz_compress(&outputData.base,&inputData.base,&props);
             assert(outputSize==outputData.out_length);
         }catch(const std::exception& e){
