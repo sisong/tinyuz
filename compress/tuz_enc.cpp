@@ -212,7 +212,7 @@ hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatc
         _codeList.resize(threadNum+1+threadNum/2);
         for (size_t i=0;i<_codeList.size();++i)
             checkv(mt.work_chan.send(&_codeList[i],true));
-        mt.start_threads(threadNum,_tuz_compress_mt,&mt,true);
+        mt.start_threads((int)threadNum,_tuz_compress_mt,&mt,true);
 
         mt.wait_all_thread_end();
         checkv(!mt.is_on_error());
