@@ -1,13 +1,14 @@
 # args
+MT       := 1
 STATIC_CPP := 0
 # used clang?
-CL  	 := 0
+CL  	   := 0
 # build with -m32?
 M32      := 0
 # build for out min size
 MINS     := 0
 ifeq ($(OS),Windows_NT) # mingw?
-  CC    := gcc
+  CC     := gcc
 endif
 
 
@@ -16,6 +17,13 @@ HDP_OBJ := \
 	$(HDP_PATH)/libHDiffPatch/HDiff/private_diff/libdivsufsort/divsufsort.o \
     $(HDP_PATH)/libHDiffPatch/HPatch/patch.o \
     $(HDP_PATH)/file_for_patch.o
+
+ifeq ($(MT),0)
+else
+  HDP_OBJ += \
+    $(HDP_PATH)/libParallel/parallel_import.o \
+    $(HDP_PATH)/libParallel/parallel_channel.o
+endif
 
 TINY_OBJ := \
     decompress/tuz_dec.o \
@@ -27,7 +35,15 @@ TINY_OBJ := \
 	$(HDP_OBJ)
 
 DEF_FLAGS := \
-    -O3 -DNDEBUG -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_IS_USED_MULTITHREAD=0
+    -O3 -DNDEBUG -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+
+ifeq ($(MT),0)
+  DEF_FLAGS += -D_IS_USED_MULTITHREAD=0
+else
+  DEF_FLAGS += \
+    -D_IS_USED_MULTITHREAD=1 \
+    -D_IS_USED_CPP11THREAD=1
+endif
 
 ifeq ($(M32),0)
 else
@@ -45,6 +61,10 @@ else
 endif
 
 TINY_LINK  := 
+ifeq ($(MT),0)
+else
+  TINY_LINK += -lpthread	# link pthread
+endif
 ifeq ($(M32),0)
 else
   TINY_LINK += -m32
@@ -64,7 +84,7 @@ else
 endif
 
 CFLAGS   += $(DEF_FLAGS) 
-CXXFLAGS += $(DEF_FLAGS)
+CXXFLAGS += $(DEF_FLAGS) -std=c++11
 
 .PHONY: all install clean
 

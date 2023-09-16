@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		0D7FEA82282A676D0029772D /* patch.c in Sources */ = {isa = PBXBuildFile; fileRef = 0D7FEA81282A676D0029772D /* patch.c */; };
 		0D7FEA84282A67830029772D /* divsufsort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0D7FEA83282A67830029772D /* divsufsort.cpp */; };
+		0D7FEA86282A67850029772D /* parallel_channel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0D7FEA85282A67850029772D /* parallel_channel.cpp */; };
+		0D7FEA88282A67870029772D /* parallel_import.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0D7FEA87282A67870029772D /* parallel_import.cpp */; };
 		D6F3B7C82427B30E0066B989 /* tuz_enc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D6F3B7BB2427B30E0066B989 /* tuz_enc.cpp */; };
 		D6F3B7C92427B30E0066B989 /* tuz_enc_types.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7BC2427B30E0066B989 /* tuz_enc_types.h */; };
 		D6F3B7CA2427B30E0066B989 /* tuz_enc.h in Headers */ = {isa = PBXBuildFile; fileRef = D6F3B7BD2427B30E0066B989 /* tuz_enc.h */; };
@@ -30,6 +32,8 @@
 /* Begin PBXFileReference section */
 		0D7FEA81282A676D0029772D /* patch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = patch.c; path = ../../../HDiffPatch/libHDiffPatch/HPatch/patch.c; sourceTree = "<group>"; };
 		0D7FEA83282A67830029772D /* divsufsort.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = divsufsort.cpp; path = ../../../HDiffPatch/libHDiffPatch/HDiff/private_diff/libdivsufsort/divsufsort.cpp; sourceTree = "<group>"; };
+		0D7FEA85282A67850029772D /* parallel_channel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parallel_channel.cpp; path = ../../../HDiffPatch/libParallel/parallel_channel.cpp; sourceTree = "<group>"; };
+		0D7FEA87282A67870029772D /* parallel_import.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parallel_import.cpp; path = ../../../HDiffPatch/libParallel/parallel_import.cpp; sourceTree = "<group>"; };
 		0D7FEA9C282A6BC60029772D /* tinyuz.xcworkspace */ = {isa = PBXFileReference; lastKnownFileType = wrapper.workspace; path = tinyuz.xcworkspace; sourceTree = "<group>"; };
 		D6F3B7B32427B2D20066B989 /* liblibtinyuz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblibtinyuz.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6F3B7BB2427B30E0066B989 /* tuz_enc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tuz_enc.cpp; sourceTree = "<group>"; };
@@ -124,6 +128,8 @@
 			isa = PBXGroup;
 			children = (
 				0D7FEA83282A67830029772D /* divsufsort.cpp */,
+				0D7FEA85282A67850029772D /* parallel_channel.cpp */,
+				0D7FEA87282A67870029772D /* parallel_import.cpp */,
 				0D7FEA81282A676D0029772D /* patch.c */,
 			);
 			name = HDiffPatch;
@@ -213,6 +219,8 @@
 				D6F3B7D12427B30E0066B989 /* tuz_enc_match.cpp in Sources */,
 				D6F3B7CD2427B30E0066B989 /* tuz_enc_code.cpp in Sources */,
 				0D7FEA84282A67830029772D /* divsufsort.cpp in Sources */,
+				0D7FEA86282A67850029772D /* parallel_channel.cpp in Sources */,
+				0D7FEA88282A67870029772D /* parallel_import.cpp in Sources */,
 				D6F3B7C82427B30E0066B989 /* tuz_enc.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -226,6 +234,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -264,7 +273,6 @@
 					"DEBUG=1",
 					"_LARGEFILE_SOURCE",
 					"_FILE_OFFSET_BITS=64",
-					"_IS_USED_MULTITHREAD=0",
 					"$(inherited)",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -288,6 +296,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -324,7 +333,6 @@
 					"NDEBUG",
 					"_LARGEFILE_SOURCE",
 					"_FILE_OFFSET_BITS=64",
-					"_IS_USED_MULTITHREAD=0",
 					"$(inherited)",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;

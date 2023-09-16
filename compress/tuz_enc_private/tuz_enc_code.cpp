@@ -161,6 +161,7 @@ size_t TTuzCode::_getSavedDictLenBit(size_t len)const{
 void TTuzCode::outDict(size_t match_len,size_t dict_pos){
     outType(tuz_codeType_dict);
     size_t saved_dict_pos=dict_pos+1; //0 for ctrl
+    if (saved_dict_pos>_dict_size_max) _dict_size_max=saved_dict_pos;
     const size_t isSamePos=(_dictPos_back==saved_dict_pos)?1:0;
     const size_t isSavedSamePos=(isSamePos&&_isHaveData_back)?1:0;
     size_t len=match_len-tuz_kMinDictMatchLen;

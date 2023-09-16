@@ -11,15 +11,15 @@ namespace _tuz_private{
     struct TTuzCode{
         explicit TTuzCode(std::vector<tuz_byte>& out_code,bool _isNeedLiteralLine)
         :code(out_code),isNeedLiteralLine(_isNeedLiteralLine),
-        type_count(0),_dictPos_back(1),_isHaveData_back(false){ _init_2bit(); }
+        type_count(0),_dictPos_back(1),_dict_size_max(tuz_kMinOfDictSize),_isHaveData_back(false){ _init_2bit(); }
         
-        void outDictPos(size_t pos);
         void outDictSize(size_t dict_size);
         void outData(const tuz_byte* data,const tuz_byte* data_end);
         void outDict(size_t match_len,size_t dict_pos);
         void outCtrl_typesEnd();
         void outCtrl_streamEnd();
         void outCtrl_clipEnd();
+        const size_t getCurDictSizeMax() { return _dict_size_max; }
         
         inline size_t getSavedDataBit(size_t data_len)const{
             if (isNeedLiteralLine&&(data_len>=tuz_kMinLiteralLen)){
@@ -42,6 +42,7 @@ namespace _tuz_private{
             else return _getSavedDictPosBit(pos)+isHaveData;
         }
     private:
+        void outDictPos(size_t pos);
         enum { _len2bit_count=1024*8, _pos2bit_count=1024*32 };
         tuz_byte _pos2bit[_pos2bit_count];
         tuz_byte _len2bit[_len2bit_count];
@@ -53,6 +54,7 @@ namespace _tuz_private{
         size_t    types_index;
         size_t    type_count;
         size_t    _dictPos_back;
+        size_t    _dict_size_max;
         bool      _isHaveData_back;
         void outType(size_t bit1v);
         void outCtrl(tuz_TCtrlType ctrl);

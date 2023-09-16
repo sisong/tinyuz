@@ -248,6 +248,7 @@ int _test_tuz_compress(unsigned char* out_data,unsigned char* out_data_end,
     mem_as_hStreamInput(&in_stream,src,src_end);
     tuz_TCompressProps props=tuz_kDefaultCompressProps;
     props.dictSize=_tuz_kDictSize;
+    props.threadNum=8;
     //props.maxSaveLength=255;
     hpatch_StreamPos_t codeSize=tuz_compress(&out_stream,&in_stream,&props);
     return (int)codeSize;
@@ -317,12 +318,12 @@ bool _test_tuz_decompress_mem(unsigned char* out_data,unsigned char* out_data_en
 }
 
 static void testFile(const char* srcFileName){
-    zlib_level=6;
-    outResult(testProc(srcFileName, zlib_compress, "", zlib_decompress, "       zlib -6"));
+    //zlib_level=6;
+    //outResult(testProc(srcFileName, zlib_compress, "", zlib_decompress, "      zlib -6"));
+    zlib_level=9;
 
-    /*
     if (!isDictSizeTest) {
-        outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"       zlib -9"));
+        outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"      zlib -9"));
         outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tinyuz_stream"));
         outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_mem   ,"   tinyuz_mem"));
     }else{
@@ -333,7 +334,7 @@ static void testFile(const char* srcFileName){
             _tuz_kDictSize=tDictSizes[i];
             outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,tag.c_str()));
         }
-    }*/
+    }
 }
 
 int main(int argc, const char * argv[]){

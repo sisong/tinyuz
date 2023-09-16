@@ -37,9 +37,9 @@
 extern "C" {
 #endif
 
-#define TINYUZ_VERSION_MAJOR    0
-#define TINYUZ_VERSION_MINOR    9
-#define TINYUZ_VERSION_RELEASE  4
+#define TINYUZ_VERSION_MAJOR    1
+#define TINYUZ_VERSION_MINOR    0
+#define TINYUZ_VERSION_RELEASE  0
 
 #define _TINYUZ_VERSION                 TINYUZ_VERSION_MAJOR.TINYUZ_VERSION_MINOR.TINYUZ_VERSION_RELEASE
 #define _TINYUZ_QUOTE(str)              #str
@@ -116,6 +116,9 @@ extern "C" {
 #   define tuz_kMaxOfDictSize   __tuz_kMaxOfDictSize_MAX
 //#   define tuz_kMaxOfDictSize   ((1<<24)-1)   //3 bytes
 //#   define tuz_kMaxOfDictSize   ((1<<16)-1)   //2 bytes
+#endif
+#ifndef tuz_kMinOfDictSize
+#   define tuz_kMinOfDictSize   1
 #endif
 
 //save dictSize at the beginning of the compressed code stream, little-endian order, tuz_kDictSizeSavedBytes bytes
