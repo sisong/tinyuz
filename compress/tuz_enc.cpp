@@ -22,7 +22,9 @@ hpatch_StreamPos_t tuz_maxCompressedSize(hpatch_StreamPos_t data_size){
     return data_size + u_size + 1+kMaxPackedPosByteSize + 4*c_count + 4;
 }
 
-inline void _flush_code(const hpatch_TStreamOutput* out_code,hpatch_StreamPos_t& cur_out_pos,std::vector<tuz_byte>& code){
+namespace{
+
+static inline void _flush_code(const hpatch_TStreamOutput* out_code,hpatch_StreamPos_t& cur_out_pos,std::vector<tuz_byte>& code){
     checkv(out_code->write(out_code,cur_out_pos,code.data(),code.data()+code.size()));
     cur_out_pos+=code.size();
     code.clear();
@@ -156,6 +158,7 @@ static void _tuz_compress_mt(int threadIndex,void* workData){
 }
 
 #endif
+} //namespace
 
 hpatch_StreamPos_t tuz_compress(const hpatch_TStreamOutput* out_code,const hpatch_TStreamInput* data,
                                 const tuz_TCompressProps* props){
