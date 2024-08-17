@@ -24,7 +24,7 @@ namespace _tuz_private{
         for (TInt h=0,i=0; i<n; ++i){
             if (R[i]==0) continue;
             TInt j = SA[R[i]-1];
-            while (((i+h!=n)&(j+h!=n))&&(T[i+h]==T[j+h]))
+            while (((i+h!=n)&&(j+h!=n))&&(T[i+h]==T[j+h]))
                 ++h;
             LCP[R[i]-1]=(TLCPInt)((h<=maxLCPValue)?h:maxLCPValue);
             if (h>0) --h;
