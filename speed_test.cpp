@@ -14,6 +14,10 @@
 #include "decompress/tuz_dec.h"
 #include "compress/tuz_enc.h"
 #include "zlib.h"
+#define _IS_NEED_TEST_OTHERS 0
+#if (_IS_NEED_TEST_OTHERS)
+#include "test_others.h"
+#endif
 
 #ifdef min
 #   undef min
@@ -22,8 +26,9 @@
 std::string TEST_FILE_DIR;
 
 tuz_BOOL isDictSizeTest=0;
-static const tuz_size_t tDictSizes[]={24,79,255,1<<10,5<<10,32<<10,1<<20,32<<20};
-static const char*  tDictSizes_tag[]={"24","79","255","1k","5k","32k","1m","32m"};
+int threadTest=1;
+static const tuz_size_t tDictSizes[]={255,1<<10,4<<10,32<<10,1<<20};
+static const char*  tDictSizes_tag[]={"255","1k","4k","32k","1m"};
 
 void readFile(std::vector<unsigned char>& data,const char* fileName){
     FILE	* file=fopen(fileName, "rb");
@@ -71,8 +76,8 @@ double testDecodeProc(T_decompress proc_decompress,unsigned char* out_data,unsig
     do {
         for (int i=0; i<10; ++i){
             bool ret=proc_decompress(out_data,out_data_end,zip_code,zip_code_end);
-            ++testDecompressCount;
             if (!ret) throw "error result!";
+            ++testDecompressCount;
             if (isDictSizeTest) break;
         }
         time2=clock_s();
@@ -89,6 +94,7 @@ double testEncodeProc(T_compress proc_compress,std::vector<unsigned char>& compr
     double time1=clock_s();
     do{
         dstCodeSize=proc_compress(&compressedCode[0],&compressedCode[0]+compressedCode.size(),src,src_end);
+        if (dstCodeSize<=0) throw "error result!";
         ++testCompressCount;
     }while ((clock_s()-time1)<minEncTestTime);
     double time2=clock_s();
@@ -97,7 +103,7 @@ double testEncodeProc(T_compress proc_compress,std::vector<unsigned char>& compr
     return compressTime_s;
 }
 
-TTestResult testProc(const char* srcFileName,T_compress proc_compress,const char* proc_compress_Name,
+TTestResult testProc(const char* srcFileName,T_compress proc_compress,
                  T_decompress proc_decompress,const char* proc_decompress_Name){
     std::string testFilePath=TEST_FILE_DIR; testFilePath.append(srcFileName);
     std::vector<unsigned char> oldData; readFile(oldData,testFilePath.c_str());
@@ -132,13 +138,16 @@ TTestResult testProc(const char* srcFileName,T_compress proc_compress,const char
 
 static void outResult(const TTestResult& rt){
     const bool isSimpleView=isDictSizeTest;
+    static tuz_BOOL isOutedTag=0;
     if (isSimpleView){
-        static tuz_BOOL isOutedTag=0;
         if (!isOutedTag){
             isOutedTag=1;
-            printf("|zlib -9");
+            printf("test file|zlib -9");
+#if (_IS_NEED_TEST_OTHERS)
+            printf("|QuickLZ -3|heatshrink 4k|FastLZ -2|miniLZO 1x_1");
+#endif
             for (int i=(sizeof(tDictSizes)/sizeof(tDictSizes[0])-1);i>=0; --i) {
-                std::string tag=std::string("tuz -")+tDictSizes_tag[i];
+                std::string tag=std::string("tuz ")+tDictSizes_tag[i];
                 printf("|%s",tag.c_str());
             }
         }
@@ -150,16 +159,20 @@ static void outResult(const TTestResult& rt){
         }
         printf("|%.2f%%",rt.zipSize*100.0/rt.srcSize);
     }else{//default view
+        if (!isOutedTag){
+            isOutedTag=1;
+            printf("test file|size|program|C M/S|D M/S|C size|C ratio\n");
+        }
         printf("%s|%d|%s|",rt.srcFileName.c_str(),rt.srcSize,rt.procName.c_str());
         printf("%.2f|%.0f|",rt.srcSize/rt.compressTime_s/1024/1024,rt.srcSize/rt.decompressTime_s/1024/1024);
-        printf("%.2f|%.0f|",rt.zipSize/rt.compressTime_s/1024/1024,rt.zipSize/rt.decompressTime_s/1024/1024);
+        //printf("%.2f|%.0f|",rt.zipSize/rt.compressTime_s/1024/1024,rt.zipSize/rt.decompressTime_s/1024/1024);
         printf("%d|%.2f%%\n",rt.zipSize,rt.zipSize*100.0/rt.srcSize);
     }
 }
 
 
 ////
-int zlib_windowBits = 0;
+int zlib_windowBits = -15;
 int zlib_level = 9;
 
 int zlib_compress(unsigned char* out_data,unsigned char* out_data_end,
@@ -248,7 +261,7 @@ int _test_tuz_compress(unsigned char* out_data,unsigned char* out_data_end,
     mem_as_hStreamInput(&in_stream,src,src_end);
     tuz_TCompressProps props=tuz_kDefaultCompressProps;
     props.dictSize=_tuz_kDictSize;
-    props.threadNum=8;
+    props.threadNum=threadTest;
     //props.maxSaveLength=255;
     hpatch_StreamPos_t codeSize=tuz_compress(&out_stream,&in_stream,&props);
     return (int)codeSize;
@@ -318,21 +331,24 @@ bool _test_tuz_decompress_mem(unsigned char* out_data,unsigned char* out_data_en
 }
 
 static void testFile(const char* srcFileName){
-    //zlib_level=6;
-    //outResult(testProc(srcFileName, zlib_compress, "", zlib_decompress, "      zlib -6"));
-    zlib_level=9;
-
+        outResult(testProc(srcFileName,zlib_compress      ,zlib_decompress              ,"       zlib -9"));
+    #if (_IS_NEED_TEST_OTHERS)
+        outResult(testProc(srcFileName,quicklz_compress   ,quicklz_decompress           ,"    QuickLZ -3"));
+//hs_windowBits=15;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress,"heatshrink 32k"));// test fail when hs_windowBits=15
+hs_windowBits=12;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress," heatshrink 4k"));
+//hs_windowBits=10;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress," heatshrink 1k"));
+//hs_windowBits=8; outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress,"heatshrink 256"));
+        outResult(testProc(srcFileName,_fastlz_compress   ,_fastlz_decompress           ,"     FastLZ -2"));
+        outResult(testProc(srcFileName,minilzo_compress   ,minilzo_decompress           ,"  miniLZO 1x_1"));
+    #endif
     if (!isDictSizeTest) {
-        outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"      zlib -9"));
-        outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,"tinyuz_stream"));
-        outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_mem   ,"   tinyuz_mem"));
+        outResult(testProc(srcFileName,_test_tuz_compress ,_test_tuz_decompress_stream   ," tinyuz_stream"));
+        outResult(testProc(srcFileName,_test_tuz_compress ,_test_tuz_decompress_mem      ,"    tinyuz_mem"));
     }else{
-        zlib_windowBits=-15;
-        outResult(testProc(srcFileName,zlib_compress     ,"",zlib_decompress            ,"zlib -9"));
         for (int i=(sizeof(tDictSizes)/sizeof(tDictSizes[0])-1);i>=0; --i) {
-            std::string tag=std::string("tinyuz -c-")+tDictSizes_tag[i];
+            std::string tag=std::string("tuz ")+tDictSizes_tag[i];
             _tuz_kDictSize=tDictSizes[i];
-            outResult(testProc(srcFileName,_test_tuz_compress,"",_test_tuz_decompress_stream,tag.c_str()));
+            outResult(testProc(srcFileName,_test_tuz_compress,_test_tuz_decompress_stream,tag.c_str()));
         }
     }
 }
@@ -342,7 +358,8 @@ int main(int argc, const char * argv[]){
         std::cout << "speed_test \"testFile\"\n";
         return -1;
     }
-    isDictSizeTest=0;
+    isDictSizeTest=1;
+    threadTest=16;
     const int testDictBit=15;
     zlib_windowBits=-testDictBit;
     _tuz_kDictSize = (1 << testDictBit);
@@ -380,7 +397,7 @@ int main(int argc, const char * argv[]){
     //testFile("enwik9");
     //*/
 
-    std::cout << "done!\n";
+    std::cout << "\ndone!\n";
     return 0;
 }
 
