@@ -21,6 +21,7 @@ namespace _tuz_private{
         std::vector<TLCPInt>  LCP;    // lcp(i,i+1), longest common prefix between adjacent sstring
         size_t                threadNum;
         inline size_t size()const { return src_end-src; }
+        void clearMem();
     private:
         void _init(TLCPInt maxLCPValue);
     };
