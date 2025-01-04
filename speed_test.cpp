@@ -29,6 +29,7 @@ tuz_BOOL isDictSizeTest=0;
 int threadTest=1;
 static const tuz_size_t tDictSizes[]={255,1<<10,4<<10,32<<10,1<<20};
 static const char*  tDictSizes_tag[]={"255","1k","4k","32k","1m"};
+static std::string tTestPrograms;
 
 void readFile(std::vector<unsigned char>& data,const char* fileName){
     FILE	* file=fopen(fileName, "rb");
@@ -142,14 +143,10 @@ static void outResult(const TTestResult& rt){
     if (isSimpleView){
         if (!isOutedTag){
             isOutedTag=1;
-            printf("test file|zlib -9");
-#if (_IS_NEED_TEST_OTHERS)
-            printf("|QuickLZ -3|heatshrink 4k|FastLZ -2|miniLZO 1x_1");
-#endif
-            for (int i=(sizeof(tDictSizes)/sizeof(tDictSizes[0])-1);i>=0; --i) {
-                std::string tag=std::string("tuz ")+tDictSizes_tag[i];
-                printf("|%s",tag.c_str());
-            }
+            std::string str="test file"+tTestPrograms;
+            for (int i=(sizeof(tDictSizes)/sizeof(tDictSizes[0])-1);i>=0; --i)
+                str+=std::string("|tuz ")+tDictSizes_tag[i];
+            printf(str.c_str());
         }
 
         static std::string srcFileName_back;
@@ -331,9 +328,15 @@ bool _test_tuz_decompress_mem(unsigned char* out_data,unsigned char* out_data_en
 }
 
 static void testFile(const char* srcFileName){
+    tTestPrograms="|zlib -9";
+    tTestPrograms+=(_IS_NEED_TEST_OTHERS?"|QuickLZ -3|tamp 32k|tamp 4k|heatshrink 4k|FastLZ -2|miniLZO 1x_1":"");
         outResult(testProc(srcFileName,zlib_compress      ,zlib_decompress              ,"       zlib -9"));
     #if (_IS_NEED_TEST_OTHERS)
         outResult(testProc(srcFileName,quicklz_compress   ,quicklz_decompress           ,"    QuickLZ -3"));
+    tamp_windowBits=15; outResult(testProc(srcFileName,tamp_compress  ,tamp_decompress  ,"       tamp 32k"));
+    tamp_windowBits=12; outResult(testProc(srcFileName,tamp_compress  ,tamp_decompress  ,"       tamp 4k"));
+//tamp_windowBits=10; outResult(testProc(srcFileName,tamp_compress  ,tamp_decompress  ,"       tamp 1k"));
+//tamp_windowBits=8;  outResult(testProc(srcFileName,tamp_compress  ,tamp_decompress  ,"       tamp 256"));
 //hs_windowBits=15;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress,"heatshrink 32k"));// test fail when hs_windowBits=15
 hs_windowBits=12;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress," heatshrink 4k"));
 //hs_windowBits=10;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress," heatshrink 1k"));
@@ -346,9 +349,8 @@ hs_windowBits=12;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_d
         outResult(testProc(srcFileName,_test_tuz_compress ,_test_tuz_decompress_mem      ,"    tinyuz_mem"));
     }else{
         for (int i=(sizeof(tDictSizes)/sizeof(tDictSizes[0])-1);i>=0; --i) {
-            std::string tag=std::string("tuz ")+tDictSizes_tag[i];
             _tuz_kDictSize=tDictSizes[i];
-            outResult(testProc(srcFileName,_test_tuz_compress,_test_tuz_decompress_stream,tag.c_str()));
+            outResult(testProc(srcFileName,_test_tuz_compress,_test_tuz_decompress_stream,(std::string("tuz ")+tDictSizes_tag[i]).c_str()));
         }
     }
 }

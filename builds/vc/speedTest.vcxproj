@@ -19,6 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\fastlz\fastlz.c" />
+    <ClCompile Include="..\..\..\heatshrink\heatshrink_decoder.c" />
+    <ClCompile Include="..\..\..\heatshrink\heatshrink_encoder.c" />
+    <ClCompile Include="..\..\..\minilzo\minilzo.c" />
+    <ClCompile Include="..\..\..\quicklz\src\quicklz.c" />
+    <ClCompile Include="..\..\..\tamp\tamp\_c_src\tamp\common.c" />
+    <ClCompile Include="..\..\..\tamp\tamp\_c_src\tamp\compressor.c" />
+    <ClCompile Include="..\..\..\tamp\tamp\_c_src\tamp\decompressor.c" />
     <ClCompile Include="..\..\speed_test.cpp" />
   </ItemGroup>
   <ItemGroup>

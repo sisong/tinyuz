@@ -162,4 +162,44 @@ bool heatshrink_decompress(unsigned char* out_data,unsigned char* out_data_end,
 }
 
 
+#include "../tamp/tamp/_c_src/tamp/compressor.h"
+#include "../tamp/tamp/_c_src/tamp/decompressor.h"
+// Apache License Version 2.0 LICENSE
+
+uint8_t tamp_windowBits =10; // [8--15]
+int tamp_compress(unsigned char* out_data,unsigned char* out_data_end,
+                  const unsigned char* src,const unsigned char* src_end){
+    TampConf conf; conf.window=tamp_windowBits; conf.literal=8; conf.use_custom_dictionary=false;
+    unsigned char* buf = (unsigned char*)malloc(1<<conf.window);
+    if (buf==0) return 0;
+    TampCompressor c;
+    if (TAMP_OK!=tamp_compressor_init(&c,&conf,buf))
+        return 0;
+    size_t output_size;
+    size_t input_size;
+    if(TAMP_OK!=tamp_compressor_compress_and_flush(&c,out_data,out_data_end-out_data,
+                &output_size,src,src_end-src,&input_size,false))
+        return 0;
+
+    free(buf);
+    return output_size;
+}
+
+bool tamp_decompress(unsigned char* out_data,unsigned char* out_data_end,
+                     const unsigned char* zip_code,const unsigned char* zip_code_end){
+    unsigned char* buf = (unsigned char*)malloc(1<<15);
+    if (buf==0) return false;
+    TampDecompressor d;
+    if (TAMP_OK!=tamp_decompressor_init(&d,NULL,buf))
+        return false;
+    
+    size_t output_size=0;
+    size_t input_size=0;
+    if(0>tamp_decompressor_decompress(&d,out_data,out_data_end-out_data,
+         &output_size,zip_code,zip_code_end-zip_code,&input_size))
+        return false;
+    free(buf);
+    return true;
+}
+
 #endif //tinyuz_test_others_h
