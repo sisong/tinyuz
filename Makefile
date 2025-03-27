@@ -1,6 +1,7 @@
 # args
 MT       := 1
 STATIC_CPP := 0
+STATIC_C := 0
 # used clang?
 CL  	   := 0
 # build with -m32?
@@ -71,7 +72,11 @@ else
 endif
 ifeq ($(MINS),0)
 else
-  TINY_LINK += -Wl,--gc-sections,--as-needed
+  TINY_LINK += -s -Wl,--gc-sections,--as-needed
+endif
+ifeq ($(STATIC_C),0)
+else
+  TINY_LINK += -static
 endif
 ifeq ($(CL),1)
   CXX := clang++

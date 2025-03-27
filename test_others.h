@@ -85,9 +85,11 @@ extern "C" {
 
 // test fail when hs_windowBits=15
 uint8_t hs_windowBits   =10; // [4--15]
-uint8_t hs_lookaheadBits=4;  // [3--hs_windowBits)
+uint8_t hs_lookaheadBits=5;//[3--hs_windowBits)
 int heatshrink_compress(unsigned char* out_data,unsigned char* out_data_end,
                      const unsigned char* src,const unsigned char* src_end){
+    hs_lookaheadBits=hs_windowBits/2;
+    if (hs_lookaheadBits<HEATSHRINK_MIN_LOOKAHEAD_BITS) hs_lookaheadBits=HEATSHRINK_MIN_LOOKAHEAD_BITS;
     heatshrink_encoder* hse=heatshrink_encoder_alloc(hs_windowBits,hs_lookaheadBits);
     if (!hse) return 0;
 

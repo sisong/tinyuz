@@ -143,9 +143,10 @@ static void outResult(const TTestResult& rt){
     if (isSimpleView){
         if (!isOutedTag){
             isOutedTag=1;
-            std::string str="test file"+tTestPrograms;
+            std::string str="test file";
             for (int i=(sizeof(tDictSizes)/sizeof(tDictSizes[0])-1);i>=0; --i)
                 str+=std::string("|tuz ")+tDictSizes_tag[i];
+            str+=tTestPrograms;
             printf(str.c_str());
         }
 
@@ -328,22 +329,10 @@ bool _test_tuz_decompress_mem(unsigned char* out_data,unsigned char* out_data_en
 }
 
 static void testFile(const char* srcFileName){
-    tTestPrograms="|zlib -9";
-    tTestPrograms+=(_IS_NEED_TEST_OTHERS?"|QuickLZ -3|tamp 32k|tamp 4k|heatshrink 4k|FastLZ -2|miniLZO 1x_1":"");
-        outResult(testProc(srcFileName,zlib_compress      ,zlib_decompress              ,"       zlib -9"));
-    #if (_IS_NEED_TEST_OTHERS)
-        outResult(testProc(srcFileName,quicklz_compress   ,quicklz_decompress           ,"    QuickLZ -3"));
-    tamp_windowBits=15; outResult(testProc(srcFileName,tamp_compress  ,tamp_decompress  ,"       tamp 32k"));
-    tamp_windowBits=12; outResult(testProc(srcFileName,tamp_compress  ,tamp_decompress  ,"       tamp 4k"));
-//tamp_windowBits=10; outResult(testProc(srcFileName,tamp_compress  ,tamp_decompress  ,"       tamp 1k"));
-//tamp_windowBits=8;  outResult(testProc(srcFileName,tamp_compress  ,tamp_decompress  ,"       tamp 256"));
-//hs_windowBits=15;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress,"heatshrink 32k"));// test fail when hs_windowBits=15
-hs_windowBits=12;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress," heatshrink 4k"));
-//hs_windowBits=10;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress," heatshrink 1k"));
-//hs_windowBits=8; outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress,"heatshrink 256"));
-        outResult(testProc(srcFileName,_fastlz_compress   ,_fastlz_decompress           ,"     FastLZ -2"));
-        outResult(testProc(srcFileName,minilzo_compress   ,minilzo_decompress           ,"  miniLZO 1x_1"));
-    #endif
+    tTestPrograms="|zlib 32k";
+    tTestPrograms+=(_IS_NEED_TEST_OTHERS?"|QuickLZ|tamp 32k|tamp 4k|heatshrink 4k|FastLZ|miniLZO":"");
+    hs_windowBits=12;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress," heatshrink 4k"));
+    return;
     if (!isDictSizeTest) {
         outResult(testProc(srcFileName,_test_tuz_compress ,_test_tuz_decompress_stream   ," tinyuz_stream"));
         outResult(testProc(srcFileName,_test_tuz_compress ,_test_tuz_decompress_mem      ,"    tinyuz_mem"));
@@ -353,6 +342,21 @@ hs_windowBits=12;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_d
             outResult(testProc(srcFileName,_test_tuz_compress,_test_tuz_decompress_stream,(std::string("tuz ")+tDictSizes_tag[i]).c_str()));
         }
     }
+
+        outResult(testProc(srcFileName,zlib_compress      ,zlib_decompress              ,"      zlib 32k"));
+    #if (_IS_NEED_TEST_OTHERS)
+        outResult(testProc(srcFileName,quicklz_compress   ,quicklz_decompress           ,"       QuickLZ"));
+    tamp_windowBits=15; outResult(testProc(srcFileName,tamp_compress  ,tamp_decompress  ,"      tamp 32k"));
+    tamp_windowBits=12; outResult(testProc(srcFileName,tamp_compress  ,tamp_decompress  ,"       tamp 4k"));
+//tamp_windowBits=10; outResult(testProc(srcFileName,tamp_compress  ,tamp_decompress  ,"       tamp 1k"));
+//tamp_windowBits=8;  outResult(testProc(srcFileName,tamp_compress  ,tamp_decompress  ,"       tamp 256"));
+//hs_windowBits=15;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress,"heatshrink 32k"));// test fail when hs_windowBits=15
+hs_windowBits=12;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress," heatshrink 4k"));
+//hs_windowBits=10;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress," heatshrink 1k"));
+//hs_windowBits=8; outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress,"heatshrink 256"));
+        outResult(testProc(srcFileName,_fastlz_compress   ,_fastlz_decompress           ,"        FastLZ"));
+        outResult(testProc(srcFileName,minilzo_compress   ,minilzo_decompress           ,"       miniLZO"));
+    #endif
 }
 
 int main(int argc, const char * argv[]){
