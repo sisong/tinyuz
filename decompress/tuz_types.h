@@ -15,6 +15,11 @@
 #   define tuz_isNeedLiteralLine 1
 #endif
 
+#ifndef tuz_isNeedFastDec  // optimize decompress speed, but need more code size
+#  define tuz_isNeedFastDec     0
+#endif
+
+
 #if (_IS_USED_SHARE_hpatch_lite_types)
 #   include "hpatch_lite_types.h"  //in "HDiffPatch/libHDiffPatch/HPatchLite/"
 #   include "hpatch_lite_input_cache.h"
@@ -26,9 +31,6 @@
 #   define     tuz_FALSE        hpi_FALSE
 #   define     tuz_TRUE         hpi_TRUE
 #   define     tuz_size_t       hpi_size_t  //memory size type
-#   define     tuz_inline               hpi_inline
-#   define     tuz_force_inline         hpi_force_inline
-#   define     tuz_try_inline           hpi_try_inline
 #   define     tuz_TInputStreamHandle   hpi_TInputStreamHandle
 #   define     tuz_TInputStream_read    hpi_TInputStream_read
 #endif
@@ -100,8 +102,11 @@ extern "C" {
 #endif
 
 #ifndef tuz_try_inline
-//#   define tuz_try_inline   tuz_inline
+# if tuz_isNeedFastDec
+#   define tuz_try_inline   tuz_inline
+# else
 #   define tuz_try_inline
+# endif
 #endif
 
 #ifndef _IS_RUN_MEM_SAFE_CHECK 
@@ -161,7 +166,9 @@ typedef struct _tuz_TDict{
 } _tuz_TDict;
 typedef struct _tuz_TState{
     tuz_size_t      dictType_pos;
+  #if tuz_isNeedFastDec
     tuz_size_t      dictType_pos_inc;
+  #endif
     tuz_size_t      dict_pos_back;
     tuz_length_t    dictType_len;
   #if tuz_isNeedLiteralLine

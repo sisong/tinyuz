@@ -16,6 +16,7 @@
 #define  _memmove_order    memmove_order
 #if (!(_IS_USED_C_MEMCPY))
 #   define  _memcpy        memmove_order
+    tuz_try_inline
 #else
 #   define  _memcpy        memcpy
     tuz_force_inline
@@ -120,6 +121,190 @@ static tuz_force_inline tuz_size_t _cache_unpack_dict_pos(tuz_TStream* self){
         return ((result&((1<<7)-1))|(_cache_unpack_pos_len(self)<<7))+(1<<7);
 }
 
+tuz_size_t tuz_TStream_read_dict_size(tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code){
+    tuz_size_t v=tuz_kDictSizeSavedBytes;
+    tuz_byte   saved[tuz_kDictSizeSavedBytes];
+    assert(read_code!=0);
+    if ((read_code(inputStream,saved,&v))&&(v==tuz_kDictSizeSavedBytes)){
+        #if (tuz_kDictSizeSavedBytes==1)
+            v=saved[0];
+            assert(v>0);
+        #elif (tuz_kDictSizeSavedBytes==2)
+            v=saved[0]|(((tuz_size_t)saved[1])<<8);
+            assert((v>0)&(((v>>8)&0xFF)==saved[1]));
+        #elif (tuz_kDictSizeSavedBytes==3)
+            v=saved[0]|(((tuz_size_t)saved[1])<<8)|(((tuz_size_t)saved[2])<<16);
+            assert((v>0)&(((v>>8)&0xFF)==saved[1])&((v>>16)==saved[2]));
+        #elif (tuz_kDictSizeSavedBytes==4)
+            v=saved[0]|(((tuz_size_t)saved[1])<<8)|(((tuz_size_t)saved[2])<<16)|(((tuz_size_t)saved[3])<<24);
+            assert((v>0)&(((v>>8)&0xFF)==saved[1])&(((v>>16)&0xFF)==saved[2])&((v>>24)==saved[3]));
+        #else
+        #   error unsupport tuz_kDictSizeSavedBytes
+        #endif
+        return v;
+    }else{ //error 
+        return 0;
+    }
+}
+
+tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
+                             tuz_byte* dict_and_cache,tuz_size_t dict_size,tuz_size_t cache_size){
+    assert((read_code!=0)&&(dict_and_cache!=0));
+    if (dict_size==0) return tuz_READ_DICT_SIZE_ERROR;
+    if (cache_size==0) return tuz_CACHE_SIZE_ERROR;
+    self->_code_cache.cache_begin=cache_size;
+    self->_code_cache.cache_end=cache_size;
+    self->_code_cache.cache_buf=dict_and_cache+dict_size;
+    self->_code_cache.inputStream=inputStream;
+    self->_code_cache.read_code=read_code;
+    self->_dict.dict_cur=0;
+    self->_dict.dict_size=dict_size;
+    self->_dict.dict_buf=dict_and_cache;
+    
+    self->_state.dictType_pos=0;
+  #if tuz_isNeedFastDec
+    self->_state.dictType_pos_inc=0;
+    #endif
+    self->_state.dict_pos_back=1;
+    self->_state.dictType_len=0;
+  #if tuz_isNeedLiteralLine
+    self->_state.literalType_len=0;
+  #endif
+    self->_state.types=0;
+    self->_state.type_count=0;
+    self->_state.isHaveData_back=tuz_FALSE;
+    return tuz_OK;
+}
+
+
+#if (!tuz_isNeedFastDec)
+
+static tuz_inline tuz_byte _dict_read_byte(tuz_TStream* self){
+    //  [               dict buf                 ]
+    //             dict_cur+dictType_pos|
+    //                            dict_cur+dictType_pos|
+    tuz_size_t index_pos=self->_dict.dict_cur+self->_state.dictType_pos;
+    index_pos-=(self->_state.dictType_pos<(tuz_size_t)(self->_dict.dict_size-self->_dict.dict_cur))?0:self->_dict.dict_size;
+    return self->_dict.dict_buf[index_pos];
+}
+
+static tuz_try_inline void _dict_write_byte(tuz_TStream* self,tuz_byte bdata){
+    //  [               dict buf                 ]
+    //           |dict_cur               dict_cur+dict_size|
+    tuz_size_t index_pos=self->_dict.dict_cur;
+    self->_dict.dict_buf[index_pos++]=bdata;
+    self->_dict.dict_cur=(index_pos<self->_dict.dict_size)?index_pos:0;
+}
+
+tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* cur_out_data,tuz_size_t* data_size){
+    tuz_byte* const out_data_end=cur_out_data+(*data_size);
+#ifdef __RUN_MEM_SAFE_CHECK
+    const tuz_BOOL isNeedOut=(cur_out_data<out_data_end);
+#endif
+    for(;;){
+      copyDict_cmp_process:
+        if (self->_state.dictType_len){ //copy from dict or out_data
+          //copyDict_process:
+            if (cur_out_data<out_data_end){
+                const tuz_byte bdata=_dict_read_byte(self);
+                _dict_write_byte(self,bdata);
+                *cur_out_data++=bdata;
+                self->_state.dictType_len--;
+                goto copyDict_cmp_process;
+            }else{
+                break;
+            }
+        }
+
+  #if tuz_isNeedLiteralLine
+      copyLiteral_cmp_process:
+        if (self->_state.literalType_len){
+          //copyLiteral_process:
+            if (cur_out_data<out_data_end){
+                const tuz_byte bdata=_cache_read_1byte(&self->_code_cache);
+                _dict_write_byte(self,bdata);
+                *cur_out_data++=bdata;
+                self->_state.literalType_len--;
+                goto copyLiteral_cmp_process;
+            }else{
+                break;
+            }
+        }
+  #endif
+  
+    type_process:
+        {
+            if (_cache_read_1bit(self)==tuz_codeType_dict){
+                tuz_size_t saved_len=_cache_unpack_len(self);
+                tuz_size_t saved_dict_pos;
+                if ((self->_state.isHaveData_back)&&(_cache_read_1bit(self))){
+                    saved_dict_pos=self->_state.dict_pos_back;
+                }else{
+                    saved_dict_pos=_cache_unpack_dict_pos(self);
+                    if (saved_dict_pos>tuz_kBigPosForLen) ++saved_len;
+                }
+                self->_state.isHaveData_back=tuz_FALSE;
+
+                if (saved_dict_pos){
+                    self->_state.dict_pos_back=saved_dict_pos;
+                    self->_state.dictType_len=saved_len+tuz_kMinDictMatchLen;
+                    saved_dict_pos=(self->_dict.dict_size-saved_dict_pos);
+#ifdef __RUN_MEM_SAFE_CHECK
+                    if (saved_dict_pos>=self->_dict.dict_size) return tuz_DICT_POS_ERROR;
+#endif
+                    self->_state.dictType_pos=saved_dict_pos;
+                    continue; // goto copyDict_process;
+                }else{ // ctrlType
+                  #if tuz_isNeedLiteralLine
+                    if (tuz_ctrlType_literalLine==saved_len){
+                        self->_state.isHaveData_back=tuz_TRUE;
+                        self->_state.literalType_len=_cache_unpack_pos_len(self)+tuz_kMinLiteralLen;
+                        continue; // goto copyLiteral_process;
+                    }
+                  #endif
+
+                    self->_state.dict_pos_back=1;
+                    self->_state.type_count=0;
+                    if (tuz_ctrlType_clipEnd==saved_len){ //clip end
+                        goto type_process;
+                    }else if (tuz_ctrlType_streamEnd==saved_len){ //stream end
+                        (*data_size)-=(tuz_size_t)(out_data_end-cur_out_data);
+                        return tuz_STREAM_END;
+                    }else{
+                        return _cache_success_finish(&self->_code_cache)?
+                                    tuz_CTRLTYPE_UNKNOW_ERROR:tuz_READ_CODE_ERROR;
+                    }
+                }
+            }else{
+                if (cur_out_data<out_data_end){                
+                    const tuz_byte bdata=_cache_read_1byte(&self->_code_cache);
+                    _dict_write_byte(self,bdata);
+                    *cur_out_data++=bdata;
+                    self->_state.isHaveData_back=tuz_TRUE;
+                    goto type_process;
+                }else{
+                    _cache_push_1bit(self,tuz_codeType_data);
+                    break;
+                }
+            }
+        }
+    }//end for
+
+//return_process:
+    {
+        assert(cur_out_data==out_data_end);
+        if (!_cache_success_finish(&self->_code_cache))
+            return tuz_READ_CODE_ERROR;
+
+        #ifdef __RUN_MEM_SAFE_CHECK
+            return isNeedOut?tuz_OK:tuz_OUT_SIZE_OR_CODE_ERROR;
+        #else
+            return tuz_OK;
+        #endif
+    }
+}
+
+#else //tuz_isNeedFastDec
 
 static void _update_dict(tuz_TStream *self,const tuz_byte* out_data,const tuz_byte* cur_out_data) {
     //  [               dict buf                 ]|[          out buf        ]
@@ -176,60 +361,6 @@ static tuz_size_t _copy_from_dict(tuz_TStream *self,tuz_byte* cur_out_data,tuz_s
     return len;
 }
 
-
-tuz_size_t tuz_TStream_read_dict_size(tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code){
-    tuz_size_t v=tuz_kDictSizeSavedBytes;
-    tuz_byte   saved[tuz_kDictSizeSavedBytes];
-    assert(read_code!=0);
-    if ((read_code(inputStream,saved,&v))&&(v==tuz_kDictSizeSavedBytes)){
-        #if (tuz_kDictSizeSavedBytes==1)
-            v=saved[0];
-            assert(v>0);
-        #elif (tuz_kDictSizeSavedBytes==2)
-            v=saved[0]|(((tuz_size_t)saved[1])<<8);
-            assert((v>0)&(((v>>8)&0xFF)==saved[1]));
-        #elif (tuz_kDictSizeSavedBytes==3)
-            v=saved[0]|(((tuz_size_t)saved[1])<<8)|(((tuz_size_t)saved[2])<<16);
-            assert((v>0)&(((v>>8)&0xFF)==saved[1])&((v>>16)==saved[2]));
-        #elif (tuz_kDictSizeSavedBytes==4)
-            v=saved[0]|(((tuz_size_t)saved[1])<<8)|(((tuz_size_t)saved[2])<<16)|(((tuz_size_t)saved[3])<<24);
-            assert((v>0)&(((v>>8)&0xFF)==saved[1])&(((v>>16)&0xFF)==saved[2])&((v>>24)==saved[3]));
-        #else
-        #   error unsupport tuz_kDictSizeSavedBytes
-        #endif
-        return v;
-    }else{ //error 
-        return 0;
-    }
-}
-
-tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
-                             tuz_byte* dict_and_cache,tuz_size_t dict_size,tuz_size_t cache_size){
-    assert((read_code!=0)&&(dict_and_cache!=0));
-    if (dict_size==0) return tuz_READ_DICT_SIZE_ERROR;
-    if (cache_size==0) return tuz_CACHE_SIZE_ERROR;
-    self->_code_cache.cache_begin=cache_size;
-    self->_code_cache.cache_end=cache_size;
-    self->_code_cache.cache_buf=dict_and_cache+dict_size;
-    self->_code_cache.inputStream=inputStream;
-    self->_code_cache.read_code=read_code;
-    self->_dict.dict_cur=0;
-    self->_dict.dict_size=dict_size;
-    self->_dict.dict_buf=dict_and_cache;
-    
-    self->_state.dictType_pos=0;
-    self->_state.dictType_pos_inc=0;
-    self->_state.dict_pos_back=1;
-    self->_state.dictType_len=0;    
-  #if tuz_isNeedLiteralLine
-    self->_state.literalType_len=0;
-  #endif
-    self->_state.types=0;
-    self->_state.type_count=0;
-    self->_state.isHaveData_back=tuz_FALSE;
-    return tuz_OK;
-}
-
 tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,tuz_size_t* data_size){
     tuz_byte*  cur_out_data=out_data;
     tuz_size_t dsize=*data_size;
@@ -237,9 +368,9 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
     const tuz_BOOL isNeedOut=(dsize>0);
 #endif
     for(;;){
-        copyDict_cmp_process:
+        //copyDict_cmp_process:
         if (self->_state.dictType_len){ //copy from dict or out_data
-        copyDict_process:
+        //copyDict_process:
             if (dsize){
                 //  [                 dict buf                 ]|[          out buf        |              ]
                 //             |dict_cur               dict_size|out_data      cur_out_data| <-- dsize -->|
@@ -258,30 +389,30 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
                 self->_state.dictType_len-=len;
                 cur_out_data+=len;
                 dsize-=len;
-                goto copyDict_cmp_process;
+                continue; // goto copyDict_cmp_process;
             }else{
                 break;
             }
         }
 
   #if tuz_isNeedLiteralLine
-    copyLiteral_cmp_process:
+    //copyLiteral_cmp_process:
         if (self->_state.literalType_len){
-        copyLiteral_process:
+        //copyLiteral_process:
             if (dsize){
                 tuz_length_t cpyLen=(self->_state.literalType_len<dsize)?self->_state.literalType_len:dsize;
                 self->_state.literalType_len-=cpyLen;
                 dsize-=cpyLen;
                 while (cpyLen--)
                     *cur_out_data++=_cache_read_1byte(&self->_code_cache);
-                goto copyLiteral_cmp_process;
+                    continue; // goto copyLiteral_cmp_process;
             }else{
                 break;
             }
         }
   #endif
   
-    type_process:
+    //type_process:
         {
             if (_cache_read_1bit(self)==tuz_codeType_dict){
                 tuz_size_t saved_len=_cache_unpack_len(self);
@@ -309,20 +440,20 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
                         self->_state.dictType_pos=self->_dict.dict_size;
                         self->_state.dictType_pos_inc=outed_size+saved_dict_pos-self->_dict.dict_size;
                     }
-                    goto copyDict_process;
+                    continue; // goto copyDict_process;
                 }else{ // ctrlType
                   #if tuz_isNeedLiteralLine
                     if (tuz_ctrlType_literalLine==saved_len){
                         self->_state.isHaveData_back=tuz_TRUE;
                         self->_state.literalType_len=_cache_unpack_pos_len(self)+tuz_kMinLiteralLen;
-                        goto copyLiteral_process;
+                        continue; // goto copyLiteral_process;
                     }
                   #endif
 
                     self->_state.dict_pos_back=1;
                     self->_state.type_count=0;
                     if (tuz_ctrlType_clipEnd==saved_len){ //clip end
-                        goto type_process;
+                        continue; // goto type_process;
                     }else if (tuz_ctrlType_streamEnd==saved_len){ //stream end
                         *data_size=(tuz_size_t)(cur_out_data-out_data);
                         return tuz_STREAM_END;
@@ -336,7 +467,7 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
                     self->_state.isHaveData_back=tuz_TRUE;
                     *cur_out_data++=_cache_read_1byte(&self->_code_cache);
                     --dsize;
-                    goto type_process;
+                    continue; // goto type_process;
                 }else{
                     _cache_push_1bit(self,tuz_codeType_data);
                     break;
@@ -361,6 +492,7 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* out_data,
     }
 }
 
+#endif //tuz_isNeedFastDec
 
 //---------------------------------------------------------------------------------------------
 
