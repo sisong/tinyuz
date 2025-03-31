@@ -8,8 +8,8 @@
    
 **tinyuz** is a lossless compression algorithm, designed for embedded systems,MCU, NB-IoT, etc.,  with better compression ratios.   
 Which is characterized by a very small decompress code(ROM or flash occupancy); 
-The stream decompresser compiled by Mbed Studio is 856 bytes(can define to 758 bytes), 
-and the memory decompresser is 424 bytes(can define to unsafe mode 298 bytes).    
+The stream decompresser compiled by Mbed Studio is 626 bytes(can define to 468 bytes), 
+and the memory decompresser is 424 bytes(can define to 298 bytes).    
 At the same time, the stream decompress memory(RAM occupancy) can also be very small, 
 RAM size = dictionary size(>=1Byte, specified when compress) + cache size(>=2Byte, specified when decompress). 
 Tip: The smaller the dictionary, the lower the compression ratio; while the smaller cache only affects the decompress speed.   
