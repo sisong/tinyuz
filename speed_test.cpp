@@ -331,8 +331,6 @@ bool _test_tuz_decompress_mem(unsigned char* out_data,unsigned char* out_data_en
 static void testFile(const char* srcFileName){
     tTestPrograms="|zlib 32k";
     tTestPrograms+=(_IS_NEED_TEST_OTHERS?"|QuickLZ|tamp 32k|tamp 4k|heatshrink 4k|FastLZ|miniLZO":"");
-    hs_windowBits=12;outResult(testProc(srcFileName,heatshrink_compress,heatshrink_decompress," heatshrink 4k"));
-    return;
     if (!isDictSizeTest) {
         outResult(testProc(srcFileName,_test_tuz_compress ,_test_tuz_decompress_stream   ," tinyuz_stream"));
         outResult(testProc(srcFileName,_test_tuz_compress ,_test_tuz_decompress_mem      ,"    tinyuz_mem"));
