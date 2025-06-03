@@ -1,7 +1,7 @@
 //  tuz_dec.h
 /*
  The MIT License (MIT)
- Copyright (c) 2012-2022 HouSisong All Rights Reserved.
+ Copyright (c) 2012-2025 HouSisong All Rights Reserved.
 */
 #ifndef _tuz_dec_h
 #define _tuz_dec_h

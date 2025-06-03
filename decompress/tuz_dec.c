@@ -1,7 +1,7 @@
 //  tuz_dec.c
 /*
  The MIT License (MIT)
- Copyright (c) 2012-2022 HouSisong All Rights Reserved.
+ Copyright (c) 2012-2025 HouSisong All Rights Reserved.
 */
 #include "tuz_dec.h"
 #include "tuz_types_private.h"
@@ -159,7 +159,7 @@ tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStrea
 }
 
 
-static tuz_inline tuz_byte _dict_read_byte(tuz_TStream* self){
+static tuz_force_inline tuz_byte _dict_read_byte(tuz_TStream* self){
     //  [               dict buf                 ]
     //             dict_cur+dictType_pos|
     //                            dict_cur+dictType_pos|

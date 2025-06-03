@@ -1,5 +1,5 @@
 # [tinyuz]
-[![release](https://img.shields.io/badge/release-v1.0.0-blue.svg)](https://github.com/sisong/tinyuz/releases) 
+[![release](https://img.shields.io/badge/release-v1.1.0-blue.svg)](https://github.com/sisong/tinyuz/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/tinyuz/blob/master/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/tinyuz/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/tinyuz?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/tinyuz/issues)   
@@ -91,7 +91,7 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_
 ---
 ## 压缩率测试:
 压缩率: 压缩后大小/压缩前大小   
-[tinyuz] v0.9.2 测试时字典大小分别设置为 1MB,32KB,4KB,1KB,255B 
+[tinyuz] v1.1.0 测试时字典大小分别设置为 1MB,32KB,4KB,1KB,255B 
 (表中'tuz -32k' 表示: tinyuz -c-32k)   
 [zlib] v1.3.1 测试时设置压缩水平为9, 窗口比特大小设置为-15(即字典大小32KB)   
 [QuickLZ] v1.5.0 测试时使用默认设置QLZ_COMPRESSION_LEVEL=3, QLZ_STREAMING_BUFFER=1048576   

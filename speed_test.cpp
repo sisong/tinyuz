@@ -2,7 +2,7 @@
 // for tinyuz
  /*
  The MIT License (MIT)
- Copyright (c) 2012-2022 HouSisong All Rights Reserved.
+ Copyright (c) 2012-2025 HouSisong All Rights Reserved.
  */
 #include <iostream>
 #include <string.h>

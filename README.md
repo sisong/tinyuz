@@ -1,5 +1,5 @@
 # [tinyuz]
-[![release](https://img.shields.io/badge/release-v1.0.0-blue.svg)](https://github.com/sisong/tinyuz/releases) 
+[![release](https://img.shields.io/badge/release-v1.1.0-blue.svg)](https://github.com/sisong/tinyuz/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/tinyuz/blob/master/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/tinyuz/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/tinyuz?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/tinyuz/issues)   
@@ -94,7 +94,7 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_
 ---
 ## test compression ratio:
 ratio: compressedSize/uncompressedSize   
-[tinyuz] v0.9.2: test with multiple different dictSize 1MB,32KB,4KB,1KB,255B 
+[tinyuz] v1.1.0: test with multiple different dictSize 1MB,32KB,4KB,1KB,255B 
 ('tuz -32k' means: tinyuz -c-32k)   
 [zlib] v1.3.1 test with compress level 9, windowBits -15(i.e. dictSize 32KB)   
 [QuickLZ] v1.5.0 test compress with default setting QLZ_COMPRESSION_LEVEL=3, QLZ_STREAMING_BUFFER=1048576   
