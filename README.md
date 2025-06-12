@@ -101,7 +101,7 @@ ratio: compressedSize/uncompressedSize
 [tamp] v1.7.0 test compress with windowBits 15 & 12(i.e. dictSize 32KB & 4KB)   
 [heatshrink] v0.4.1 test compress with windowBits 12(i.e. dictSize 4KB), lookahead_sz2=6   
 [FastLZ] v0.5.0 test with compress level 2   
-[miniLZO] v2.10 test with `lzo1x_1_compress` function, wrkmem used default `LZO1X_1_MEM_COMPRESS=16k*sizeof(viod*)` size   
+[miniLZO] v2.10 test with `lzo1x_1_compress` function, wrkmem used default `LZO1X_1_MEM_COMPRESS=16k*sizeof(void*)` size   
    
 "aMCU.bin" is a firmware file of MCU device;   
 "aMCU.bin.diff" is a uncompressed differential file between two versions of firmware files (created by [HPatchLite]);   

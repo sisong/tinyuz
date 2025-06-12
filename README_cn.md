@@ -98,7 +98,7 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_
 [tamp] v1.7.0 测试时窗口比特大小分别设置为15和12(即字典大小32KB和4KB)   
 [heatshrink] v0.4.1 测试时窗口比特大小设置为12(即字典大小4KB), lookahead_sz2=6   
 [FastLZ] v0.5.0 测试时设置压缩水平为2   
-[miniLZO] v2.10 测试时`lzo1x_1_compress`函数, wrkmem使用了默认的`LZO1X_1_MEM_COMPRESS=16k*sizeof(viod*)`大小   
+[miniLZO] v2.10 测试时`lzo1x_1_compress`函数, wrkmem使用了默认的`LZO1X_1_MEM_COMPRESS=16k*sizeof(void*)`大小   
    
 "aMCU.bin" 是一个MCU设备的固件文件;   
 "aMCU.bin.diff" 是用两个不同版本的固件文件来创建的一个未压缩的补丁文件(用 [HPatchLite] 所创建);   
