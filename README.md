@@ -1,5 +1,5 @@
-# [tinyuz](https://github.com/sisong/tinyuz)
-[![release](https://img.shields.io/badge/release-v1.0.0-blue.svg)](https://github.com/sisong/tinyuz/releases) 
+# [tinyuz]
+[![release](https://img.shields.io/badge/release-v1.1.0-blue.svg)](https://github.com/sisong/tinyuz/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/tinyuz/blob/master/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/tinyuz/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/tinyuz?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/tinyuz/issues)   
@@ -8,16 +8,26 @@
    
 **tinyuz** is a lossless compression algorithm, designed for embedded systems,MCU, NB-IoT, etc.,  with better compression ratios.   
 Which is characterized by a very small decompress code(ROM or flash occupancy); 
-The stream decompresser compiled by Mbed Studio is 856 bytes(can define to 758 bytes), 
-and the memory decompresser is 424 bytes(can define to unsafe mode 298 bytes).    
+The stream decompresser compiled by Mbed Studio is 626 bytes(can define to 468 bytes), 
+and the memory decompresser is 424 bytes(can define to 298 bytes).    
 At the same time, the stream decompress memory(RAM occupancy) can also be very small, 
 RAM size = dictionary size(>=1Byte, specified when compress) + cache size(>=2Byte, specified when decompress). 
 Tip: The smaller the dictionary, the lower the compression ratio; while the smaller cache only affects the decompress speed.   
-( other decompresser compiled by Mbed Studio: zlib v1.2.12 stream decompresser >~10k; lzma v22.01 stream decompresser ~6k; minilzo v2.10 memory decompresser 868 bytes(unsafe mode 628 bytes). )   
+( other decompresser compiled by Mbed Studio: [zlib] v1.3.1 stream decompresser >~10k; [lzma] v22.01 stream decompresser ~6k; [miniLZO] v2.10 memory decompresser 868 bytes(unsafe mode 628 bytes). )   
    
 Large data are supported, both compress and decompress support streaming. 
 The compress and decompress speed is related to the characteristics of the input data and parameter settings; 
 On modern CPUs, compress speed is slower by about 0.4MB/S--2MB/S, and decompress speed is faster by about 180MB/S--300MB/S.   
+
+[tinyuz]: https://github.com/sisong/tinyuz
+[HPatchLite]: https://github.com/sisong/HPatchLite
+[zlib]: https://github.com/madler/zlib
+[lzma]: https://www.7-zip.org/sdk.html
+[QuickLZ]: http://www.quicklz.com/order.html
+[tamp]: https://github.com/BrianPugh/tamp
+[heatshrink]: https://github.com/atomicobject/heatshrink
+[FastLZ]: https://github.com/ariya/fastlz
+[miniLZO]: http://www.oberhumer.com/opensource/lzo
 
 ---
 ## Releases/Binaries
@@ -77,34 +87,44 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_
 ```
 
 ---
+## Porting decompress algorithm to embedded devices:
+* Add or copy the entire directory `tinyuz/decompress/` to your project;
+* Add a reference to the `tuz_dec.h` header file where the decompress algorithm is needed, and call the decompress functions declared in this file.
+
+---
 ## test compression ratio:
 ratio: compressedSize/uncompressedSize   
-zlib v1.2.11: test with compress level 9, windowBits -15   
-tinyuz v0.9.2: test with multiple different dictSizes 32MB,1MB,32KB,5KB,1KB,255B,79B,24B   
-  ('tuz -32m' means: tinyuz -c-32m)   
+[tinyuz] v1.1.0: test with multiple different dictSize 1MB,32KB,4KB,1KB,255B 
+('tuz -32k' means: tinyuz -c-32k)   
+[zlib] v1.3.1 test with compress level 9, windowBits -15(i.e. dictSize 32KB)   
+[QuickLZ] v1.5.0 test compress with default setting QLZ_COMPRESSION_LEVEL=3, QLZ_STREAMING_BUFFER=1048576   
+[tamp] v1.7.0 test compress with windowBits 15 & 12(i.e. dictSize 32KB & 4KB)   
+[heatshrink] v0.4.1 test compress with windowBits 12(i.e. dictSize 4KB), lookahead_sz2=6   
+[FastLZ] v0.5.0 test with compress level 2   
+[miniLZO] v2.10 test with `lzo1x_1_compress` function, wrkmem used default `LZO1X_1_MEM_COMPRESS=16k*sizeof(void*)` size   
    
 "aMCU.bin" is a firmware file of MCU device;   
-"aMCU.bin.diff" is a uncompressed differential file between two versions of firmware files (created by [HPatchLite](https://github.com/sisong/HPatchLite));   
+"aMCU.bin.diff" is a uncompressed differential file between two versions of firmware files (created by [HPatchLite]);   
 "A10.jpg"--"world95.txt" download from http://www.maximumcompression.com/data/files/index.html   
 "enwik8" download from https://data.deepai.org/enwik8.zip   
 "silesia.tar" download from https://sun.aei.polsl.pl//~sdeor/index.php?page=silesia
    
-||zlib -9|tuz -32m|tuz -1m|tuz -32k|tuz -5k|tuz -1k|tuz -255|tuz -79|tuz -24|
-|:----|----:|----:|----:|----:|----:|----:|----:|----:|----:|
-|aMCU.bin|46.54%|45.80%|45.80%|45.98%|49.16%|54.29%|60.61%|68.03%|77.95%|
-|aMCU.bin.diff|5.29%|5.75%|5.75%|5.75%|5.95%|6.35%|6.89%|7.85%|9.54%|
-|A10.jpg|99.88%|99.99%|99.99%|99.99%|99.99%|99.99%|99.99%|99.99%|99.99%|
-|AcroRd32.exe|44.88%|42.01%|42.12%|43.80%|46.53%|51.48%|58.29%|67.57%|78.81%|
-|english.dic|25.83%|28.62%|28.65%|29.20%|29.98%|31.25%|33.49%|36.53%|39.93%|
-|FlashMX.pdf|84.76%|86.08%|85.34%|85.81%|87.34%|88.31%|89.90%|92.05%|96.83%|
-|FP.LOG|6.46%|4.95%|5.26%|7.36%|9.99%|12.67%|19.27%|99.25%|100.00%|
-|MSO97.DLL|57.94%|53.54%|54.12%|56.96%|59.80%|64.38%|70.62%|78.36%|87.73%|
-|ohs.doc|24.05%|20.65%|21.03%|24.50%|26.85%|31.08%|37.50%|69.31%|82.85%|
-|rafale.bmp|30.23%|30.30%|30.40%|32.66%|35.51%|40.81%|43.52%|47.70%|54.42%|
-|vcfiu.hlp|20.41%|17.71%|17.79%|20.39%|24.24%|27.46%|32.39%|49.01%|69.64%|
-|world95.txt|28.87%|22.88%|23.44%|30.79%|47.15%|54.96%|65.23%|78.53%|97.20%|
-|enwik8|36.45%|30.09%|33.22%|38.36%|43.96%|51.53%|63.38%|79.63%|96.78%|
-|silesia.tar|31.98%|28.41%|29.66%|33.27%|38.21%|44.45%|52.58%|63.62%|78.49%|
+|test file|tuz 1m|tuz 32k|tuz 4k|tuz 1k|tuz 255|zlib 32k|QuickLZ|tamp 32k|tamp 4k|heatshrink 4k|FastLZ|miniLZO
+|:----|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|----:|
+aMCU.bin|45.80%|45.98%|49.64%|54.29%|60.61%|46.54%|54.49%|57.87%|56.11%|58.52%|62.21%|61.33%
+aMCU.bin.diff|5.75%|5.75%|5.99%|6.35%|6.89%|5.29%|9.52%|18.91%|16.78%|9.26%|12.50%|14.21%
+A10.jpg|99.99%|99.99%|99.99%|99.99%|99.99%|99.88%|100.00%|107.79%|108.27%|112.16%|102.91%|100.38%
+AcroRd32.exe|42.12%|43.80%|46.99%|51.48%|58.29%|44.88%|52.07%|55.86%|54.17%|56.15%|61.22%|61.44%
+english.dic|28.65%|29.20%|30.10%|31.25%|33.49%|25.83%|35.50%|39.81%|36.64%|36.82%|40.86%|43.82%
+FlashMX.pdf|85.34%|85.81%|87.46%|88.31%|89.90%|84.76%|100.00%|92.92%|93.40%|96.60%|89.57%|91.73%
+FP.LOG|5.26%|7.36%|10.34%|12.67%|19.27%|6.46%|8.59%|20.95%|21.51%|14.12%|11.97%|13.01%
+MSO97.DLL|54.12%|56.96%|60.23%|64.38%|70.62%|57.94%|65.65%|67.75%|65.78%|70.49%|74.80%|75.57%
+ohs.doc|21.03%|24.50%|27.14%|31.08%|37.50%|24.05%|25.72%|38.34%|38.15%|33.51%|28.31%|30.41%
+rafale.bmp|30.40%|32.66%|35.80%|40.81%|43.52%|30.23%|42.06%|37.38%|39.72%|40.30%|52.63%|55.41%
+vcfiu.hlp|17.79%|20.39%|24.51%|27.46%|32.39%|20.41%|24.88%|32.77%|33.87%|30.42%|32.36%|34.10%
+world95.txt|23.44%|30.79%|48.07%|54.96%|65.23%|28.87%|35.17%|38.18%|51.30%|54.32%|52.04%|51.56%
+enwik8|33.22%|38.36%|44.81%|51.53%|63.38%|36.45%|44.79%|44.48%|48.04%|50.41%|54.52%|55.79%
+silesia.tar|29.66%|33.27%|38.99%|44.45%|52.58%|31.98%|38.60%|42.77%|45.09%|44.27%|47.25%|47.50%
 
 ---
 ## Contact

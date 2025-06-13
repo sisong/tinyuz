@@ -6,14 +6,11 @@
 #include "tuz_enc_match.h"
 #include "tuz_enc_code.h"
 namespace _tuz_private{
-    
-    typedef TMatch::TInt     TInt;
-    typedef TMatch::TUInt    TUInt;
-    typedef TMatch::TLCPInt  TLCPInt;
+
     const TUInt kNullCostValue=~(TUInt)0;
     #define _k_kBMatchStep   512  // skip by a big match
 
-    static TInt _sstr_eqLen(const tuz_byte* ss_end,size_t maxSaveLength,
+    static inline TInt _sstr_eqLen(const tuz_byte* ss_end,size_t maxSaveLength,
                             const  tuz_byte* matchedString,const tuz_byte* curString){
         TInt eqLen=0;
         while ((curString<ss_end)&&((*curString)==matchedString[eqLen])&&(eqLen<(TInt)maxSaveLength)){
@@ -151,7 +148,33 @@ void TMatch::_getCostByMatch(const tuz_byte* cur0,std::vector<TUInt>& cost){
     }
 }
 
-void TMatch::_getCostByLiteralLen(const tuz_byte* cur0,std::vector<TUInt>& cost){
+
+
+    #define _MatchedAtBy_byLiteralLen(isSamePos){   \
+            const size_t saveDictCost=coder.getSavedDictPosBit<isSamePos>(dict_pos,isHaveData);         \
+            const size_t curSaveCost=cost[curi-1]+saveDictCost; \
+            assert(curSaveCost<kNullCostValue); \
+            const size_t dictCost=curSaveCost+coder.getSavedDictLenBit<isSamePos>(match_len,dict_pos);  \
+            const size_t ni=curi+match_len-1;       \
+            const size_t cost_ni=cost[ni];  \
+            if (dictCost<cost_ni){          \
+                cost[ni]=(TUInt)dictCost;   \
+                matchLen[ni]=(TLCPInt)match_len;    \
+                dictPos[ni]=(TPosInt)dict_pos;      \
+            } }
+    void TMatch::_cost_match_byLiteralLen(const size_t match_len,const size_t dict_pos,
+                                          const size_t curi,std::vector<TUInt>& cost){
+        const size_t back_pos=dictPos[curi-1];
+        const size_t isHaveData=((matchLen[curi-1]==0)&&(curi>1))?1:0;
+
+        if (isHaveData&&(back_pos==dict_pos)){ //same pos match
+            _MatchedAtBy_byLiteralLen(true);
+        }else{
+            _MatchedAtBy_byLiteralLen(false);
+        }
+    }
+
+void TMatch::_getCostByLiteralLen(std::vector<TUInt>& cost){
     size_t costSize=cost.size();
     size_t unmatched_len=0;
     size_t unmatched_fill0_i=0;
@@ -193,37 +216,45 @@ void TMatch::_getCostByLiteralLen(const tuz_byte* cur0,std::vector<TUInt>& cost)
             unmatched_fill0_i=i;
         }
         ++i;
-    }    
+    }
 }
-void TMatch::_getCost(const tuz_byte* cur0){
-    std::vector<TUInt> cost;
-    size_t costSize=(sstring.src_end-cur0)+1;
+
+    static void _restoreMatch(size_t costSize,TPosInt* dictPos,TLCPInt* matchLen){
+        size_t i_inc=costSize;
+        while (i_inc>0) {
+            size_t i=i_inc-1;
+            TLCPInt mlen=matchLen[i];
+            if (mlen>0){
+                dictPos[i-mlen+1]=dictPos[i];
+                matchLen[i-mlen+1]=mlen;
+                i_inc-=mlen;
+            }else{
+                --i_inc;
+            }
+        }
+    }
+void TMatch::_initCost(std::vector<TUInt>& cost,size_t costSize){
+    cost.clear();
+    matchLen.clear();
     cost.resize(costSize,kNullCostValue);
-    dictPos.resize(costSize);
     matchLen.resize(costSize,0);
+    dictPos.clear();
+    dictPos.resize(costSize,~(size_t)0);
     cost[0]=0;
     dictPos[0]=0;
     matchLen[0]=0;
-    
+}
+void TMatch::_getCost(const tuz_byte* cur0){
+    std::vector<TUInt> cost;
+    const size_t costSize=(sstring.src_end-cur0)+1;
+
+    _initCost(cost,costSize);
     _getCostByMatch(cur0,cost);
-
-    size_t i_inc=costSize;
-    while (i_inc>0) {
-        size_t i=i_inc-1;
-        TLCPInt mlen=matchLen[i];
-        if (mlen>0){
-            dictPos[i-mlen+1]=dictPos[i];
-            matchLen[i-mlen+1]=mlen;
-            if (props.isNeedLiteralLine)
-                cost[i-mlen+1]=cost[i];
-            i_inc-=mlen;
-        }else{
-            --i_inc;
-        }
-    }
-
+    sstring.clearMem();
+    _restoreMatch(costSize,dictPos.data(),matchLen.data());
+    
     if (props.isNeedLiteralLine)
-        _getCostByLiteralLen(cur0,cost);
+        _getCostByLiteralLen(cost);
 }
 
 bool TMatch::match(const tuz_byte** out_matched,size_t* out_match_len,
@@ -241,4 +272,4 @@ bool TMatch::match(const tuz_byte** out_matched,size_t* out_match_len,
     }
 }
 
-}
+}//namespace _tuz_private

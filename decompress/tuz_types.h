@@ -11,7 +11,7 @@
 #endif
 
 #ifndef tuz_isNeedLiteralLine  // optimize incompressible data for improve compression ratio
-//if tuz_isNeedLiteralLine==0 when decompress, must also be set to 0 when compress, can reduce 80 bytes
+//if tuz_isNeedLiteralLine==0 when decompress, must also be set to 0 when compress, can reduce 54 bytes
 #   define tuz_isNeedLiteralLine 1
 #endif
 
@@ -26,9 +26,6 @@
 #   define     tuz_FALSE        hpi_FALSE
 #   define     tuz_TRUE         hpi_TRUE
 #   define     tuz_size_t       hpi_size_t  //memory size type
-#   define     tuz_inline               hpi_inline
-#   define     tuz_force_inline         hpi_force_inline
-#   define     tuz_try_inline           hpi_try_inline
 #   define     tuz_TInputStreamHandle   hpi_TInputStreamHandle
 #   define     tuz_TInputStream_read    hpi_TInputStream_read
 #endif
@@ -100,16 +97,11 @@ extern "C" {
 #endif
 
 #ifndef tuz_try_inline
-//#   define tuz_try_inline   tuz_inline
 #   define tuz_try_inline
 #endif
 
 #ifndef _IS_RUN_MEM_SAFE_CHECK 
 #   define _IS_RUN_MEM_SAFE_CHECK  1
-#endif
-
-#ifndef _IS_USED_C_MEMCPY  // use memcpy() in <string.h>?
-#   define _IS_USED_C_MEMCPY  1
 #endif
 
 #ifndef tuz_kMaxOfDictSize
@@ -161,7 +153,6 @@ typedef struct _tuz_TDict{
 } _tuz_TDict;
 typedef struct _tuz_TState{
     tuz_size_t      dictType_pos;
-    tuz_size_t      dictType_pos_inc;
     tuz_size_t      dict_pos_back;
     tuz_length_t    dictType_len;
   #if tuz_isNeedLiteralLine

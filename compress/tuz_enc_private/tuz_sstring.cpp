@@ -44,4 +44,15 @@ void TSuffixString::_init(TLCPInt maxLCPValue){
     _LCP_create_withR(src,(TInt)SA.size(),SA.data(),R.data(),LCP.data(),maxLCPValue);
 }
 
+    template<class T>
+    static void _clearVector(std::vector<T>& v){
+        std::vector<T> _tmp;
+        v.swap(_tmp);
+    }
+void TSuffixString::clearMem(){
+    _clearVector(SA);
+    _clearVector(R);
+    _clearVector(LCP);
+}
+
 }

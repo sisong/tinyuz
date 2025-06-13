@@ -160,13 +160,13 @@ size_t TTuzCode::_getSavedDictLenBit(size_t len)const{
 }
 void TTuzCode::outDict(size_t match_len,size_t dict_pos){
     outType(tuz_codeType_dict);
-    size_t saved_dict_pos=dict_pos+1; //0 for ctrl
+    const size_t saved_dict_pos=dict_pos+1; //0 for ctrl
     if (saved_dict_pos>_dict_size_max) _dict_size_max=saved_dict_pos;
     const size_t isSamePos=(_dictPos_back==saved_dict_pos)?1:0;
     const size_t isSavedSamePos=(isSamePos&&_isHaveData_back)?1:0;
     size_t len=match_len-tuz_kMinDictMatchLen;
     if (!isSavedSamePos){
-        if (saved_dict_pos>tuz_kBigPosForLen) { checkv(match_len>=3); --len; } 
+        if (saved_dict_pos>tuz_kBigPosForLen) { checkv(match_len>=tuz_kMinDictMatchLen+1); --len; }
         //if (saved_dict_pos>((1<<17)+(1<<15)+(1<<13)+(1<<11)+(1<<9)+(1<<7)-1)) { checkv(match_len>=4); --len; } 
     }
     outDictLen(len);
@@ -200,7 +200,7 @@ void TTuzCode::outDict(size_t match_len,size_t dict_pos){
     mdict_offs=dict_pos;
 #endif
     _isHaveData_back=false;
-    _dictPos_back=dict_pos+1;
+    _dictPos_back=saved_dict_pos;
 }
 
 void TTuzCode::outCtrl_streamEnd(){
