@@ -19,3 +19,4 @@ builds/android_ndk_jni_mk/libs
 builds/android_ndk_jni_mk/obj
 *.opensdf
 *.sdf
+tinyuz
