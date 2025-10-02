@@ -3,7 +3,7 @@
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/tinyuz/blob/master/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/tinyuz/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/tinyuz?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/tinyuz/issues)   
-[![Build Status](https://github.com/sisong/tinyuz/workflows/ci/badge.svg?branch=master)](https://github.com/sisong/tinyuz/actions?query=workflow%3Aci+branch%3Amaster)   
+[![Build Status](https://github.com/sisong/tinyuz/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/sisong/tinyuz/actions?query=branch%3Amaster)   
  english | [中文版](README_cn.md)   
    
 **tinyuz** is a lossless compression algorithm, designed for embedded systems,MCU, NB-IoT, etc.,  with better compression ratios.   

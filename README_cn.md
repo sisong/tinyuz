@@ -3,7 +3,7 @@
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/tinyuz/blob/master/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/tinyuz/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/tinyuz?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/tinyuz/issues)   
-[![Build Status](https://github.com/sisong/tinyuz/workflows/ci/badge.svg?branch=master)](https://github.com/sisong/tinyuz/actions?query=workflow%3Aci+branch%3Amaster)   
+[![Build Status](https://github.com/sisong/tinyuz/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/sisong/tinyuz/actions?query=branch%3Amaster)   
  中文版 | [english](README.md)   
 
 **tinyuz** 是一个无损压缩算法，为超小型嵌入式设备(MCU、NB-IoT等)设计，保持还不错的压缩率。   
