@@ -22,7 +22,7 @@ HDP_OBJ := \
 ifeq ($(MT),0)
 else
   HDP_OBJ += \
-    $(HDP_PATH)/libParallel/parallel_import.o \
+    $(HDP_PATH)/libParallel/parallel_import_c.o \
     $(HDP_PATH)/libParallel/parallel_channel.o
 endif
 
@@ -36,14 +36,12 @@ TINY_OBJ := \
 	$(HDP_OBJ)
 
 DEF_FLAGS := \
-    -O3 -DNDEBUG -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+    -O3 -DNDEBUG -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_HPATCH_IS_USED_MULTITHREAD=0
 
 ifeq ($(MT),0)
   DEF_FLAGS += -D_IS_USED_MULTITHREAD=0
 else
-  DEF_FLAGS += \
-    -D_IS_USED_MULTITHREAD=1 \
-    -D_IS_USED_CPP11THREAD=1
+  DEF_FLAGS += -D_IS_USED_MULTITHREAD=1
 endif
 
 ifeq ($(M32),0)
