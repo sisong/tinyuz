@@ -239,7 +239,7 @@ void TMatch::_initCost(std::vector<TUInt>& cost,size_t costSize){
     cost.resize(costSize,kNullCostValue);
     matchLen.resize(costSize,0);
     dictPos.clear();
-    dictPos.resize(costSize,~(size_t)0);
+    dictPos.resize(costSize,~(TPosInt)0);
     cost[0]=0;
     dictPos[0]=0;
     matchLen[0]=0;
