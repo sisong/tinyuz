@@ -43,12 +43,25 @@ static void printVersion(){
     printf("tinyuz v" TINYUZ_VERSION_STRING "\n");
 }
 static void printHelpInfo(){
-    printf("compress   : tinyuz -c[-dictSize[k|m]]  inputFile outputFile\n"
-           "compress ci: tinyuz -ci[-dictSize[k|m]] inputFile outputFile\n"
-           "deccompress: tinyuz -d[-cacheSize[k|m]] inputFile outputFile\n"
+    printf("compress   : tinyuz -c[-dictSize]  inputFile outputFile\n"
+           "compress ci: tinyuz -ci[-dictSize] inputFile outputFile\n"
+           "deccompress: tinyuz -d[-cacheSize] inputFile outputFile\n"
            "  Note: -c is default compressor;\n"
            "    But if your compile deccompressor source code, set tuz_isNeedLiteralLine=0,\n"
            "    then must used -ci compressor.\n"
+           "options:\n"
+           "  -dictSize\n"
+           "      set compress dictSize;\n"
+           "      1g>=dictSize>=1, DEFAULT -c-1m, recommended: 127, 4k, 16m, 256m, etc...\n"
+           "      compress requires O(dictSize*18"
+#if (_IS_USED_MULTITHREAD)
+           "*parallelThreadNumber"
+#endif
+           ") bytes of memory;\n"
+           "  -cacheSize\n"
+           "      set decompress cacheSize;\n"
+           "      cacheSize>=2, DEFAULT -d-256k, recommended: 64, 1k, 32k, 4m, etc...\n"
+           "      decompress requires (dictSize+cacheSize) bytes of memory;\n"
 #if (_IS_USED_MULTITHREAD)
            "  -p-parallelThreadNumber\n"
            "      if parallelThreadNumber>1 then open multi-thread Parallel compress mode;\n"

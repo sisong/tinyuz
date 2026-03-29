@@ -8,7 +8,7 @@
    
 **tinyuz** is a lossless compression algorithm, designed for embedded systems,MCU, NB-IoT, etc.,  with better compression ratios.   
 Which is characterized by a very small decompress code(ROM or flash occupancy); 
-The stream decompresser compiled by Mbed Studio is 626 bytes(can define to 468 bytes), 
+The stream decompresser compiled by Mbed Studio is 626 bytes(can define to 506 bytes), 
 and the memory decompresser is 424 bytes(can define to 298 bytes).    
 At the same time, the stream decompress memory(RAM occupancy) can also be very small, 
 RAM size = dictionary size(>=1Byte, specified when compress) + cache size(>=2Byte, specified when decompress). 
@@ -55,16 +55,23 @@ build `tinyuz/builds/vc/tinyuz.sln` with [`Visual Studio`](https://visualstudio.
 ## command line usage:  
 ```
 compress   : tinyuz -c[-dictSize]  inputFile outputFile
+compress ci: tinyuz -ci[-dictSize] inputFile outputFile
 deccompress: tinyuz -d[-cacheSize] inputFile outputFile
+  Note: -c is default compressor;
+    But if your compile deccompressor source code, set tuz_isNeedLiteralLine=0,
+    then must used -ci compressor.
 options:
-  -c[-dictSize]
+  -dictSize
       set compress dictSize;
-      dictSize>=1, DEFAULT -c-16m, recommended: 127, 4k, 1m, 512m, etc...
-      requires O(dictSize*18) bytes of memory;
-  -d[-cacheSize]
+      1g>=dictSize>=1, DEFAULT -c-1m, recommended: 127, 4k, 16m, 256m, etc...
+      compress requires O(dictSize*18*parallelThreadNumber) bytes of memory;
+  -cacheSize
       set decompress cacheSize;
       cacheSize>=2, DEFAULT -d-256k, recommended: 64, 1k, 32k, 4m, etc...
-      requires (dictSize+cacheSize) bytes of memory;
+      decompress requires (dictSize+cacheSize) bytes of memory;
+  -p-parallelThreadNumber
+      if parallelThreadNumber>1 then open multi-thread Parallel compress mode;
+      DEFAULT -p-4; multi-thread requires more memory!
 ```
 
 ---

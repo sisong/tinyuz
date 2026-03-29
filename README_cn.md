@@ -8,8 +8,8 @@
 
 **tinyuz** 是一个无损压缩算法，为超小型嵌入式设备(MCU、NB-IoT等)设计，保持还不错的压缩率。   
 特色是编译后的解压缩代码(ROM或flash占用)非常的小； 
-流模式解压用 Mbed Studio 编译后为 626 字节(可以调整宏定义后可以到 468 字节)； 
-而内存模式解压为 424 字节(可以调整宏定义后可以到 298 字节)。   
+流模式解压用 Mbed Studio 编译后为 626 字节(可以调整宏定义后到 506 字节)； 
+而内存模式解压为 424 字节(可以调整宏定义后到 298 字节)。   
 （其他解压器用 Mbed Studio 编译后大小参考: [zlib] v1.3.1 流模式解压 约大于10k; [lzma] v22.01 流模式解压 约6k; [miniLZO] v2.10 内存模式解压为 868 字节(非安全模式 628 字节)。）   
 同时，流模式解压时内存(RAM占用)也可以非常的小，RAM大小= 字典大小(>=1Byte，压缩时指定) + 缓冲区大小(>=2Byte，解压缩时指定)。 
 提示：字典越小压缩率越低，而缓冲区较小时只影响解压缩速度。   
@@ -51,17 +51,24 @@ $ git clone https://github.com/sisong/HDiffPatch.git HDiffPatch
 ---
 ## 命令行使用:  
 ```
-压缩  : tinyuz -c[-dictSize]  inputFile outputFile
+  压缩: tinyuz -c[-dictSize]  inputFile outputFile
+ci压缩: tinyuz -ci[-dictSize] inputFile outputFile
 解压缩: tinyuz -d[-cacheSize] inputFile outputFile
+  注意：-c 是默认压缩器；
+    但是如果你编译了解压缩器的源代码，并设置 tuz_isNeedLiteralLine=0，
+    那么必须使用 -ci 压缩器。
 选项说明:
-  -c[-dictSize]
+  -dictSize
       设置压缩时使用的字典大小;
-      dictSize>=1, 默认 -c-16m, 推荐: 127、4k、1m、512m 等...
-      运行时需要内存约 (dictSize*18) 字节;
-  -d[-cacheSize]
+      1g>=dictSize>=1, 默认 -c-1m, 推荐: 127、4k、16m、256m 等...
+      压缩运行时需要内存约 (dictSize*18*parallelThreadNumber) 字节;
+  -cacheSize
       设置解压时使用的缓冲区大小;
       cacheSize>=2, 默认 -d-256k, 推荐: 64、1k、32k、4m 等...
-      运行时需要内存 (dictSize+cacheSize) 字节;
+      解压缩运行时需要内存 (dictSize+cacheSize) 字节;
+  -p-parallelThreadNumber
+      设置线程数 parallelThreadNumber>1 时,开启多线程并行压缩模式;
+      默认为-p-4;多线程需要占用较多的内存。
 ```
 
 ---
