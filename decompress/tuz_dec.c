@@ -26,7 +26,7 @@
 
 #if (_IS_USED_SHARE_hpatch_lite_types)
 #   define _cache_success_finish    _hpi_cache_success_finish
-#   define _cache_update            _hpi__cache_update
+//#   define _cache_update            _hpi_cache_update
 #   define _cache_read_1byte        _hpi_cache_read_1byte
 #else
 

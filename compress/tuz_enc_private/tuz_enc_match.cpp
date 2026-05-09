@@ -148,32 +148,6 @@ void TMatch::_getCostByMatch(const tuz_byte* cur0,std::vector<TUInt>& cost){
     }
 }
 
-
-
-    #define _MatchedAtBy_byLiteralLen(isSamePos){   \
-            const size_t saveDictCost=coder.getSavedDictPosBit<isSamePos>(dict_pos,isHaveData);         \
-            const size_t curSaveCost=cost[curi-1]+saveDictCost; \
-            assert(curSaveCost<kNullCostValue); \
-            const size_t dictCost=curSaveCost+coder.getSavedDictLenBit<isSamePos>(match_len,dict_pos);  \
-            const size_t ni=curi+match_len-1;       \
-            const size_t cost_ni=cost[ni];  \
-            if (dictCost<cost_ni){          \
-                cost[ni]=(TUInt)dictCost;   \
-                matchLen[ni]=(TLCPInt)match_len;    \
-                dictPos[ni]=(TPosInt)dict_pos;      \
-            } }
-    void TMatch::_cost_match_byLiteralLen(const size_t match_len,const size_t dict_pos,
-                                          const size_t curi,std::vector<TUInt>& cost){
-        const size_t back_pos=dictPos[curi-1];
-        const size_t isHaveData=((matchLen[curi-1]==0)&&(curi>1))?1:0;
-
-        if (isHaveData&&(back_pos==dict_pos)){ //same pos match
-            _MatchedAtBy_byLiteralLen(true);
-        }else{
-            _MatchedAtBy_byLiteralLen(false);
-        }
-    }
-
 void TMatch::_getCostByLiteralLen(std::vector<TUInt>& cost){
     size_t costSize=cost.size();
     size_t unmatched_len=0;
