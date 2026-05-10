@@ -1,5 +1,5 @@
 # [tinyuz]
-[![release](https://img.shields.io/badge/release-v1.1.0-blue.svg)](https://github.com/sisong/tinyuz/releases) 
+[![release](https://img.shields.io/badge/release-v1.1.1-blue.svg)](https://github.com/sisong/tinyuz/releases) 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sisong/tinyuz/blob/master/LICENSE) 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/sisong/tinyuz/pulls)
 [![+issue Welcome](https://img.shields.io/github/issues-raw/sisong/tinyuz?color=green&label=%2Bissue%20welcome)](https://github.com/sisong/tinyuz/issues)   
@@ -101,7 +101,7 @@ tuz_TResult tuz_decompress_mem(const tuz_byte* in_code,tuz_size_t code_size,tuz_
 ---
 ## test compression ratio:
 ratio: compressedSize/uncompressedSize   
-[tinyuz] v1.1.0: test with multiple different dictSize 1MB,32KB,4KB,1KB,255B 
+[tinyuz] v1.1.1: test with multiple different dictSize 1MB,32KB,4KB,1KB,255B 
 ('tuz -32k' means: tinyuz -c-32k)   
 [zlib] v1.3.1 test with compress level 9, windowBits -15(i.e. dictSize 32KB)   
 [QuickLZ] v1.5.0 test compress with default setting QLZ_COMPRESSION_LEVEL=3, QLZ_STREAMING_BUFFER=1048576   
@@ -121,17 +121,17 @@ ratio: compressedSize/uncompressedSize
 aMCU.bin|45.80%|45.98%|49.64%|54.29%|60.61%|46.54%|54.49%|57.87%|56.11%|58.52%|62.21%|61.33%
 aMCU.bin.diff|5.75%|5.75%|5.99%|6.35%|6.89%|5.29%|9.52%|18.91%|16.78%|9.26%|12.50%|14.21%
 A10.jpg|99.99%|99.99%|99.99%|99.99%|99.99%|99.88%|100.00%|107.79%|108.27%|112.16%|102.91%|100.38%
-AcroRd32.exe|42.12%|43.80%|46.99%|51.48%|58.29%|44.88%|52.07%|55.86%|54.17%|56.15%|61.22%|61.44%
+AcroRd32.exe|42.11%|43.79%|46.98%|51.45%|58.27%|44.88%|52.07%|55.86%|54.17%|56.15%|61.22%|61.44%
 english.dic|28.65%|29.20%|30.10%|31.25%|33.49%|25.83%|35.50%|39.81%|36.64%|36.82%|40.86%|43.82%
-FlashMX.pdf|85.34%|85.81%|87.46%|88.31%|89.90%|84.76%|100.00%|92.92%|93.40%|96.60%|89.57%|91.73%
+FlashMX.pdf|83.14%|84.26%|85.97%|87.07%|89.20%|84.76%|100.00%|92.92%|93.40%|96.60%|89.57%|91.73%
 FP.LOG|5.26%|7.36%|10.34%|12.67%|19.27%|6.46%|8.59%|20.95%|21.51%|14.12%|11.97%|13.01%
-MSO97.DLL|54.12%|56.96%|60.23%|64.38%|70.62%|57.94%|65.65%|67.75%|65.78%|70.49%|74.80%|75.57%
-ohs.doc|21.03%|24.50%|27.14%|31.08%|37.50%|24.05%|25.72%|38.34%|38.15%|33.51%|28.31%|30.41%
+MSO97.DLL|54.06%|56.91%|60.17%|64.31%|70.60%|57.94%|65.65%|67.75%|65.78%|70.49%|74.80%|75.57%
+ohs.doc|20.88%|24.38%|26.98%|30.90%|37.29%|24.05%|25.72%|38.34%|38.15%|33.51%|28.31%|30.41%
 rafale.bmp|30.40%|32.66%|35.80%|40.81%|43.52%|30.23%|42.06%|37.38%|39.72%|40.30%|52.63%|55.41%
 vcfiu.hlp|17.79%|20.39%|24.51%|27.46%|32.39%|20.41%|24.88%|32.77%|33.87%|30.42%|32.36%|34.10%
-world95.txt|23.44%|30.79%|48.07%|54.96%|65.23%|28.87%|35.17%|38.18%|51.30%|54.32%|52.04%|51.56%
+world95.txt|23.44%|30.79%|48.07%|54.96%|65.22%|28.87%|35.17%|38.18%|51.30%|54.32%|52.04%|51.56%
 enwik8|33.22%|38.36%|44.81%|51.53%|63.38%|36.45%|44.79%|44.48%|48.04%|50.41%|54.52%|55.79%
-silesia.tar|29.66%|33.27%|38.99%|44.45%|52.58%|31.98%|38.60%|42.77%|45.09%|44.27%|47.25%|47.50%
+silesia.tar|29.60%|33.22%|38.93%|44.41%|52.57%|31.98%|38.60%|42.77%|45.09%|44.27%|47.25%|47.50%
 
 ---
 ## Contact
