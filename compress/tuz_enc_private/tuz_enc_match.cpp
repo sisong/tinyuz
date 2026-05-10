@@ -54,10 +54,10 @@ namespace _tuz_private{
 
         size_t maxDictPos=props.dictSize-1;
         if (maxDictPos>=(size_t)curString) maxDictPos=curString-1;
+        #define _kShortPosForLen  (((1<<7)-1)-1)
+        //#define _kShortPosForLen  (((1<<11)-1)-1) // better(0.2%) but slower(30%)
+        const TInt kShortPos=(TInt)((maxDictPos>=_kShortPosForLen)?_kShortPosForLen:maxDictPos);
         {// short pos match
-            #define _kShortPosForLen  (((1<<7)-1)-1)
-            //#define _kShortPosForLen  (((1<<9)-1)-1) // better(0.2%) but slower(30%)
-            const TInt kShortPos=(TInt)((maxDictPos>=_kShortPosForLen)?_kShortPosForLen:maxDictPos);
             for (TInt dict_pos=kShortPos;dict_pos>=0;dict_pos--){
                 TInt matchedString=curString-(dict_pos+1);
                 TInt curMinLcp=_sstr_eqLen(sstring.src_end,props.maxSaveLength,
@@ -117,7 +117,7 @@ namespace _tuz_private{
                     if ((matchCountLimit--)<=0) break;
                     ++it_right;
                 }
-                if (dict_pos<=maxDictPos)
+                if ((kShortPos<dict_pos)&&(dict_pos<=maxDictPos))
                     _MatchedAt(false,dict_pos);
             }
         }
