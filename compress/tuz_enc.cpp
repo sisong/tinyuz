@@ -9,7 +9,7 @@
 #include "../../HDiffPatch/libParallel/parallel_channel.h"
 using namespace _tuz_private;
 
-#define tuz_kDefaultDictSize  (1<<24)
+#define tuz_kDefaultDictSize  (1<<20)
 
 const tuz_TCompressProps tuz_kDefaultCompressProps={tuz_kDefaultDictSize,tuz_kMaxOfMaxSaveLength,1,
                                                     tuz_isNeedLiteralLine?true:false};

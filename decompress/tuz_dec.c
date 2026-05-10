@@ -26,7 +26,7 @@
 
 #if (_IS_USED_SHARE_hpatch_lite_types)
 #   define _cache_success_finish    _hpi_cache_success_finish
-#   define _cache_update            _hpi__cache_update
+//#   define _cache_update            _hpi_cache_update
 #   define _cache_read_1byte        _hpi_cache_read_1byte
 #else
 
@@ -135,8 +135,11 @@ tuz_size_t tuz_TStream_read_dict_size(tuz_TInputStreamHandle inputStream,tuz_TIn
 tuz_TResult tuz_TStream_open(tuz_TStream* self,tuz_TInputStreamHandle inputStream,tuz_TInputStream_read read_code,
                              tuz_byte* dict_and_cache,tuz_size_t dict_size,tuz_size_t cache_size){
     assert((read_code!=0)&&(dict_and_cache!=0));
+    assert((dict_size>0)&&(cache_size>0));
+#ifdef __RUN_MEM_SAFE_CHECK
     if (dict_size==0) return tuz_READ_DICT_SIZE_ERROR;
     if (cache_size==0) return tuz_CACHE_SIZE_ERROR;
+#endif
     self->_code_cache.cache_begin=cache_size;
     self->_code_cache.cache_end=cache_size;
     self->_code_cache.cache_buf=dict_and_cache+dict_size;
@@ -221,7 +224,7 @@ tuz_TResult tuz_TStream_decompress_partial(tuz_TStream* self,tuz_byte* cur_out_d
                     saved_dict_pos=self->_state.dict_pos_back;
                 }else{
                     saved_dict_pos=_cache_unpack_dict_pos(self);
-                    if (saved_dict_pos>tuz_kBigPosForLen) ++saved_len;
+                    saved_len+=(saved_dict_pos>tuz_kBigPosForLen)?1:0;
                 }
                 self->_state.isHaveData_back=tuz_FALSE;
 
@@ -362,7 +365,7 @@ tuz_TResult tuz_decompress_mem(tuz_pbyte_r in_code,tuz_size_t code_size,tuz_pbyt
                 saved_dict_pos=dict_pos_back;
             }else{
                 _mem_unpack_dict_pos(saved_dict_pos);
-                if (saved_dict_pos>tuz_kBigPosForLen) ++saved_len;
+                saved_len+=(saved_dict_pos>tuz_kBigPosForLen)?1:0;
             }
             isHaveData_back=tuz_FALSE;
             if (saved_dict_pos){

@@ -37,8 +37,6 @@ namespace _tuz_private{
         void _initCost(std::vector<TUInt>& cost,size_t costSize);
         void _getCost(const tuz_byte* cur0);
         void _getCostByMatch(const tuz_byte* cur0,std::vector<TUInt>& cost);
-        void _cost_match_byLiteralLen(const size_t match_len,const size_t dict_pos,
-                                      const size_t curi,std::vector<TUInt>& cost);
         void _getCostByLiteralLen(std::vector<TUInt>& cost);
     };
     

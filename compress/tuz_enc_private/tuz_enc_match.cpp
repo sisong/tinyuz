@@ -1,4 +1,4 @@
-  //  tuz_enc_match.cpp
+//  tuz_enc_match.cpp
 /*
  The MIT License (MIT)
  Copyright (c) 2012-2022 HouSisong All Rights Reserved.
@@ -54,10 +54,10 @@ namespace _tuz_private{
 
         size_t maxDictPos=props.dictSize-1;
         if (maxDictPos>=(size_t)curString) maxDictPos=curString-1;
+        #define _kShortPosForLen  (((1<<7)-1)-1)
+        //#define _kShortPosForLen  (((1<<11)-1)-1) // better(0.2%) but slower(30%)
+        const TInt kShortPos=(TInt)((maxDictPos>=_kShortPosForLen)?_kShortPosForLen:maxDictPos);
         {// short pos match
-            #define _kShortPosForLen  (((1<<7)-1)-1)
-            //#define _kShortPosForLen  (((1<<9)-1)-1) // better(0.2%) but slower(30%)
-            const TInt kShortPos=(TInt)((maxDictPos>=_kShortPosForLen)?_kShortPosForLen:maxDictPos);
             for (TInt dict_pos=kShortPos;dict_pos>=0;dict_pos--){
                 TInt matchedString=curString-(dict_pos+1);
                 TInt curMinLcp=_sstr_eqLen(sstring.src_end,props.maxSaveLength,
@@ -117,7 +117,7 @@ namespace _tuz_private{
                     if ((matchCountLimit--)<=0) break;
                     ++it_right;
                 }
-                if (dict_pos<=maxDictPos)
+                if ((kShortPos<dict_pos)&&(dict_pos<=maxDictPos))
                     _MatchedAt(false,dict_pos);
             }
         }
@@ -148,43 +148,23 @@ void TMatch::_getCostByMatch(const tuz_byte* cur0,std::vector<TUInt>& cost){
     }
 }
 
-
-
-    #define _MatchedAtBy_byLiteralLen(isSamePos){   \
-            const size_t saveDictCost=coder.getSavedDictPosBit<isSamePos>(dict_pos,isHaveData);         \
-            const size_t curSaveCost=cost[curi-1]+saveDictCost; \
-            assert(curSaveCost<kNullCostValue); \
-            const size_t dictCost=curSaveCost+coder.getSavedDictLenBit<isSamePos>(match_len,dict_pos);  \
-            const size_t ni=curi+match_len-1;       \
-            const size_t cost_ni=cost[ni];  \
-            if (dictCost<cost_ni){          \
-                cost[ni]=(TUInt)dictCost;   \
-                matchLen[ni]=(TLCPInt)match_len;    \
-                dictPos[ni]=(TPosInt)dict_pos;      \
-            } }
-    void TMatch::_cost_match_byLiteralLen(const size_t match_len,const size_t dict_pos,
-                                          const size_t curi,std::vector<TUInt>& cost){
-        const size_t back_pos=dictPos[curi-1];
-        const size_t isHaveData=((matchLen[curi-1]==0)&&(curi>1))?1:0;
-
-        if (isHaveData&&(back_pos==dict_pos)){ //same pos match
-            _MatchedAtBy_byLiteralLen(true);
-        }else{
-            _MatchedAtBy_byLiteralLen(false);
-        }
-    }
-
 void TMatch::_getCostByLiteralLen(std::vector<TUInt>& cost){
+    //NOTE: current implementation does not search the optimal encoding path;
+    // moreover, even if the optimal goal is to be achieved, it is recommended to handle it together in the _getCostByMatch().
     size_t costSize=cost.size();
-    size_t unmatched_len=0;
+    size_t unmatched_first=1;
     size_t unmatched_fill0_i=0;
+    size_t best_win_cost=0;
 
-    size_t i=1;
+    size_t i=unmatched_first;
     while (i<costSize){
         size_t mlen=matchLen[i];
         if (mlen==0){
-            ++unmatched_len;
-        }else{
+            ++i;
+            continue;
+        }
+
+        {//next match is same pos?
             const size_t curPos=dictPos[i];
             size_t nextPos=curPos-1; //not same
             size_t j=i+mlen;
@@ -196,24 +176,24 @@ void TMatch::_getCostByLiteralLen(std::vector<TUInt>& cost){
                 ++j;
             }
             if (curPos==nextPos){
-                size_t nexti=j;
-                unmatched_len+=nexti-i;
-                i=nexti;
+                i=j;
                 continue; //next
             }
 
-            unmatched_len+=mlen;
-            i+=mlen-1;
+            i=i+mlen-1;
         }
 
-        size_t curSaveDataCost=cost[i-unmatched_len]+coder.getSavedDataBit(unmatched_len);
-        if (curSaveDataCost<cost[i]){
+        const size_t unmatched_len=i-unmatched_first+1;
+        size_t curSaveDataCost=cost[unmatched_first-1]+coder.getSavedDataBit(unmatched_len);
+        if (curSaveDataCost+best_win_cost<cost[i]){
             for (size_t j=unmatched_fill0_i+1;j<=i;++j)
                 matchLen[j]=0;
             unmatched_fill0_i=i;
-        }else if (curSaveDataCost>=cost[i]+tuz_kMinLiteralLen){
-            unmatched_len=0;
+            best_win_cost=cost[i]-curSaveDataCost;
+        }else if (curSaveDataCost+best_win_cost>=cost[i]+tuz_kMinLiteralLen){
+            unmatched_first=i+1;
             unmatched_fill0_i=i;
+            best_win_cost=0;
         }
         ++i;
     }
