@@ -23,7 +23,7 @@ namespace _tuz_private{
         explicit TMatch(const tuz_byte* data,const tuz_byte* data_end,
                         const TTuzCode& _coder,const tuz_TCompressProps& _props)
         :sstring(data,data_end,(TLCPInt)_props.maxSaveLength,_props.threadNum), coder(_coder),
-        props(_props){ }
+        props(_props){ _initMinDictLenBit(); }
         bool match(const tuz_byte** out_matched,size_t* out_match_len,
                    const tuz_byte* cur);
     private:
@@ -32,6 +32,8 @@ namespace _tuz_private{
         const tuz_TCompressProps&   props;
         std::vector<TPosInt>        dictPos;
         std::vector<TLCPInt>        matchLen;
+        std::vector<TUInt>          minDictLenBit; //min bit count of mLen for a LCP match
+        void _initMinDictLenBit();
         void _cost_match(const TInt curString,const size_t curi,
                          size_t* out_maxMatchLen,std::vector<TUInt>& cost);
         void _initCost(std::vector<TUInt>& cost,size_t costSize);

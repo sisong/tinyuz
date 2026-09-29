@@ -36,6 +36,19 @@ namespace _tuz_private{
         (*out_maxMatchLen)=((size_t)curMinLcp>(*out_maxMatchLen))?curMinLcp:(*out_maxMatchLen); \
         if (curMinLcp>=_k_kBMatchStep) return; }
     
+    void TMatch::_initMinDictLenBit(){
+        minDictLenBit.resize(_k_kBMatchStep);
+        for (size_t mLen=0;mLen<_k_kBMatchStep;++mLen){
+            size_t bit=0;
+            if (mLen>=tuz_kMinDictMatchLen){
+                const size_t bitNear=coder.getSavedDictLenBit<false>(mLen,0);
+                const size_t bitFar =coder.getSavedDictLenBit<false>(mLen,tuz_kBigPosForLen);
+                bit=(bitNear<bitFar)?bitNear:bitFar;
+            }
+            minDictLenBit[mLen]=(TUInt)bit;
+        }
+    }
+
     void TMatch::_cost_match(const TInt curString,const size_t curi,
                              size_t* out_maxMatchLen,std::vector<TUInt>& cost){
         if (curString<=0) return;
@@ -76,6 +89,13 @@ namespace _tuz_private{
             const TInt it_right_end=(TInt)sstring.size();
             const TLCPInt* LCP=sstring.LCP.data();
 
+            //a match found by LCP has dict_pos>kShortPos, so its cost is at least
+            //  minPosCost+minDictLenBit[mLen]; if that can't lower cost[curi+mLen-1] for
+            //  every mLen<=curMinLcp, then this and all later (shorter) matches change nothing.
+            const size_t minPosCost=cost[curi-1]+coder.getSavedDictPosBit<false>(kShortPos+1,isHaveData);
+            TInt noGainLen=tuz_kMinDictMatchLen; //matches with len<noGainLen can't lower cost
+            bool isFoundGainLen=false;
+
             TInt matchCountLimit=1024*2; //limit match time
             while (matchCountLimit>0){
                 TInt curMinLcp=0;
@@ -104,6 +124,20 @@ namespace _tuz_private{
                 }
                 if (curMinLcp<tuz_kMinDictMatchLen) 
                     return;
+                if (curMinLcp<_k_kBMatchStep){ //skip search if no gain
+                    if (curMinLcp<noGainLen)
+                        return;
+                    if (!isFoundGainLen){
+                        for (;noGainLen<=curMinLcp;++noGainLen){
+                            if (minPosCost+minDictLenBit[noGainLen]<=cost[curi+noGainLen-1]){
+                                isFoundGainLen=true;
+                                break;
+                            }
+                        }
+                        if (!isFoundGainLen)
+                            return;
+                    }
+                }
 
                 while ((it_left>it_left_end)&&(LCP[it_left]>=curMinLcp)){
                     size_t curPos=(curString-SA[it_left])-1;
